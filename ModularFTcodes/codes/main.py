@@ -32,13 +32,15 @@ import SysGAAux as sysgax
 
 import event_calendar as ec
 import event_handler as eh
-import json, os
+import json, os, sys, socket, platform, shutil
 from msg_builder import build_msg_from_dir
 from msg_builder import build_msg_artifacts
 from LoggerUtility import setup_logger
 
 import argparse
 from pathlib import Path
+from datetime import datetime
+from importlib import metadata as importlib_metadata
 
 PROJECT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_PLATFORMS_DIR = PROJECT_DIR / "Platforms"
@@ -75,6 +77,176 @@ BASELINE_DEADLINES = {
     "500T": 4300,
 }
 DEADLINE_PERCENT_CHOICES = (100, 90, 80, 70)
+
+AM_ID_ALIASES = {
+    "AM100": "100T", "100": "100T", "100T": "100T",
+    "AM250": "250T", "250": "250T", "250T": "250T",
+    "AM500": "500T", "500": "500T", "500T": "500T",
+}
+AM_PUBLIC_IDS = {
+    "100T": "AM100",
+    "250T": "AM250",
+    "500T": "AM500",
+}
+REQUIRED_ENV_CONFIG_KEYS = ("AM_ID", "BASE_DEADLINE", "DEADLINE_RATIO", "SEED")
+
+
+def _env_flag(name):
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _using_env_config():
+    return _env_flag("REQUIRE_ENV_CONFIG") or any(key in os.environ for key in REQUIRED_ENV_CONFIG_KEYS)
+
+
+def _normalize_am_id(raw_am_id):
+    key = str(raw_am_id).strip().upper().replace("-", "").replace("_", "")
+    if key not in AM_ID_ALIASES:
+        allowed = ", ".join(sorted(AM_ID_ALIASES))
+        raise ValueError(f"Unsupported AM_ID={raw_am_id!r}. Use one of: {allowed}")
+    am_size = AM_ID_ALIASES[key]
+    return am_size, AM_PUBLIC_IDS[am_size]
+
+
+def _require_env_config():
+    missing = [key for key in REQUIRED_ENV_CONFIG_KEYS if not os.environ.get(key)]
+    if missing:
+        raise RuntimeError(
+            "Missing required environment variable(s): " + ", ".join(missing) +
+            ". Export AM_ID, BASE_DEADLINE, DEADLINE_RATIO, and SEED before running main.py."
+        )
+
+
+def _nice_number(value):
+    if value is None:
+        return None
+    value = float(value)
+    return int(round(value)) if abs(value - round(value)) < 1e-9 else value
+
+
+def _format_ratio(ratio):
+    return f"{float(ratio):.2f}"
+
+
+def _safe_name(value):
+    text = str(value)
+    for old, new in (("/", "-"), ("\\", "-"), (" ", "_"), (":", "-")):
+        text = text.replace(old, new)
+    return text
+
+
+def _slurm_metadata():
+    return {
+        "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        "slurm_array_job_id": os.environ.get("SLURM_ARRAY_JOB_ID"),
+        "slurm_array_task_id": os.environ.get("SLURM_ARRAY_TASK_ID"),
+        "slurm_cpus_per_task": os.environ.get("SLURM_CPUS_PER_TASK"),
+        "slurm_mem_per_node": os.environ.get("SLURM_MEM_PER_NODE"),
+    }
+
+
+def _make_run_id(am_id, base_deadline, deadline_ratio, deadline_value, seed, variant, slurm_meta, run_timestamp):
+    job_id = slurm_meta.get("slurm_job_id") or slurm_meta.get("slurm_array_job_id") or "local"
+    task_id = slurm_meta.get("slurm_array_task_id")
+    task_label = f"task{task_id}" if task_id is not None else "tasklocal"
+    return "__".join([
+        _safe_name(am_id),
+        f"base{_safe_name(_nice_number(base_deadline))}",
+        f"ratio{_format_ratio(deadline_ratio)}",
+        f"deadline{_safe_name(_nice_number(deadline_value))}",
+        f"seed{int(seed)}",
+        _safe_name(variant),
+        f"job{_safe_name(job_id)}",
+        _safe_name(task_label),
+        _safe_name(run_timestamp),
+    ])
+
+
+def _peak_memory_mb():
+    try:
+        import resource
+        return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
+    except Exception:
+        return None
+
+
+def _package_versions():
+    versions = {}
+    for package_name in ("numpy", "networkx", "matplotlib", "deap", "plotly"):
+        try:
+            versions[package_name] = importlib_metadata.version(package_name)
+        except Exception:
+            versions[package_name] = None
+    return versions
+
+
+def _ga_config_values():
+    names = [
+        "APPLCATION_DEADLINE_FACTOR",
+        "PartitionMakespanWeight", "PartitionLatenessWeight",
+        "PartitionCrossoverProb", "PartitionMutationProb",
+        "PartitionPopulationSize", "PartitionGenerations",
+        "SystemLevelPopulationSize", "SystemLevelGenerations",
+        "SystemLevelCrossOverProb", "SystemLevelMutationProb",
+        "SystemLevelWeightViolationSum", "SystemLevelWeightGlobalLateness",
+        "TBMinMarginRatio", "TBDeadbandRatio", "TBStepGainUp", "TBStepGainDown",
+        "TBMinStepAbs", "TBMaxStepAbs", "TBMaxStepFrac",
+        "TBHoldSlackRatioLo", "TBHoldSlackRatioHi",
+        "TBMutNoiseFrac", "TBSlackPenaltyWeight",
+    ]
+    return {name: getattr(cfg, name, None) for name in names}
+
+
+def _write_json(path, data):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, default=str)
+
+
+def _copy_requirements_snapshot(requirements_path, run_dir):
+    src = Path(requirements_path)
+    if not src.exists():
+        return None
+    dst = Path(run_dir) / "requirements_run.txt"
+    shutil.copyfile(src, dst)
+    return str(dst)
+
+
+def _write_hardware_info(path, run_metadata):
+    lines = [
+        f"hostname: {socket.gethostname()}",
+        f"platform: {platform.platform()}",
+        f"python_version: {sys.version}",
+        f"python_executable: {sys.executable}",
+        f"cpu_count: {os.cpu_count()}",
+        f"working_directory: {os.getcwd()}",
+        f"output_dir: {run_metadata.get('output_dir')}",
+        f"SLURM_JOB_ID: {run_metadata.get('slurm_job_id')}",
+        f"SLURM_ARRAY_TASK_ID: {run_metadata.get('slurm_array_task_id')}",
+        f"SLURM_CPUS_PER_TASK: {run_metadata.get('slurm_cpus_per_task')}",
+        f"SLURM_MEM_PER_NODE: {run_metadata.get('slurm_mem_per_node')}",
+        f"PYTHONHASHSEED: {os.environ.get('PYTHONHASHSEED')}",
+    ]
+    Path(path).write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def _collect_plot_files(value):
+    files = []
+    if value is None:
+        return files
+    if isinstance(value, dict):
+        for item in value.values():
+            files.extend(_collect_plot_files(item))
+    elif isinstance(value, (list, tuple, set)):
+        for item in value:
+            files.extend(_collect_plot_files(item))
+    elif isinstance(value, (str, os.PathLike)):
+        text = os.fspath(value)
+        if text.lower().endswith((".png", ".pdf", ".svg", ".jpg", ".jpeg")):
+            files.append(text)
+    return files
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--timestamp', type=str, default=None)
@@ -134,9 +306,56 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-platforms_dir = args.platforms_dir.expanduser()
+run_start_perf = time.perf_counter()
+timestamp_start = datetime.now().isoformat(timespec="seconds")
+slurm_meta = _slurm_metadata()
+env_config_mode = _using_env_config()
+
+if os.environ.get("RESUME_FROM") and args.resume_from is None:
+    args.resume_from = Path(os.environ["RESUME_FROM"])
+if os.environ.get("CHECKPOINT_PATH") and args.checkpoint_path is None:
+    args.checkpoint_path = Path(os.environ["CHECKPOINT_PATH"])
+if _env_flag("AUTO_RESUME") or _env_flag("RESUME_LATEST"):
+    args.auto_resume = True
+
+platforms_dir = Path(os.environ.get("PLATFORMS_DIR", args.platforms_dir)).expanduser()
 if not platforms_dir.is_absolute():
     platforms_dir = (Path.cwd() / platforms_dir).resolve()
+
+if env_config_mode:
+    _require_env_config()
+    args.am_size, am_id = _normalize_am_id(os.environ["AM_ID"])
+    deadline_base = float(os.environ["BASE_DEADLINE"])
+    deadline_ratio = float(os.environ["DEADLINE_RATIO"])
+    seed = int(os.environ["SEED"])
+    variant = os.environ.get("VARIANT", "proposed")
+    output_root = Path(os.environ.get("OUTPUT_ROOT", "logs")).expanduser()
+    if not output_root.is_absolute():
+        output_root = (Path.cwd() / output_root).resolve()
+    run_timestamp = os.environ.get("RUN_TIMESTAMP") or datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    deadline_value = deadline_base * deadline_ratio
+    run_id = _make_run_id(am_id, deadline_base, deadline_ratio, deadline_value, seed, variant, slurm_meta, run_timestamp)
+    run_output_dir = output_root / am_id / f"ratio{_format_ratio(deadline_ratio)}" / f"seed{seed}" / run_id
+    args.log_dir = str(run_output_dir.parent)
+    args.timestamp = run_output_dir.name
+else:
+    args.am_size, am_id = _normalize_am_id(args.am_size)
+    deadline_base = float(args.deadline_base) if args.deadline_base is not None else float(BASELINE_DEADLINES[args.am_size])
+    if args.deadline is not None:
+        deadline_value = float(args.deadline)
+        deadline_ratio = deadline_value / deadline_base if deadline_base else 1.0
+    else:
+        deadline_ratio = args.deadline_percent / 100.0
+        deadline_value = deadline_base * deadline_ratio
+    seed = int(os.environ["SEED"]) if os.environ.get("SEED") else None
+    variant = os.environ.get("VARIANT", "proposed")
+    run_id = args.timestamp or datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    if args.timestamp is None:
+        args.timestamp = run_id
+
+if seed is not None:
+    random.seed(seed)
+    np.random.seed(seed)
 
 resume_checkpoint = None
 if args.resume_from is not None:
@@ -147,21 +366,39 @@ if args.resume_from is not None:
         resume_checkpoint = resume_from / "checkpoint_latest.pkl"
         args.timestamp = resume_from.name
         args.log_dir = str(resume_from.parent)
+        run_id = resume_from.name
     else:
         resume_checkpoint = resume_from
-        run_dir = resume_from.parent
-        args.timestamp = run_dir.name
-        args.log_dir = str(run_dir.parent)
+        resume_run_dir = resume_from.parent
+        args.timestamp = resume_run_dir.name
+        args.log_dir = str(resume_run_dir.parent)
+        run_id = resume_run_dir.name
 
 log, log_dir, timestamp = setup_logger(base_log_dir=args.log_dir, timestamp=args.timestamp)
+run_dir = Path(log_dir).resolve()
 
 checkpoint_path = args.checkpoint_path
 if checkpoint_path is None:
-    checkpoint_path = Path(log_dir) / "checkpoint_latest.pkl"
+    checkpoint_path = run_dir / "checkpoint_latest.pkl"
 else:
     checkpoint_path = checkpoint_path.expanduser()
     if not checkpoint_path.is_absolute():
         checkpoint_path = (Path.cwd() / checkpoint_path).resolve()
+
+log.info("[RUN] run_id=%s", run_id)
+log.info("[RUN] seed=%s", seed)
+log.info("[RUN] PYTHONHASHSEED=%s", os.environ.get("PYTHONHASHSEED"))
+log.info("[RUN] am_id=%s", am_id)
+log.info("[RUN] base_deadline=%s", _nice_number(deadline_base))
+log.info("[RUN] deadline_ratio=%s", _format_ratio(deadline_ratio))
+log.info("[RUN] actual_deadline_value=%s", _nice_number(deadline_value))
+log.info("[RUN] variant=%s", variant)
+log.info("[RUN] output_dir=%s", run_dir)
+log.info("[RUN] hostname=%s", socket.gethostname())
+log.info("[RUN] python_version=%s", sys.version.replace("\n", " "))
+log.info("[RUN] working_directory=%s", os.getcwd())
+log.info("[RUN] slurm_job_id=%s", slurm_meta.get("slurm_job_id"))
+log.info("[RUN] slurm_array_task_id=%s", slurm_meta.get("slurm_array_task_id"))
 
 def require_path(path):
     if not path.exists():
@@ -381,24 +618,90 @@ TimeBudget = [
   # Time budget for each partition
 
 
-deadline_base = float(args.deadline_base) if args.deadline_base is not None else float(BASELINE_DEADLINES[args.am_size])
-if args.deadline is not None:
-    deadline_value = float(args.deadline)
-    deadline_setting = "custom"
-else:
-    deadline_value = deadline_base * (args.deadline_percent / 100.0)
-    deadline_setting = f"{args.deadline_percent}%"
-
-DEADLINE = int(round(deadline_value)) if abs(deadline_value - round(deadline_value)) < 1e-9 else deadline_value
+deadline_setting = f"ratio{_format_ratio(deadline_ratio)}"
+DEADLINE = _nice_number(deadline_value)
+list_schedule_makespan = _nice_number(max_time)
 print("List-scheduling makespan is ", max_time)
-print("Baseline Deadline is ", int(deadline_base) if deadline_base.is_integer() else deadline_base)
+print("Baseline Deadline is ", _nice_number(deadline_base))
 print("Deadline setting is ", deadline_setting)
 print("Application Deadline is ", DEADLINE)
+log.info("[RUN] list_schedule_makespan=%s", list_schedule_makespan)
 log.info("[MAIN] List-scheduling makespan: %s", max_time)
-log.info("[MAIN] Baseline deadline: %s", int(deadline_base) if deadline_base.is_integer() else deadline_base)
+log.info("[MAIN] Baseline deadline: %s", _nice_number(deadline_base))
 log.info("[MAIN] Deadline setting: %s", deadline_setting)
 log.info("[MAIN] Application deadline: %s", DEADLINE)
-start_sys_ga = time.time()
+
+run_metadata = {
+    "run_id": run_id,
+    "am_id": am_id,
+    "am_size": args.am_size,
+    "base_deadline": _nice_number(deadline_base),
+    "deadline_ratio": float(deadline_ratio),
+    "actual_deadline_value": DEADLINE,
+    "seed": seed,
+    "variant": variant,
+    "timestamp_start": timestamp_start,
+    "output_dir": str(run_dir),
+    "working_directory": os.getcwd(),
+    "hostname": socket.gethostname(),
+    "python_version": sys.version,
+    "python_executable": sys.executable,
+    "PYTHONHASHSEED": os.environ.get("PYTHONHASHSEED"),
+    **slurm_meta,
+}
+input_files = {
+    "application_model": str(AM_PATH),
+    "partition_fog_edge": str(am_dir / am_layout["fe"]),
+    "partition_cloud1": str(am_dir / am_layout["c1"]),
+    "partition_cloud2": str(am_dir / am_layout["c2"]),
+    "partition_cloud3": str(am_dir / am_layout["c3"]),
+    "platform_fog_edge": str(PM_PATH_FE),
+    "platform_cloud1": str(PM_PATH_C1),
+    "platform_cloud2": str(PM_PATH_C2),
+    "platform_cloud3": str(PM_PATH_C3),
+}
+requirements_snapshot = _copy_requirements_snapshot(PROJECT_DIR / "requirements.txt", run_dir)
+hardware_info_path = run_dir / "hardware_info.txt"
+_write_hardware_info(hardware_info_path, run_metadata)
+run_config = {
+    **run_metadata,
+    "timestamp": timestamp,
+    "input_files": input_files,
+    "number_of_tasks": n_tasks,
+    "number_of_messages": len(message_list),
+    "number_of_partitions": 4,
+    "partition_names": ["P_FE", "P_C1", "P_C2", "P_C3"],
+    "list_schedule_makespan": list_schedule_makespan,
+    "partition_list_schedule_makespans": {
+        "P_FE": _nice_number(FogEdgePartitionTime),
+        "P_C1": _nice_number(Cloud1PartitionTime),
+        "P_C2": _nice_number(Cloud2PartitionTime),
+        "P_C3": _nice_number(Cloud3PartitionTime),
+    },
+    "GA_parameters": _ga_config_values(),
+    "time_budget_mutation_parameters": {
+        key: getattr(cfg, key, None)
+        for key in (
+            "TBMinMarginRatio", "TBDeadbandRatio", "TBStepGainUp", "TBStepGainDown",
+            "TBMinStepAbs", "TBMaxStepAbs", "TBMaxStepFrac",
+            "TBHoldSlackRatioLo", "TBHoldSlackRatioHi", "TBMutNoiseFrac", "TBSlackPenaltyWeight",
+        )
+    },
+    "population_size": getattr(cfg, "SystemLevelPopulationSize", None),
+    "number_of_generations": getattr(cfg, "SystemLevelGenerations", None),
+    "crossover_probability": getattr(cfg, "SystemLevelCrossOverProb", None),
+    "mutation_probability": getattr(cfg, "SystemLevelMutationProb", None),
+    "package_versions": _package_versions(),
+    "requirements_run_path": requirements_snapshot,
+    "hardware_info_path": str(hardware_info_path),
+    "checkpoint_path": str(checkpoint_path),
+    "auto_resume": bool(args.auto_resume),
+    "resume_from": str(resume_checkpoint) if resume_checkpoint else None,
+}
+_write_json(run_dir / "run_config.json", run_config)
+log.info("[RUN] run_config_json=%s", run_dir / "run_config.json")
+
+start_sys_ga = time.perf_counter()
 log.info("[MAIN] System-level scheduling launched")
 
 
@@ -409,28 +712,37 @@ SystemSchedule, meta = sls.SystemLevelGA(processor_ids_FE,processor_ids_C1,proce
                                       DEADLINE, message_list, merged_paths_w_costs,log_dir,
                                       checkpoint_path=checkpoint_path,
                                       resume_checkpoint=resume_checkpoint,
-                                      auto_resume=args.auto_resume )
+                                      auto_resume=args.auto_resume,
+                                      run_metadata=run_metadata )
 
-end_sys_ga = time.time()
+end_sys_ga = time.perf_counter()
 print("System Level Schedule is ", SystemSchedule)
 
 schedule_path = os.path.join(log_dir, f"schedule_{timestamp}.json")
+final_schedule_path = os.path.join(log_dir, "final_schedule.json")
+plots_dir = os.path.join(log_dir, "plots")
+os.makedirs(plots_dir, exist_ok=True)
+generated_plot_files = []
 
 ########### Plotting 
-# # Save JSON + emit plots into your existing log_dir/timestamp
+# # Save JSON + emit plots into this run's private plots directory.
 
 
-arts = gam.plot_system_makespan_and_lateness(meta, out_dir=log_dir, deadline=DEADLINE, timestamp=timestamp)
+arts = gam.plot_system_makespan_and_lateness(meta, out_dir=plots_dir, deadline=DEADLINE, timestamp=timestamp)
+generated_plot_files.extend(_collect_plot_files(arts))
 print("[PLOT] Saved:", arts)
 
 
-budg = gam.plot_system_time_budgets(meta, out_dir=log_dir, timestamp=timestamp)
+budg = gam.plot_system_time_budgets(meta, out_dir=plots_dir, timestamp=timestamp)
+generated_plot_files.extend(_collect_plot_files(budg))
 print("[PLOT] Time budgets:", budg)
 
-arts = gam.plot_system_budgets_and_makespans_all(meta, out_dir=log_dir, timestamp=timestamp)
+arts = gam.plot_system_budgets_and_makespans_all(meta, out_dir=plots_dir, timestamp=timestamp)
+generated_plot_files.extend(_collect_plot_files(arts))
 print("[PLOT] Saved:", arts)
 
-vf = gam.plot_system_violations_and_fitness(meta, out_dir=log_dir, timestamp=timestamp)
+vf = gam.plot_system_violations_and_fitness(meta, out_dir=plots_dir, timestamp=timestamp)
+generated_plot_files.extend(_collect_plot_files(vf))
 print("[PLOT] Violations/Fitness:", vf)
 
 # Choose scalar weights. If your DEAP weights are negative (minimization), take abs().
@@ -442,13 +754,14 @@ except Exception:
 
 arts = gam.plot_fitness_evolution(
     meta,
-    out_dir=log_dir,
+    out_dir=plots_dir,
     use_signed=True,               # show signed lateness curve
     deadline=DEADLINE,             # only used if signed series must be derived
     scalar_weights=(w1, w2),       # scalar = w1*viol + w2*lateness_clipped
     scalar_use_clipped=True,       # match GA objective definition
     timestamp=timestamp
 )
+generated_plot_files.extend(_collect_plot_files(arts))
 print("[PLOT] Fitness (violation + lateness + scalar):", arts)
 
 ###########################################
@@ -458,8 +771,11 @@ sorted_schedule = dict(sorted(SystemSchedule.items(), key=lambda x: x[1][1]))
 
 with open(schedule_path, "w", encoding="utf-8") as f:
     json.dump(sorted_schedule, f, indent=2)
+with open(final_schedule_path, "w", encoding="utf-8") as f:
+    json.dump(sorted_schedule, f, indent=2)
 
 log.info(f"Final schedule saved as {schedule_path}")
+log.info(f"Final schedule copy saved as {final_schedule_path}")
 log.info(f"[SystemLevelGA] Total execution time: {end_sys_ga - start_sys_ga:.2f} seconds")
 
 # --- NEW: save an enveloped, DAG-ready copy with parent & tag ---
@@ -487,11 +803,16 @@ root_envelope["meta"]["schedule_hash"] = hashlib.sha256(blob.encode("utf-8")).he
 
 
 root_envelope["meta"].update({
+    "am_id": am_id,
     "am_size": args.am_size,
     "deadline": DEADLINE,
     "deadline_setting": deadline_setting,
-    "deadline_percent": None if args.deadline is not None else args.deadline_percent,
+    "deadline_ratio": float(deadline_ratio),
+    "deadline_percent": int(round(float(deadline_ratio) * 100)),
     "deadline_base": deadline_base,
+    "seed": seed,
+    "variant": variant,
+    "run_id": run_id,
     "checkpoint_path": str(checkpoint_path),
     "time_budgets_partition": meta.get("time_budgets_partition"),
     "global_makespan": int(meta.get("global_makespan",
@@ -534,6 +855,62 @@ else:
             v["task_id"], v["starts_at"], v["violated_dep"],
             str(v["path_id"]), v["arrival_time"], v["violation_by"]
         )
+
+run_stats = meta.get("run_stats", {}) or {}
+final_budgets = meta.get("time_budgets_partition", {}) or {}
+final_makespans = meta.get("partition_makespans_final", {}) or {}
+final_violations = meta.get("partition_violations_final", {}) or {}
+final_fitness = meta.get("final_fitness", {}) or {}
+final_generation = meta.get("final_generation")
+final_global_makespan = int(meta.get("global_makespan", max(int(v[2]) for v in sorted_schedule.values())))
+final_global_lateness_signed = int(final_fitness.get("lateness_signed", final_global_makespan - int(DEADLINE)))
+final_global_lateness_clipped = int(final_fitness.get("lateness_clipped", max(0, final_global_lateness_signed)))
+final_viol_sum = float(final_fitness.get("viol_sum", sum(final_violations.values()) if final_violations else 0.0))
+final_fitness_lateness = float(final_fitness.get("fitness_lateness", final_global_lateness_clipped))
+total_runtime_s = time.perf_counter() - run_start_perf
+total_runtime_h = total_runtime_s / 3600.0
+peak_memory_mb = _peak_memory_mb()
+partition_feasible = final_viol_sum == 0
+deadline_feasible = final_global_lateness_clipped == 0
+fully_feasible = deadline_feasible and partition_feasible
+
+run_summary = {
+    **run_metadata,
+    "completed_successfully": True,
+    "timestamp_end": datetime.now().isoformat(timespec="seconds"),
+    "total_runtime_s": total_runtime_s,
+    "total_runtime_h": total_runtime_h,
+    "peak_memory_mb": peak_memory_mb,
+    "final_generation": final_generation,
+    "final_global_makespan": final_global_makespan,
+    "final_global_lateness_signed": final_global_lateness_signed,
+    "final_global_lateness_clipped": final_global_lateness_clipped,
+    "final_viol_sum": final_viol_sum,
+    "final_fitness_lateness": final_fitness_lateness,
+    "deadline_feasible": deadline_feasible,
+    "partition_feasible": partition_feasible,
+    "fully_feasible": fully_feasible,
+    "first_deadline_feasible_generation": run_stats.get("first_deadline_feasible_generation"),
+    "first_partition_feasible_generation": run_stats.get("first_partition_feasible_generation"),
+    "first_fully_feasible_generation": run_stats.get("first_fully_feasible_generation"),
+    "best_global_makespan_so_far": run_stats.get("best_global_makespan_so_far"),
+    "best_feasible_makespan_so_far": run_stats.get("best_feasible_makespan_so_far"),
+    "best_feasible_generation": run_stats.get("best_feasible_generation"),
+    "system_ga_summary_csv": str(run_dir / "system_ga_summary.csv"),
+    "final_schedule_json": final_schedule_path,
+    "schedule_json": schedule_path,
+    "checkpoint_path": str(checkpoint_path),
+    "generated_plot_files": sorted(set(generated_plot_files)),
+}
+for part in ("P_FE", "P_C1", "P_C2", "P_C3"):
+    prefix = f"final_{part}"
+    run_summary[f"{prefix}_budget"] = final_budgets.get(part)
+    run_summary[f"{prefix}_makespan"] = final_makespans.get(part)
+    run_summary[f"{prefix}_violation"] = final_violations.get(part)
+
+_write_json(run_dir / "run_summary.json", run_summary)
+log.info("[RUN-SUMMARY] %s", json.dumps(run_summary, sort_keys=True, default=str))
+log.info("[RUN-SUMMARY] total_runtime_s=%.3f total_runtime_h=%.6f peak_memory_mb=%s", total_runtime_s, total_runtime_h, peak_memory_mb)
 
 
 

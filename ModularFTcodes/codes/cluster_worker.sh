@@ -8,7 +8,7 @@ CODE_DIR="$PROJECT_DIR/codes"
 REQ_FILE="$PROJECT_DIR/requirements.txt"
 
 cd "$CODE_DIR"
-mkdir -p logs
+mkdir -p logs logs/slurm
 
 export MPLBACKEND=Agg
 export PYTHONPATH="$CODE_DIR:${PYTHONPATH:-}"
@@ -45,71 +45,76 @@ source "$VENV/bin/activate"
 python -V
 which python
 
-read -r -a AM_SIZE_LIST <<< "${AM_SIZES:-100T 250T 500T}"
-TASK_ID="${SLURM_ARRAY_TASK_ID:-0}"
-if [[ -n "${AM_SIZE:-}" ]]; then
-  SELECTED_AM_SIZE="$AM_SIZE"
-else
-  if (( TASK_ID >= ${#AM_SIZE_LIST[@]} )); then
-    echo "Skipping task $TASK_ID; only ${#AM_SIZE_LIST[@]} AM sizes configured."
-    exit 0
-  fi
-  SELECTED_AM_SIZE="${AM_SIZE_LIST[$TASK_ID]}"
+export PLATFORMS_DIR="${PLATFORMS_DIR:-$PROJECT_DIR/Platforms}"
+export OUTPUT_ROOT="${OUTPUT_ROOT:-logs}"
+export VARIANT="${VARIANT:-proposed}"
+export REQUIRE_ENV_CONFIG=1
+export AUTO_RESUME="${AUTO_RESUME:-1}"
+
+if [[ -z "${AM_ID:-}" && -n "${AM_SIZE:-}" ]]; then
+  case "$AM_SIZE" in
+    100T|100|AM100) export AM_ID=AM100 ;;
+    250T|250|AM250) export AM_ID=AM250 ;;
+    500T|500|AM500) export AM_ID=AM500 ;;
+    *) echo "ERROR: Unsupported AM_SIZE='$AM_SIZE'" >&2; exit 2 ;;
+  esac
 fi
 
-DEADLINE_PERCENT="${DEADLINE_PERCENT:-100}"
-case "$DEADLINE_PERCENT" in
-  100|90|80|70) ;;
-  *) echo "ERROR: DEADLINE_PERCENT must be one of 100, 90, 80, 70; got '$DEADLINE_PERCENT'" >&2; exit 2 ;;
-esac
-
-CONFIG_TAG="${CONFIG_TAG:-D${DEADLINE_PERCENT}}"
-if [[ -n "${RUN_ID:-}" ]]; then
-  timestamp="$RUN_ID"
-elif [[ -n "${SLURM_ARRAY_JOB_ID:-}" ]]; then
-  timestamp="${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
-elif [[ -n "${SLURM_JOB_ID:-}" ]]; then
-  timestamp="$SLURM_JOB_ID"
-else
-  timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
-fi
-DEADLINE_LABEL="D${DEADLINE_PERCENT}"
-if [[ -n "${DEADLINE:-}" ]]; then
-  DEADLINE_LABEL="Dcustom"
+if [[ -z "${BASE_DEADLINE:-}" && -n "${AM_ID:-}" ]]; then
+  case "$AM_ID" in
+    AM100|100|100T) export BASE_DEADLINE=2600 ;;
+    AM250|250|250T) export BASE_DEADLINE=2700 ;;
+    AM500|500|500T) export BASE_DEADLINE=4300 ;;
+    *) echo "ERROR: Unsupported AM_ID='$AM_ID'" >&2; exit 2 ;;
+  esac
 fi
 
-RUN_BASE_DIR="logs/$CONFIG_TAG/$SELECTED_AM_SIZE/$DEADLINE_LABEL"
+if [[ -z "${DEADLINE_RATIO:-}" && -n "${DEADLINE_PERCENT:-}" ]]; then
+  export DEADLINE_RATIO="$(python - <<'EOF'
+import os
+print(f"{int(os.environ['DEADLINE_PERCENT']) / 100.0:.2f}")
+EOF
+)"
+fi
 
-main_args=(
-  --am-size "$SELECTED_AM_SIZE"
-  --deadline-percent "$DEADLINE_PERCENT"
-  --platforms-dir "$PROJECT_DIR/Platforms"
-  --log-dir "$RUN_BASE_DIR"
-  --timestamp "$timestamp"
-  --auto-resume
-)
+if [[ -z "${AM_ID:-}" || -z "${BASE_DEADLINE:-}" || -z "${DEADLINE_RATIO:-}" || -z "${SEED:-}" ]]; then
+  echo "ERROR: AM_ID, BASE_DEADLINE, DEADLINE_RATIO, and SEED must be exported before running cluster_worker.sh" >&2
+  exit 2
+fi
+
+export PYTHONHASHSEED="${PYTHONHASHSEED:-$SEED}"
+
+ratio_dir="$(python - <<'EOF'
+import os
+print(f"ratio{float(os.environ['DEADLINE_RATIO']):.2f}")
+EOF
+)"
+seed_dir="seed${SEED}"
+resume_root="$OUTPUT_ROOT/$AM_ID/$ratio_dir/$seed_dir"
 
 if [[ "${RESUME_LATEST:-0}" == "1" && -z "${RESUME_FROM:-}" ]]; then
   latest_checkpoint=""
-  for candidate in "$RUN_BASE_DIR"/*/checkpoint_latest.pkl; do
+  for candidate in "$resume_root"/*/checkpoint_latest.pkl; do
     [[ -f "$candidate" ]] || continue
     if [[ -z "$latest_checkpoint" || "$candidate" -nt "$latest_checkpoint" ]]; then
       latest_checkpoint="$candidate"
     fi
   done
   if [[ -n "$latest_checkpoint" ]]; then
-    main_args+=(--resume-from "$latest_checkpoint")
+    export RESUME_FROM="$latest_checkpoint"
   fi
 fi
 
-if [[ -n "${DEADLINE_BASE:-}" ]]; then
-  main_args+=(--deadline-base "$DEADLINE_BASE")
-fi
-if [[ -n "${DEADLINE:-}" ]]; then
-  main_args+=(--deadline "$DEADLINE")
-fi
-if [[ -n "${RESUME_FROM:-}" ]]; then
-  main_args+=(--resume-from "$RESUME_FROM")
+if [[ -z "${RUN_TIMESTAMP:-}" ]]; then
+  if [[ -n "${SLURM_ARRAY_JOB_ID:-}" ]]; then
+    export RUN_TIMESTAMP="${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}"
+  elif [[ -n "${SLURM_JOB_ID:-}" ]]; then
+    export RUN_TIMESTAMP="${SLURM_JOB_ID}"
+  else
+    export RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
+  fi
 fi
 
-python main.py "${main_args[@]}" "$@"
+echo "[cluster_worker] AM_ID=$AM_ID BASE_DEADLINE=$BASE_DEADLINE DEADLINE_RATIO=$DEADLINE_RATIO SEED=$SEED VARIANT=$VARIANT OUTPUT_ROOT=$OUTPUT_ROOT RUN_TIMESTAMP=$RUN_TIMESTAMP"
+
+python main.py "$@"

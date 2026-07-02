@@ -27,32 +27,26 @@ source "$VENV/bin/activate"
 python -m pip install -U pip
 python -m pip install -r "$REQ_FILE"
 
-AM_SIZE="${AM_SIZE:-100T}"
-DEADLINE_PERCENT="${DEADLINE_PERCENT:-100}"
-CONFIG_TAG="${CONFIG_TAG:-local}"
-timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
-DEADLINE_LABEL="D${DEADLINE_PERCENT}"
-if [[ -n "${DEADLINE:-}" ]]; then
-  DEADLINE_LABEL="Dcustom"
+export AM_ID="${AM_ID:-AM100}"
+export BASE_DEADLINE="${BASE_DEADLINE:-2600}"
+if [[ -z "${DEADLINE_RATIO:-}" && -n "${DEADLINE_PERCENT:-}" ]]; then
+  export DEADLINE_RATIO="$(python - <<'EOF'
+import os
+print(f"{int(os.environ['DEADLINE_PERCENT']) / 100.0:.2f}")
+EOF
+)"
+fi
+export DEADLINE_RATIO="${DEADLINE_RATIO:-1.00}"
+export SEED="${SEED:-1001}"
+export VARIANT="${VARIANT:-proposed}"
+export OUTPUT_ROOT="${OUTPUT_ROOT:-logs}"
+export PYTHONHASHSEED="${PYTHONHASHSEED:-$SEED}"
+export PLATFORMS_DIR="${PLATFORMS_DIR:-$PROJECT_DIR/Platforms}"
+export REQUIRE_ENV_CONFIG=1
+export AUTO_RESUME="${AUTO_RESUME:-1}"
+
+if [[ -z "${RUN_TIMESTAMP:-}" ]]; then
+  export RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
 fi
 
-main_args=(
-  --am-size "$AM_SIZE"
-  --deadline-percent "$DEADLINE_PERCENT"
-  --platforms-dir "$PROJECT_DIR/Platforms"
-  --log-dir "logs/$CONFIG_TAG/$AM_SIZE/$DEADLINE_LABEL"
-  --timestamp "$timestamp"
-  --auto-resume
-)
-
-if [[ -n "${DEADLINE_BASE:-}" ]]; then
-  main_args+=(--deadline-base "$DEADLINE_BASE")
-fi
-if [[ -n "${DEADLINE:-}" ]]; then
-  main_args+=(--deadline "$DEADLINE")
-fi
-if [[ -n "${RESUME_FROM:-}" ]]; then
-  main_args+=(--resume-from "$RESUME_FROM")
-fi
-
-python main.py "${main_args[@]}" "$@"
+python main.py "$@"

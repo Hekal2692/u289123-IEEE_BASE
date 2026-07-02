@@ -24,8 +24,8 @@ PartitionMakespanWeight = -10
 PartitionLatenessWeight = -1
 PartitionCrossoverProb = 0.7
 PartitionMutationProb = 0.7
-PartitionPopulationSize = 8
-PartitionGenerations = 2
+PartitionPopulationSize = 16
+PartitionGenerations = 20
 #######################################################################
 
 
@@ -37,8 +37,8 @@ PartitionGenerations = 2
 # =========================
 
 # Population / evolution
-SystemLevelPopulationSize       = 8
-SystemLevelGenerations          = 2
+SystemLevelPopulationSize       = 16
+SystemLevelGenerations          = 60
 SystemLevelCrossOverProb        = 0.80
 SystemLevelMutationProb         = 0.70   
 

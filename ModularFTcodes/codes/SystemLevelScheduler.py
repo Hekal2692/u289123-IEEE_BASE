@@ -545,7 +545,8 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
                   log_dir,
                   checkpoint_path=None,
                   resume_checkpoint=None,
-                  auto_resume=False):
+                  auto_resume=False,
+                  run_metadata=None):
     """
     System-level GA with budget mutation (no global per-gen overwrite).
     - Keeps your logging & plotting schema (tb_knobs_base/used, budgets/budgets_prev, etc.)
@@ -563,6 +564,16 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
     from collections import defaultdict
 
     log = logging.getLogger(__name__)
+    run_metadata = dict(run_metadata or {})
+    ga_start_perf = time.perf_counter()
+    eval_counter = {"total": 0}
+
+    def _peak_memory_mb():
+        try:
+            import resource
+            return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
+        except Exception:
+            return None
 
     # Expect cfg/gax/pga/sgax/SystemLevelReconstruction_2 available at module scope:
     # import config as cfg, GAAux as gax, PartitionGA as pga, SysGAAux as sgax
@@ -746,6 +757,7 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
     # Evaluate → (viol_sum_eff, lateness_clipped)
     # -------------------
     def evaluate(ind, gen_context="Init"):
+        eval_counter["total"] += 1
         _repair_po_alignment(ind, partitions, num_parts, len(message_ids))
         _repair_pa_unique(ind, num_parts)
 
@@ -1017,7 +1029,62 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         "fitness_lateness": [],
         "tb_knobs_base": [],            # kept for plotting compatibility
         "tb_knobs_used": [],
+        "elapsed_generation_s": [],
+        "cumulative_runtime_s": [],
+        "evaluated_individuals_this_generation": [],
+        "total_evaluated_individuals": [],
+        "deadline_feasible": [],
+        "partition_feasible": [],
+        "fully_feasible": [],
+        "best_global_makespan_so_far": [],
+        "best_feasible_makespan_so_far": [],
+        "best_feasible_generation": [],
+        "peak_memory_mb": [],
     }
+
+    def _empty_run_stats():
+        return {
+            "first_deadline_feasible_generation": None,
+            "first_partition_feasible_generation": None,
+            "first_fully_feasible_generation": None,
+            "best_global_makespan_so_far": None,
+            "best_feasible_makespan_so_far": None,
+            "best_feasible_generation": None,
+        }
+
+    def _update_run_stats(stats, generation, global_makespan, lateness_clipped, viol_sum):
+        generation = int(generation)
+        global_makespan = int(global_makespan)
+        lateness_clipped = int(lateness_clipped)
+        viol_sum = float(viol_sum)
+        deadline_feasible = lateness_clipped == 0
+        partition_feasible = viol_sum == 0
+        fully_feasible = deadline_feasible and partition_feasible
+
+        if stats["best_global_makespan_so_far"] is None or global_makespan < stats["best_global_makespan_so_far"]:
+            stats["best_global_makespan_so_far"] = global_makespan
+        if deadline_feasible and stats["first_deadline_feasible_generation"] is None:
+            stats["first_deadline_feasible_generation"] = generation
+        if partition_feasible and stats["first_partition_feasible_generation"] is None:
+            stats["first_partition_feasible_generation"] = generation
+        if fully_feasible:
+            if stats["first_fully_feasible_generation"] is None:
+                stats["first_fully_feasible_generation"] = generation
+            if stats["best_feasible_makespan_so_far"] is None or global_makespan < stats["best_feasible_makespan_so_far"]:
+                stats["best_feasible_makespan_so_far"] = global_makespan
+                stats["best_feasible_generation"] = generation
+        return deadline_feasible, partition_feasible, fully_feasible
+
+    def _derive_run_stats_from_history(history):
+        stats = _empty_run_stats()
+        gens = history.get("gen", []) or []
+        gms = history.get("global_makespan", []) or []
+        lates = history.get("global_lateness", []) or []
+        viols = history.get("fitness_vsum", []) or []
+        for idx, generation in enumerate(gens):
+            if idx < len(gms) and idx < len(lates) and idx < len(viols):
+                _update_run_stats(stats, generation, gms[idx], lates[idx], viols[idx])
+        return stats
 
     # -------------------
     # Init / Resume Population
@@ -1050,25 +1117,46 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         start_gen = 0
         _save_checkpoint(0, pop, sys_history)
 
-    # --- CSV summary (same schema as before) ---
+    run_stats = _derive_run_stats_from_history(sys_history)
+
+    # --- CSV summary: keep the legacy columns and add run metadata for aggregation. ---
     os.makedirs(log_dir, exist_ok=True)
     csv_path = os.path.join(log_dir, "system_ga_summary.csv")
-    if not os.path.exists(csv_path):
+    csv_columns = [
+        "run_id", "am_id", "am_size", "base_deadline", "deadline_ratio", "actual_deadline_value",
+        "seed", "variant", "slurm_job_id", "slurm_array_job_id", "slurm_array_task_id",
+        "generation", "elapsed_generation_s", "cumulative_runtime_s",
+        "evaluated_individuals_this_generation", "total_evaluated_individuals",
+        "global_makespan", "global_lateness", "global_lateness_signed", "global_lateness_clipped",
+        "fitness_vsum", "fitness_lateness",
+        "deadline_feasible", "partition_feasible", "fully_feasible",
+        "first_deadline_feasible_generation", "first_partition_feasible_generation", "first_fully_feasible_generation",
+        "best_global_makespan_so_far", "best_feasible_makespan_so_far", "best_feasible_generation",
+        "P_FE_budget", "P_FE_makespan", "P_FE_violation",
+        "P_C1_budget", "P_C1_makespan", "P_C1_violation",
+        "P_C2_budget", "P_C2_makespan", "P_C2_violation",
+        "P_C3_budget", "P_C3_makespan", "P_C3_violation",
+        "peak_memory_mb",
+    ]
+    write_header = True
+    if os.path.exists(csv_path):
+        try:
+            with open(csv_path, "r", newline="") as f:
+                header_line = f.readline().strip()
+            write_header = header_line != ",".join(csv_columns)
+        except Exception:
+            write_header = True
+    if write_header:
         with open(csv_path, "w", newline="") as f:
-            w = csv.writer(f)
-            w.writerow([
-                "generation","global_makespan","global_lateness",
-                "fitness_vsum","fitness_lateness",
-                "P_FE_budget","P_FE_makespan","P_FE_violation",
-                "P_C1_budget","P_C1_makespan","P_C1_violation",
-                "P_C2_budget","P_C2_makespan","P_C2_violation",
-                "P_C3_budget","P_C3_makespan","P_C3_violation"
-            ])
+            w = csv.DictWriter(f, fieldnames=csv_columns)
+            w.writeheader()
 
     ngen = getattr(cfg, "SystemLevelGenerations", 80)
     for gen in range(start_gen, ngen):
         log.info(f"[SystemLevelGA] Generation {gen + 1}/{ngen}")
         _current_sys_gen["g"] = gen + 1
+        gen_start_perf = time.perf_counter()
+        gen_eval_start = eval_counter["total"]
 
         # Selection & cloning (preserve parent's signals for TB mutation guidance)
         parents = toolbox.select_parents(pop, len(pop))
@@ -1143,25 +1231,83 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         sys_history["fitness_vsum"].append(float(bf0))
         sys_history["fitness_lateness"].append(float(bf1))
 
+        elapsed_generation_s = time.perf_counter() - gen_start_perf
+        cumulative_runtime_s = time.perf_counter() - ga_start_perf
+        evaluated_this_generation = eval_counter["total"] - gen_eval_start
+        total_evaluated_individuals = eval_counter["total"]
+        peak_memory_mb = _peak_memory_mb()
+        viol_sum_current = int(sum(violations_current.values()))
+        deadline_feasible, partition_feasible, fully_feasible = _update_run_stats(
+            run_stats, gen + 1, global_makespan, lateness_clipped, viol_sum_current
+        )
+        sys_history["elapsed_generation_s"].append(float(elapsed_generation_s))
+        sys_history["cumulative_runtime_s"].append(float(cumulative_runtime_s))
+        sys_history["evaluated_individuals_this_generation"].append(int(evaluated_this_generation))
+        sys_history["total_evaluated_individuals"].append(int(total_evaluated_individuals))
+        sys_history["deadline_feasible"].append(bool(deadline_feasible))
+        sys_history["partition_feasible"].append(bool(partition_feasible))
+        sys_history["fully_feasible"].append(bool(fully_feasible))
+        sys_history["best_global_makespan_so_far"].append(run_stats["best_global_makespan_so_far"])
+        sys_history["best_feasible_makespan_so_far"].append(run_stats["best_feasible_makespan_so_far"])
+        sys_history["best_feasible_generation"].append(run_stats["best_feasible_generation"])
+        sys_history["peak_memory_mb"].append(peak_memory_mb)
+
         # --- CSV: write this generation’s summary ---
         tb_row = _tb_by_partition(PO, TB_used, partitions)
+        csv_row = {
+            "run_id": run_metadata.get("run_id"),
+            "am_id": run_metadata.get("am_id"),
+            "am_size": run_metadata.get("am_size"),
+            "base_deadline": run_metadata.get("base_deadline"),
+            "deadline_ratio": run_metadata.get("deadline_ratio"),
+            "actual_deadline_value": run_metadata.get("actual_deadline_value"),
+            "seed": run_metadata.get("seed"),
+            "variant": run_metadata.get("variant"),
+            "slurm_job_id": run_metadata.get("slurm_job_id"),
+            "slurm_array_job_id": run_metadata.get("slurm_array_job_id"),
+            "slurm_array_task_id": run_metadata.get("slurm_array_task_id"),
+            "generation": gen + 1,
+            "elapsed_generation_s": elapsed_generation_s,
+            "cumulative_runtime_s": cumulative_runtime_s,
+            "evaluated_individuals_this_generation": evaluated_this_generation,
+            "total_evaluated_individuals": total_evaluated_individuals,
+            "global_makespan": int(global_makespan),
+            "global_lateness": int(lateness_clipped),
+            "global_lateness_signed": int(lateness_signed),
+            "global_lateness_clipped": int(lateness_clipped),
+            "fitness_vsum": float(bf0),
+            "fitness_lateness": float(bf1),
+            "deadline_feasible": bool(deadline_feasible),
+            "partition_feasible": bool(partition_feasible),
+            "fully_feasible": bool(fully_feasible),
+            "first_deadline_feasible_generation": run_stats["first_deadline_feasible_generation"],
+            "first_partition_feasible_generation": run_stats["first_partition_feasible_generation"],
+            "first_fully_feasible_generation": run_stats["first_fully_feasible_generation"],
+            "best_global_makespan_so_far": run_stats["best_global_makespan_so_far"],
+            "best_feasible_makespan_so_far": run_stats["best_feasible_makespan_so_far"],
+            "best_feasible_generation": run_stats["best_feasible_generation"],
+            "P_FE_budget": int(tb_row["P_FE"]),
+            "P_FE_makespan": int(makespans["P_FE"]),
+            "P_FE_violation": int(violations_current["P_FE"]),
+            "P_C1_budget": int(tb_row["P_C1"]),
+            "P_C1_makespan": int(makespans["P_C1"]),
+            "P_C1_violation": int(violations_current["P_C1"]),
+            "P_C2_budget": int(tb_row["P_C2"]),
+            "P_C2_makespan": int(makespans["P_C2"]),
+            "P_C2_violation": int(violations_current["P_C2"]),
+            "P_C3_budget": int(tb_row["P_C3"]),
+            "P_C3_makespan": int(makespans["P_C3"]),
+            "P_C3_violation": int(violations_current["P_C3"]),
+            "peak_memory_mb": peak_memory_mb,
+        }
         with open(csv_path, "a", newline="") as f:
-            w = csv.writer(f)
-            w.writerow([
-                gen + 1,
-                int(global_makespan),
-                int(lateness_clipped),
-                float(bf0),            # fitness_vsum (first objective)
-                float(bf1),            # fitness_lateness (second objective)
-                int(tb_row["P_FE"]),   int(makespans["P_FE"]), int(violations_current["P_FE"]),
-                int(tb_row["P_C1"]),   int(makespans["P_C1"]), int(violations_current["P_C1"]),
-                int(tb_row["P_C2"]),   int(makespans["P_C2"]), int(violations_current["P_C2"]),
-                int(tb_row["P_C3"]),   int(makespans["P_C3"]), int(violations_current["P_C3"]),
-            ])
+            w = csv.DictWriter(f, fieldnames=csv_columns)
+            w.writerow(csv_row)
 
         log.info(f"[Generation {gen + 1}] GlobalMS={global_makespan} "
                  f"Late={lateness_signed} TB={sys_history['budgets'][-1]} "
-                 f"ViolSum={sum(violations_current.values())}")
+                 f"ViolSum={viol_sum_current} GenTime={elapsed_generation_s:.2f}s "
+                 f"TotalTime={cumulative_runtime_s:.2f}s PeakMemMB={peak_memory_mb}")
 
         _save_checkpoint(gen + 1, pop, sys_history)
 
@@ -1175,6 +1321,10 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
     lateness_final_clipped    = max(0, lateness_final_signed)
 
     final_budgets = {p: int(final_best.triple_map[p][1]) for p in partitions}
+    final_violations = {p: int(max(0, final_makespans_eval[p] - final_budgets[p])) for p in partitions}
+    final_generation = int(sys_history["gen"][-1]) if sys_history.get("gen") else int(start_gen)
+    total_runtime_s = time.perf_counter() - ga_start_perf
+    peak_memory_mb = _peak_memory_mb()
     cluster_for = {final_best.eval_PO[i]: final_best.eval_PA[i] for i in range(num_parts)}
 
     for p in partitions:
@@ -1183,6 +1333,8 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
                  f"| Violation={max(0, ms_eval - tb_used)}")
     log.info(f"  Final Global Makespan (eval) = {global_makespan_final}, "
              f"Lateness (signed/clipped) = {lateness_final_signed}/{lateness_final_clipped}")
+    log.info("  Total runtime = %.2fs (%.4fh), peak memory = %s MB, total evaluations = %s",
+             total_runtime_s, total_runtime_s / 3600.0, peak_memory_mb, eval_counter["total"])
 
     tb_by_partition = final_budgets
     tb_by_level = {"FE": tb_by_partition["P_FE"], "C1": tb_by_partition["P_C1"],
@@ -1192,6 +1344,21 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         "time_budgets_partition": tb_by_partition,
         "time_budgets_level": tb_by_level,
         "global_makespan": int(global_makespan_final),
+        "partition_makespans_final": final_makespans_eval,
+        "partition_violations_final": final_violations,
+        "final_generation": final_generation,
+        "final_fitness": {
+            "viol_sum": float(final_best.fitness.values[0]),
+            "fitness_lateness": float(final_best.fitness.values[1]),
+            "lateness_signed": int(lateness_final_signed),
+            "lateness_clipped": int(lateness_final_clipped),
+        },
+        "run_stats": run_stats,
+        "run_metadata": run_metadata,
+        "total_runtime_s": total_runtime_s,
+        "total_runtime_h": total_runtime_s / 3600.0,
+        "peak_memory_mb": peak_memory_mb,
+        "total_evaluated_individuals": eval_counter["total"],
         "histories": {
             "system_ga": sys_history,
             "partition_ga_by_part": getattr(final_best, "partition_ga_histories", {}) or {},
