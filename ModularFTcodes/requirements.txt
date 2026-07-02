@@ -1,0 +1,6 @@
+numpy
+networkx
+matplotlib
+deap
+plotly
+kaleido

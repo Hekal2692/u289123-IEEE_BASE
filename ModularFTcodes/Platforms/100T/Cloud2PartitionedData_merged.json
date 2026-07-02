@@ -1,0 +1,83 @@
+{
+  "application": {
+    "jobs": [
+      {
+        "id": 61,
+        "wcet_fullspeed": 27,
+        "mcet": 0,
+        "deadline": 226,
+        "can_run_on": [
+          1,
+          6
+        ],
+        "processing_times": 70
+      },
+      {
+        "id": 62,
+        "wcet_fullspeed": 13,
+        "mcet": 0,
+        "deadline": 149,
+        "can_run_on": [
+          2
+        ],
+        "processing_times": 119
+      },
+      {
+        "id": 59,
+        "wcet_fullspeed": 80,
+        "mcet": 0,
+        "deadline": 233,
+        "can_run_on": [
+          2
+        ],
+        "processing_times": 117
+      },
+      {
+        "id": 72,
+        "wcet_fullspeed": 68,
+        "mcet": 0,
+        "deadline": 146,
+        "can_run_on": [
+          1,
+          6
+        ],
+        "processing_times": 106
+      },
+      {
+        "id": 12,
+        "wcet_fullspeed": 86,
+        "mcet": 0,
+        "deadline": 218,
+        "can_run_on": [
+          1,
+          6
+        ],
+        "processing_times": 123
+      },
+      {
+        "id": 13,
+        "wcet_fullspeed": 7,
+        "mcet": 0,
+        "deadline": 142,
+        "can_run_on": [
+          1
+        ],
+        "processing_times": 102
+      }
+    ],
+    "messages": [
+      {
+        "id": 136,
+        "sender": 72,
+        "receiver": 59,
+        "size": 17
+      },
+      {
+        "id": 32,
+        "sender": 13,
+        "receiver": 12,
+        "size": 17
+      }
+    ]
+  }
+}

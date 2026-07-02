@@ -1,0 +1,1332 @@
+\documentclass{ieeetj}
+\usepackage{cite}
+% \usepackage{amsmath,amssymb,amsfonts}
+% \usepackage{algorithmic}
+\usepackage{graphicx,color}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{hidelinks=true}
+% \usepackage{algorithm,algorithmic}
+
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\algnewcommand{\LineComment}[1]{\State \(\triangleright\)~#1}
+\algrenewcommand\algorithmicrequire{\textbf{Require:}}
+\algrenewcommand\algorithmicensure{\textbf{Ensure:}}
+\algnewcommand{\algorithmicbreak}{\textbf{break}}
+\newcommand{\cto}{\!\to\!}
+\newcommand{\cgets}{\mathrel{\leftarrow}}
+\usepackage{float}
+\usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\algrenewcommand\algorithmicindent{0.4em}
+\algrenewcommand\alglinenumber[1]{\scriptsize #1:}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+\AtBeginDocument{\definecolor{tmlcncolor}{cmyk}{0.93,0.59,0.15,0.02}\definecolor{NavyBlue}{RGB}{0,86,125}}
+
+
+
+
+\def\OJlogo{\vspace{-4pt}$<$Society logo(s) and publication title will appear here.$>$}
+\def\seclogo{\vspace{10pt}$<$Society logo(s) and publication title will appear here.$>$}
+
+\def\authorrefmark#1{\ensuremath{^{\textbf{#1}}}}
+
+\begin{document}
+\raggedbottom
+\receiveddate{XX Month, XXXX}
+\reviseddate{XX Month, XXXX}
+\accepteddate{XX Month, XXXX}
+\publisheddate{XX Month, XXXX}
+\currentdate{XX Month, XXXX}
+\doiinfo{XXXX.2022.1234567}
+
+\markboth{}{Omar {et al.}}
+
+\title{Hierarchical Deterministic Scheduler for Time-Triggered Edge-Fog-Cloud Architectures}
+% \authorrefmark{1}
+\author{Omar Hekal, Josepaul Paulachan,\\ Daniel Onwuchekwa and Roman Obermaisser}
+\affil{Chair of Embedded Systems, University of Siegen, 57076 Siegen, Germany}
+\corresp{Corresponding author: Omar Hekal (email:omar.hekal@uni-siegen.de).}
+\authornote{This work was supported by the EdgeAI-Trust project, which is funded within the Chips Joint Undertaking (Chips JU), a public-private partnership in collaboration with the European Union’s Horizon Europe research and innovation program and National Authorities under Grant Agreement No.~101139892.}
+
+
+
+\begin{abstract}
+The lack of determinism restricts the integration of safety-critical applications into edge–fog–cloud (EFC) architectures. Existing EFC schedulers are designed for dynamic, best-effort operation and focus primarily on computational placement, while communication is either abstracted or treated as a secondary cost term. Bounded-latency routing and deterministic task execution are seldom co-optimized under a unified timing model, limiting the provision of end-to-end timing guarantees.
+
+This paper addresses these gaps by introducing a three-tier Time-Triggered Edge–Fog–Cloud (TTEFC) architecture that supports safety-critical workloads on a managed, deterministic substrate, using IEEE Time-Sensitive Networking (TSN) for intra-domain communication and IETF Deterministic Networking (DetNet) for routed inter-domain paths. Second, a hierarchical genetic algorithm (HGA) is presented to co-schedule (i) partition-to-cluster mapping, (ii) partition execution order, (iii) deterministic route selection for inter-partition flows, and (iv) per-partition time budgets that act as scheduling contracts for parallel partition-level optimizers. Third, an adaptive slack reallocation operator is proposed to redistribute temporal slack from over-satisfied partitions to budget violators, improving feasibility convergence without increasing the end-to-end deadline.
+
+Experiments on synthetic DAG workloads (100–500 tasks) evaluate the proposed hierarchical genetic algorithm (HGA) against HEFT and round-robin. Under the evaluated platform and deterministic-network assumptions, the proposed HGA achieves lower global makespans, with up to 46.5\% and 18.9\% reduction relative to HEFT and round-robin, respectively. In addition, the specified application deadlines (2600/2700/4300 Time units (TU)) are met in all evaluated cases. In contrast, HEFT exceeds the deadline in all cases, and round-robin exceeds it in two of the three workload sizes.
+\end{abstract}
+
+% \begin{IEEEkeywords}
+% Enter key words or phrases in alphabetical order, separated by
+% commas. Using the \textit{IEEE Thesaurus} can help you find the best
+% standardized keywords to fit your article. Use the \underline{\href{https://www.ieee.org/publications/services/thesaurus.html}{thesaurus
+% access request form}} for free access to the \textit{IEEE Thesaurus}.
+% \end{IEEEkeywords}
+
+
+\begin{IEEEkeywords}
+Algorithm, Cloud Architectures, Cloud Scheduling, Co-optimization, Distributed Systems, Genetic Algorithms, Hierarchical Scheduling, Multi-tier Architecture, Optimization, Partition Negotiation, Scheduling.
+\end{IEEEkeywords}
+
+%\IEEEspecialpapernotice{(Invited Paper)}
+
+\maketitle
+\section{Introduction}
+\IEEEPARstart{T}{he} Edge–Fog–Cloud (EFC) continuum is increasingly adopted as an architectural model for distributed, data-intensive applications \cite{in2}. By distributing computation, storage, and networking capabilities from centralized cloud resources toward the network edge, EFC enables scalable processing of the massive data streams generated by the Internet of Things (IoT). In parallel, safety-critical domains such as industrial automation, automotive systems, and avionics, which are characterized by stringent timing constraints, are also undergoing data-centric transformations \cite{scs1}. Traditionally deployed on specialized platforms, these systems are facing new demands for scalability and connectivity, as well as lifecycle challenges associated with rapid hardware obsolescence.
+Migrating safety-critical logic onto distributed EFC infrastructures promises substantial benefits. However, it exposes a fundamental conflict between best-effort EFC design principles and the determinism required by safety-critical systems. This conflict is referred to as the determinism gap: safety-critical workloads require strict end-to-end timing guarantees that state-of-the-art EFC architectures were not originally designed to provide \cite{in1}.
+
+The primary value proposition of state-of-the-art EFC architectures is their dynamism, including elastic resource allocation \cite{in3,in4} and adaptation to fluctuating workloads \cite{in5}. Such dynamism is well suited to best-effort applications, such as streaming analytics or mobile computing, where average-case performance, cost, or energy consumption are the dominant objectives \cite{in6}. However, for safety-critical workloads, the heterogeneous and time-varying nature of EFC environments \cite{in7}, together with resource contention \cite{in8} and on-demand resource sharing, makes it difficult to establish end-to-end timing guarantees. While existing heuristic approaches \cite{in7} and AI-based schedulers \cite{AI1} can perform well under volatility, they typically optimize expected performance metrics and do not provide formally validated worst-case timing bounds; moreover, some approaches incur computational overhead that is incompatible with time-sensitive decision making.
+
+This determinism gap is not limited to computation; it also arises in the network fabric, where latency and jitter must be bounded to achieve end-to-end guarantees. End-to-end timing guarantees cannot be established if communication delays remain uncontrolled. Standard EFC deployments typically rely on best-effort communication mechanisms and application-layer messaging, which provide no strict bounds on message latency or jitter \cite{cc2}. In safety-critical settings, such uncertainty complicates validation because late or missing messages can violate timing assumptions.
+
+Determinism can be ensured by a time-triggered (TT) approach, which assumes a communication substrate with bounded latency and jitter. In this work, this substrate is realized by combining two established standards. Time-Sensitive Networking (TSN), specified in IEEE 802.1, provides deterministic, time-critical delivery over standard Ethernet at Layer 2 by enabling precise time synchronization, traffic scheduling, and resource reservation \cite{tsn1,tsn2}. TSN has become a widely adopted, interoperable basis for industrial automation, intended to replace proprietary fieldbuses \cite{tsn3}. However, EFC communication paths are typically multi-hop and routed, such that Layer 2 guarantees alone do not cover the full end-to-end path. This limitation is addressed by Deterministic Networking (DetNet), standardized by the Internet Engineering Task Force (IETF), which extends TSN-like properties to Layer 3 by providing bounded latency, bounded jitter, and controlled loss over routed segments \cite{det1,det2}. Together, TSN and DetNet provide the bounded-latency communication substrate on which the proposed TTEFC architecture relies. With communication latency and jitter bounded, end-to-end timing guarantees depend primarily on the scheduling algorithm.
+
+
+\textcolor{red}{attack the event-triggered cloud = one paragraph}
+
+\textcolor{red}{Safety-critical applications relying on cloud infrastucture (autonomus driving, remote control car, sevices whose failure is fatal)}
+
+conclude = The price for the TTcLOUD but why is it still necessary 
+
+Check BOSCH ppt about Cloud. 
+
+It is crucial to distinguish the scope of this work from general-purpose, best-effort cloud computing. Safety-critical workloads require determinism that cannot be guaranteed on shared public infrastructure, where contention and jitter are unbounded. The proposed TTEFC architecture targets managed, deterministic EFC deployments, in which determinism is provided through operator-controlled provisioning rather than assumed to be an inherent cloud property \cite{det1,sys1}. In this model, the underlying infrastructure must expose a Deterministic Communication Interface (DCI) through which bounded-latency communication and time synchronization can be requested and enforced. Such capabilities are increasingly supported by standards and ongoing network evolution, including IETF Deterministic Networking (DetNet) for bounded-latency forwarding over Layer 3 and emerging 3GPP mechanisms for time synchronization services (e.g., Release 18 Time Synchronization as a Service, TSaaS) \cite{sys1}. Consequently, DCI compliance is treated as an infrastructure responsibility of the provider/operator. Given a DCI-compliant substrate, the proposed HGA translates application DAGs into resource allocations and path selections that can be enforced by the underlying TSN/DetNet communication fabric.
+
+Assuming a deterministic TSN/DetNet substrate, the remaining problem is to synthesize an end-to-end schedule that jointly accounts for task execution and communication. This problem is NP-hard \cite{sch1}. Common baselines such as HEFT \cite{sch2} and the GA formulations used as EFC baselines \cite{in1} do not explicitly model deterministic route selection or adaptive cross-partition time-budget negotiation. Accordingly, two gaps are identified in the state of the art.
+
+First, a decoupled design is commonly employed. As noted in existing surveys, many scheduling techniques treat task allocation and communication routing as separate—often sequential—optimization problems \cite{in7}. In typical EFC baselines, including standard GA formulations, optimization is primarily driven by a compute-centric objective such as makespan \cite{sch2}, while communication is represented by simplified delay terms rather than explicit deterministic route selection. This separation can produce schedules that appear locally optimal at the compute level yet induce communication patterns that exceed end-to-end deadlines or create contention along shared links, which is not captured by a decoupled model.
+
+Second, adaptive time-budget negotiation across partitions is not explicitly modeled. State-of-the-art schedulers generally do not provide a formal mechanism for cross-partition temporal feedback and adjustment. When one partition is over-satisfied and another violates its budget, temporal slack is not systematically redistributed, and feasibility recovery is left to unguided perturbations. The absence of an explicit slack reallocation mechanism, as discussed in \cite{sch5}, reduces the ability to steer the search toward feasible end-to-end schedules in hierarchical settings.
+
+% To address these gaps, the scope of this work is defined in contrast to dynamic runtime scheduling and exact optimization. While contemporary EFC architectures often rely on dynamic scheduling, offline-validated timing guarantees remain difficult to establish for safety-critical workloads. A semi-static approach is therefore employed, in which time-triggered (TT) resource allocations are synthesized offline and then enforced during operation. Although exact methods such as Satisfiability Modulo Theories (SMT) and Integer Linear Programming (ILP) can provide optimality for restricted formulations, the joint optimization of partition mapping, deterministic routing, and temporal budgeting for large-scale directed acyclic graphs (DAGs) remains NP-hard and commonly exhibits combinatorial growth \cite{sch1,r2}. This motivates a meta-heuristic formulation, where a hierarchical GA (HGA) provides a scalable framework for deriving feasible, near-optimal solutions within practical synthesis windows, including the 500-task workloads evaluated in this study.
+
+% \textcolor{red}{To address these gaps, this work introduces a novel scheduling paradigm for the Edge-Fog-Cloud continuum. Unlike standard heuristic schedulers (e.g., HEFT) or flat metaheuristics that treat communication merely as an abstract delay term \cite{h5}, the proposed HGA explicitly embeds deterministic TSN/DetNet path indices into the system-level chromosome. Furthermore, in contrast to existing hierarchical EFC schedulers that rely on static budget reservations or reactive online admission control \cite{rev3}, \cite{rev4}, this work formalizes cross-tier budget negotiation as a dynamic scheduling contract via a novel Adaptive Slack Reallocation Operator}
+
+\textcolor{red}{While a conceptual foundation of a Time-Triggered Edge–Fog–Cloud (TTEFC) architecture has been proposed to address the spatial distribution of workloads across tiers \cite{jose}, baseline models treat the cloud as an abstract layer and lack a mechanism to systematically resolve temporal budget overruns. Furthermore, prior works generally address EFC architectures \cite{efc3}, deterministic networking \cite{tsn1}, \cite{detnet}, and heuristic edge scheduling \cite{in1}, \cite{h2} as largely separate domains.}
+In previous work [IEEEACCESS], the architecture was detailed . The scheduling is the major contribution ..
+list the the three contributions 
+
+
+% \textcolor{red}{ This manuscript details the deterministic EFC infrastructure required for safety-critical deployment—including 3GPP TSaaS and a formal Deterministic Communication Interface (DCI)—and introduces a fundamentally new scheduling paradigm. Unlike standard hierarchical metaheuristics, prior spatial partitioning work, or decoupled TSN/DetNet co-schedulers, the proposed approach advances the state of the art through three specific contributions:}
+\begin{itemize}
+    \item \textbf{A Hierarchical GA for system–partition co-design.} A two-level HGA is introduced. A system-level GA jointly optimizes (i) partition-to-cluster mapping, (ii) per-partition time budgets (TBs), and (iii) partition execution order. These decisions constrain multiple parallel partition-level GAs that synthesize local task schedules, enabling coordinated end-to-end optimization across system and partition layers.
+    \item \textbf{Dynamic Time-Budget Negotiation via Adaptive Slack Reallocation.} Advancing hierarchical scheduling beyond standard reservation-based methods \cite{rev1}, \cite{rev3}, the system-level scheduler governs cross-tier execution through explicitly negotiated temporal boundaries rather than reactive runtime admission tests. A novel mutation operator enables continuous time-budget adjustment across partitions. Temporal slack is automatically transferred from over-satisfied donor partitions to receiver partitions that violate their assigned budgets, which stabilizes convergence and proactively reduces deadline violations compared with independent budget perturbations \cite{sch5}.
+    \item \textbf{Integrated Deterministic Routing for Feasibility-Aware Search.} The framework distinguishes itself from decoupled workflow schedulers by integrating inter-domain DetNet and local TSN routing directly into the task-placement search, eliminating the assumption of flat communication costs. To couple routing with placement and scheduling, deterministic per-message path-index hints are embedded in the system-level chromosome. This explicit encoding links route selection on the deterministic substrate with partition decisions, preventing network contention, suppressing infeasible offspring, and reducing end-to-end latency during synthesis.
+\end{itemize}
+
+% The contributions of this work are threefold, with each directly addressing a gap identified in the state-of-the-art:
+% \begin{itemize}
+%     \item \textbf{A Hierarchical GA for system–partition co-design.}\newline
+%     A two-level HGA is introduced. A system-level GA jointly optimizes (i) partition$\rightarrow$cluster mapping, (ii) per-partition time budgets (TBs), and (iii) partition execution order. These decisions constrain multiple parallel partition-level GAs that synthesize local task schedules, enabling coordinated end-to-end optimization across system and partition layers. 
+%     \item \textbf{Adaptive Slack Reallocation Operator.}\newline
+%     A negotiation-inspired mutation operator is introduced to enable time-budget adjustment across partitions. Temporal slack is transferred from over-satisfied donor partitions to receiver partitions that violate their budgets, which stabilizes convergence and reduces deadline violations compared with independent budget perturbations \cite{sch5}.
+%     \item \textbf{Feasibility- and communication-aware GA.}\newline
+%     To couple routing with placement and scheduling, per-message path-index hints are embedded in the system-level chromosome. This encoding links deterministic route selection on the TSN/DetNet substrate with partition decisions, suppressing infeasible offspring and reducing end-to-end latency during synthesis.
+%     \end{itemize}
+
+
+The remainder of this paper is organized as follows. Section~\ref{RW} reviews the related works. Section~\ref{SM} introduces the time-triggered edge--fog--cloud system model and formulates the scheduling problem. Section~\ref{sec:method} presents the proposed hierarchical scheduling framework. Section~\ref{sec:results} evaluates the proposed approach through benchmark and sensitivity analyses. Section~\ref{sec:discussion} discusses the main observations derived from the results. Section~\ref{conc} concludes the paper.
+
+\section{Related Works}
+\label{RW}
+Modern IoT applications are increasingly deployed across an edge--fog--cloud (EFC) continuum to meet demands for low latency and high throughput while exploiting heterogeneous resources near data sources. This shift motivates architectural models that clarify the roles of edge, fog, and cloud nodes, and it raises system-level challenges in coordinating computation and communication across tiers. As this work addresses scheduling and communication-aware task placement in EFC settings, the following discussion will focus on architectural concepts and abstractions that directly affect timing, resource availability, and orchestration constraints.
+\subsection{Edge-Fog-Cloud Architectures}
+EFC architectures extend cloud-centric deployments by distributing computation across edge and fog layers to improve responsiveness and reduce traffic. In \cite{efc1}, an EFC-based framework for streaming analytics was introduced to support IoT scenarios where continuous data streams and fast reaction times make purely centralized processing impractical. Architectural resilience and operational robustness have also been emphasized in EFC ecosystems. A resilience-oriented taxonomy was provided in \cite{efc2}, where approaches were grouped into capacity-, trustworthiness-, and efficiency-driven mechanisms, highlighting that orchestration policies should reflect node capabilities and failure characteristics rather than relying solely on offloading models.
+
+The increasing adoption of IoT--fog--cloud ecosystems was further surveyed in \cite{efc3}, where fog was described as an intermediate layer that complements the cloud by enabling localized analytics and security functions while supporting quality of service objectives. Standardization efforts have aimed to formalize these layered deployments, including OpenFog/IEEE 1934 guidelines \cite{efc4} and MEC reference models \cite{efc5}. Overall, these works motivate multi-tier abstractions in which heterogeneous resources, locality, and tier-specific constraints jointly shape feasible orchestration and scheduling decisions.
+\subsection{Communication in Edge-Fog-Cloud Architectures}
+Although deterministic communication is central to this work, much of the IoT-edge-cloud literature focuses on protocol heterogeneity and security in best-effort environments. Application-layer surveys emphasize that different tiers often adopt different protocols depending on latency and energy constraints \cite{cc1}, while security frameworks focus on scalable trust and secure data exchange under dynamic connectivity \cite{cc2,cc3}. However, such approaches typically optimize flexibility and integrity rather than providing strict end-to-end timing guarantees, which motivates deterministic communication fabrics (e.g., TSN/DetNet) where transmission is treated as a schedulable resource.
+
+Deterministic networking is often paired with centralized orchestration (e.g., SDN controllers) because routing decisions and TSN/DetNet schedule configuration must be coordinated to satisfy timing constraints. Zhang et al.\cite{cc5} proposed an SDN-assisted deterministic architecture that couples TSN configuration with centralized control, highlighting that routing and scheduling must be co-designed to meet timing requirements under mixed traffic. This observation is consistent with the present work, where communication choices are integrated into the scheduling search to avoid network contention that may violate end-to-end deadlines. 
+ 
+Nie et al.\cite{cc4} investigated joint communication and computation coordination for TSN-based edge environments using dependency models to ensure deterministic completion across multiple hops. While these studies primarily rely on heuristic planning of transmission and offloading decisions, the present work emphasizes hierarchical time-budget negotiation and introduces a slack reallocation mechanism to rebalance temporal budgets when local violations occur.
+
+\subsection{Cloud Scheduling}
+\subsubsection{Heuristic-based Scheduling}
+Heuristic and meta-heuristic scheduling have been widely used in cloud environments to solve NP-hard workflow and resource allocation problems, typically minimizing makespan and cost while maintaining balanced resource utilization. Hybrid meta-heuristics have been proposed to improve solution quality and convergence behavior by combining complementary search strategies. For example, Ant-Lion Optimization combined with Particle Swarm Optimization was applied to multi-objective workflow scheduling \cite{h1}, and hybrid formulations integrating Genetic Algorithms, Differential Evolution, and Simulated Annealing were evaluated for large task sets to reduce completion time \cite{h2}. Genetic-Algorithm-based schedulers have also been explored for deadline-aware task execution in cloud-based real-time AI workloads \cite{h3}. More recent hybrid designs further combine multiple operators to mitigate premature convergence and local optima in task scheduling \cite{h4}.
+
+Survey studies confirm the prevalence of meta-heuristics in cloud scheduling and show that makespan, cost, and load balancing remain the dominant optimization criteria \cite{h5}. Despite their effectiveness, heuristic and meta-heuristic methods may suffer from parameter sensitivity, scalability limitations in high-dimensional decision spaces, and the risk of local-optimal solutions, particularly under multiple conflicting objectives. These limitations motivate scheduling frameworks that explicitly couple computation and communication decisions under timing constraints, particularly in deterministic edge--fog--cloud environments.
+
+
+Learning- and data-driven schedulers have also been explored to react to workload dynamics or to approximate expensive optimization decisions, for example using deep reinforcement learning and learned surrogate models \cite{AI1,AI3,AI4,AI2}. Since the present work targets deterministic end-to-end timing and does not employ learning-based policies, the subsequent discussion emphasizes reservation-based and hierarchical models that provide explicit timing guarantees.
+
+\subsubsection{Reservation-Based and Hierarchical Scheduling}
+In EFC deployments, predictability is often pursued through reservation-based and hierarchical scheduling to enforce temporal isolation and limit interference among co-located applications. Recent work extends container orchestration with real-time reservations and introduces online admission tests and monitoring loops to manage workload variability at the edge.
+
+KubeDeadline \cite{rev1} extends Kubernetes with SCHED-DEADLINE-based reservations and node-level admission control, enabling isolated execution of latency-sensitive containerized workloads under interference. Online admission control has also been studied for multicore platforms with non-strictly periodic arrivals, where arrival-curve models and reachability-based analyses are used to decide whether new jobs can be admitted without violating existing deadlines \cite{rev2}. Hierarchical orchestration approaches combine offline placement/dimensioning with online controllers that monitor deadline misses and response times and adjust CPU budgets or trigger migrations when local adaptation is insufficient \cite{rev3}. For workloads with highly variable execution times, job-acceptance and dismissal policies have been proposed to bound queue growth and control miss rates under probabilistic execution-time estimates \cite{rev4}. Complementary monitoring mechanisms dynamically reconfigure SCHED\_DEADLINE budgets based on observed runtime behavior to balance isolation with utilization \cite{rev5}.
+
+Unlike these largely reactive or admission-driven frameworks, the present work targets deterministic end-to-end timing through offline schedule synthesis under explicit computation and communication constraints. In particular, partition placement is coupled with deterministic TSN/DetNet routing through communication-aware chromosomes, and budget negotiation is formalized via an Adaptive Slack Reallocation Operator that transfers temporal slack between partitions to restore feasibility and improve convergence across the multi-tier continuum.
+
+Runtime adaptation and fault tolerance in edge--fog--cloud systems are widely studied, typically through proactive and reactive mitigation actions such as migration, replication, and checkpointing, and through monitoring-driven resource management \cite{ft1,ft6}. Adaptive resource allocation schemes further incorporate workload- and failure-aware selection policies to improve robustness under dynamic conditions \cite{ft4,ft5}. These directions primarily target service continuity and availability and are outside the scope of this paper. Instead, the focus is placed on deterministic end-to-end timing, where adaptation is realized at the scheduling level via time-budget negotiation: temporal slack is redistributed between partitions to maintain feasibility under explicit computation and communication constraints.
+
+% Overall, prior work addresses EFC architectures, deterministic networking, and cloud scheduling largely as separate threads. This separation motivates integrated methods that co-design computation placement and deterministic communication while enforcing end-to-end feasibility under explicit timing constraints. 
+
+\textcolor{red}{While prior works address EFC architectures \cite{efc3}, deterministic networking \cite{tsn1}, \cite{detnet}, and heuristic edge scheduling \cite{in1}, \cite{h2} as largely separate domains, the novelty of this work lies in their explicit co-design. The proposed TTEFC architecture distinguishes itself from existing communication-aware workflow schedulers by integrating inter-domain Layer 3 DetNet routing directly into the task-placement search, eliminating the assumption of flat, homogeneous communication costs. Moreover, it advances hierarchical scheduling beyond standard reservation-based methods \cite{rev1}, \cite{rev3}. Instead of relying on runtime admission tests or static boundaries, the proposed framework introduces an offline temporal negotiation mechanism that automatically redistributes execution slack across the continuum to recover end-to-end feasibility before deployment.}
+The next section introduces the system model and problem formulation that capture these coupled constraints.
+
+
+\section{System Model}\label{SM}
+This section defines the architecture and formal models used in the proposed time-triggered Edge--Fog--Cloud (TTEFC) architecture. The architecture and determinism assumptions are introduced first, followed by the platform/network and application abstractions used to formulate the end-to-end scheduling problem. The scheduling algorithms are presented in Section~\ref{sec:method}.
+
+\subsection{TTEFC Architecture and Determinism Assumptions}
+\label{SM:arch}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth,height=14cm]{EFG_Abstract.pdf}
+\caption{Hierarchical time-triggered Edge--Fog--Cloud (TTEFC) architecture with fog-level orchestration and deterministic communication}
+\label{fig:4}
+\end{figure*}
+Our work considers a distributed application deployed across a hierarchical Edge--Fog--Cloud (EFC) continuum. This architecture is driven by the growth of IoT data and the need to meet stringent timing requirements. A fog orchestrator coordinates the execution of application partitions across tiers and manages the timing of inter-partition communication. Cross-domain communication (including Fog--Cloud and Cloud--Cloud connectivity) is assumed to use a deterministic backbone with bounded latency, while the fog and edge layers operate on Time-Sensitive Networking (TSN). TSN extends standard Ethernet with time synchronization, scheduled traffic, and resource reservation, enabling bounded latency under a shared time base. These assumptions enable deterministic system behavior, allowing the orchestrator to make scheduling and routing decisions with predictable execution and communication latencies, an essential requirement for safety-critical applications.
+
+\subsection{Global Synchronization and TSaaS}
+\label{SM:sync}
+To support time-triggered execution across the distributed continuum, a system-wide global time base is assumed. The 3GPP \textit{Time Synchronization as a Service (TSaaS)} framework (Release 18)~\cite{sys1} facilitates this by leveraging 5G/6G infrastructure to distribute a Grandmaster clock signal with sub-microsecond accuracy to participating nodes. Any residual clock drift and distribution uncertainty are assumed to remain within a bounded error margin ensured by the synchronization service and the underlying network configuration, so that the time base can be used consistently for deterministic communication and time-triggered execution. This time base is assumed to be available to Edge, Fog, and Cloud end systems in the considered managed deployment
+
+\subsection{Edge Layer}
+\label{SM:edge}
+The edge layer represents the physical boundary of the system and hosts the most latency-sensitive functions, such as sensing, preprocessing, and closed-loop actuation. Edge end systems are typically resource-constrained and therefore execute lightweight processing close to data sources, while compute-intensive functions may be offloaded to higher tiers when permitted by end-to-end timing constraints. The edge domain follows the TSN assumptions stated in Section~\ref{SM:arch}.
+
+\subsection{Fog Layer}
+\label{SM:fog}
+The fog layer is an intermediate tier between the resource-constrained edge and the high-capacity cloud. It hosts the fog orchestrator, which acts as the application's coordinator by scheduling workloads, negotiating with different computational clusters, and offloading tasks to cloud or edge resources based on timing constraints. Positioned closer to edge devices than the cloud but with greater computational capacity than the edge, the fog layer is well-suited to manage time-critical workloads: it can rapidly react to task arrivals, distribute processing across local nodes, and leverage cloud resources when necessary to meet stringent deadlines. The fog domain follows the TSN assumptions stated in Section~\ref{SM:arch} 
+
+% The fog domain is assumed to operate on TSN to support deterministic inter-partition transfers within local domains.
+
+\subsubsection{Scheduler Module}
+\label{SM:fog_scheduler}
+The scheduler module implements a hierarchical scheduling mechanism that synthesizes both system-level and partition-level schedules. At the system level, it coordinates (i) the allocation of application partitions to Edge, Fog, or Cloud resources, (ii) the execution order of these partitions, (iii) the timing of inter-partition communication, and (iv) the assignment of per-partition time budgets that collectively satisfy the end-to-end deadline. At the partition level, each partition is scheduled independently within its assigned time budget by determining the internal task execution order, mapping tasks to processors, and enforcing intra-partition communication constraints to minimize the local makespan while preserving precedence and resource feasibility.
+
+To improve feasibility under heterogeneous execution and communication delays, the scheduler incorporates an adaptive time-budget negotiation mechanism that redistributes slack from partitions that complete early to those that exceed their allocated budgets. The resulting local makespans are reported to the system level; when a partition exceeds its budget, feasibility is encouraged through targeted penalties and repair actions that guide the search toward schedules that satisfy the global timing constraints.
+
+This hierarchical coordination mitigates globally infeasible solutions that may arise when task placement, timing, and communication routing are optimized independently across tiers. By negotiating time budgets based on feedback from partition schedules, end-to-end determinism and deadline compliance are maintained under varying workload characteristics.
+
+\subsubsection{Network Configurator}
+\label{SM:fog_netconfig}
+The network configurator provisions deterministic communication resources for application messages at both the inter- and intra-partition levels. For \emph{inter-partition} messages, it maps each flow onto the deterministic communication fabric and reserves the required paths and transmission resources to maintain bounded latency. It exposes the set of feasible deterministic routes between communicating endpoints and associates each route with a bounded latency that is used during schedulability analysis. If no feasible deterministic connection exists for a required sender--receiver pair, the corresponding communication is treated as infeasible and handled as a violation in the end-to-end feasibility assessment.
+
+For \emph{intra-partition} messages, the configurator provides the bounded communication parameters required by the partition-level scheduler. When communicating tasks are placed on the same end system, the transfer is abstracted as a local delivery with negligible network delay. Otherwise, the transfer is constrained to the local deterministic domain (e.g., TSN) and is modeled with a bounded latency consistent with the provisioned local communication resources.
+
+\subsubsection{Fault-Tolerance Module}
+\label{SM:fog_ft}
+The architecture anticipates deterministic adaptation by integrating concepts from multi-schedule graphs (MSGs) and metascheduling. In time-triggered systems, metascheduling computes a schedule for each possible context event and organizes the schedules into a multi-schedule graph. Upon the occurrence of an event (e.g., a resource failure or detected slack), the system switches from the active schedule to the appropriate successor schedule in the MSG. Recent work in~\cite{scs1} shows that a multi-objective genetic algorithm-based metascheduler can generate MSGs while minimizing memory consumption by exploiting structural similarity between schedules and storing only their incremental differences. By relying on pre-computed schedule variants and deterministic schedule switching, fault handling and recovery can be performed without introducing runtime uncertainty that could compromise end-to-end timing guarantees. This module is included as an architectural extension point; the evaluation in this paper focuses on baseline schedule synthesis.
+
+\subsection{Cloud Layer}
+\label{SM:cloud}
+Unlike standard best-effort cloud models (e.g., AWS, GCP), the Cloud Layer in the proposed TTEFC architecture is defined as a \textit{Managed Real-Time Cloud Slice}. This represents a logical partitioning of data center resources, with temporal isolation strictly enforced by real-time hypervisors and partitioning kernels. This substrate ensures a bounded Worst-Case Execution Time (WCET) for offloaded tasks. While our model uses representative resource constraints inspired by commercial platforms, the scheduler's ability to provide timing guarantees relies on this deterministic compute substrate.
+
+\subsection{Deterministic Communication Interface (DCI)}
+\label{SM:dci}
+The deterministic backbone used for inter-site connectivity is modeled as a \textit{Deterministic Communication Interface (DCI)}. The DCI is assumed to provide bounded-latency communication for cross-domain transfers, including Fog--Cloud and Cloud--Cloud connectivity. This interface is implemented using IETF DetNet flows, which enable explicit route pinning and resource reservation to guarantee bounded latency~\cite{det1}. Our model accounts for the significant propagation delay of these backbone paths by assigning higher communication costs to DCI transfers compared to local Edge/Fog links operating within TSN domains.
+
+
+\subsection{End Systems in the TTEFC Architecture}
+\label{SM:es}
+In the proposed architecture, the term End System (ES) is used in the strict sense defined by the avionics (TTEthernet) and industrial automation (TSN) domains. An End System is not merely a passive communication interface; it is a computational node equipped with a deterministic network interface. An End System $ES_i$ is a tuple $(C_i, N_i)$, where $C_i$ represents the Computational Unit, comprising the CPU (Host), memory, and operating system capable of executing application tasks, and $N_i$ represents the Network Unit, specifically a TSN-compliant Network Interface Card (NIC) or a specialized network controller.
+
+The ES facilitates the interaction between the application layer and the deterministic network fabric through three primary functional roles:
+\begin{itemize}
+    \item \textbf{Computation:} It executes the tasks assigned to it by the scheduler.
+    \item \textbf{Traffic Injection (Talker):} It injects data messages into the network at precise, pre-scheduled time instants governed by the global schedule. The Network Unit $N_i$ enforces traffic shaping (e.g., using IEEE 802.1Qbv time-aware shapers) to ensure that traffic enters the switch fabric without inducing congestion~\cite{sys2}.
+    \item \textbf{Traffic Reception (Listener):} It receives messages from the network, buffering them for consumption by the local tasks.
+\end{itemize}
+
+\subsubsection{Heterogeneity of End Systems in the TTEFC Architecture}
+\label{SM:es_hetero}
+To capture the heterogeneous nature of the continuum, End Systems (ES) are differentiated across the Edge, Fog, and Cloud layers.
+
+\paragraph{Edge End Systems}
+Edge End Systems represent the physical boundary of the system ``far edge'' and include smart sensors, Programmable Logic Controllers (PLCs), robotic joint controllers, and automotive Electronic Control Units (ECUs). These nodes are characterized by constrained computational resources. Typically based on microcontrollers (e.g., ARM Cortex-M/R) or low-power Systems-on-Chip (SoCs), they provide limited RAM and processing capability. Consequently, while they offer negligible communication latency for local I/O interactions, their processing-time values for complex tasks remain comparatively high. Their primary network role is to serve as sources of raw data streams and sinks for actuation commands.
+
+\paragraph{Fog End Systems}
+Fog End Systems act as intermediate aggregation and processing points at the ``near edge.'' These nodes, exemplified by Industrial PCs (IPCs), edge gateways, and roadside units (RSUs), offer moderate computational capabilities that are significantly higher than those of edge nodes. For the scheduler, fog nodes represent a critical trade-off point: they provide execution speeds capable of handling tasks that are heavy for edge nodes while maintaining lower communication latencies than the cloud. Architecturally, they bridge local TSN domains at the edge with the routed deterministic backbone leading to the cloud.
+
+\paragraph{Cloud End Systems}
+Cloud End Systems constitute the high-performance tier located in data centers, comprising rack-mounted servers and bare-metal instances. These nodes provide massive memory bandwidth and server-grade processing power (e.g., Xeon and EPYC CPUs and GP-GPUs), resulting in the lowest processing-time values for computationally intensive workloads such as global path planning and model training. However, accessing these resources incurs a significant latency penalty due to physical distance and routing hops.
+
+\subsection{Platform and Network Model}
+\label{SM:platnet}
+The execution platform is modeled as a set of heterogeneous End Systems distributed across the Edge, Fog, and Cloud layers, interconnected via deterministic communication resources. Let $\mathcal{N}=\{ES_1,ES_2,\dots,ES_{|\mathcal{N}|}\}$ denote the set of End Systems distributed across the Edge, Fog, and Cloud tiers. The network topology is extracted from the platform description and modeled as a graph $\mathcal{G}_{net}=(\mathcal{V},\mathcal{L})$, where $\mathcal{V}$ contains End Systems and intermediate forwarding elements, and $\mathcal{L}$ contains the communication links between them. For any sender--receiver pair $(s,r)\in\mathcal{N}\times\mathcal{N}$, a finite set of feasible candidate paths is derived from $\mathcal{G}_{net}$ and denoted by $\mathcal{P}_{s,r}=\{p_1,p_2,\dots\}$; the path construction procedure is described in Section~\ref{sec:method}.
+% Let $\mathcal{N}$ denote the set of End Systems, $\mathcal{N}=\{ES_1,ES_2,\dots,ES_{|\mathcal{N}|}\}$, distributed across the Edge, Fog, and Cloud tiers, and let $\mathcal{G}_{net}=(\mathcal{V},\mathcal{L})$ denote the network graph, where $\mathcal{V}$ contains End Systems and intermediate forwarding elements, and $\mathcal{L}$ contains the communication links between them.
+The Edge/Fog domains follow the TSN assumptions of Section~\ref{SM:arch}, while cross-domain transfers rely on the deterministic backbone modeled as the DCI (Section~\ref{SM:dci}).
+
+For any sender--receiver pair $(s,r)\in\mathcal{N}\times\mathcal{N}$, a finite set of feasible deterministic paths is assumed to exist, denoted by $\mathcal{P}_{s,r}=\{p_1,p_2,\dots\}$. For a message ($m$) routed over a selected path $p\in\mathcal{P}_{s,r}$, the end-to-end communication latency is modeled by a bounded cost function $L(m,p)$ that captures the propagation delay of the selected route and the message-dependent transmission effects. Consistent with Section~\ref{SM:dci}, paths traversing the DCI are modeled with higher latency than local Edge/Fog paths.
+
+
+\subsection{Application Model}
+\label{SM:app}
+The application workload is modeled as a dependency graph, where data flow determines execution eligibility. The application $\mathcal{A}$ is represented as a Directed Acyclic Graph (DAG) $\mathcal{A}=(\mathcal{T},\mathcal{E})$, where $\mathcal{T}$ is the task set and $\mathcal{E}$ is the set of directed dependencies.
+
+\subsubsection{Task Set ($\mathcal{T}$)}
+\label{SM:tasks}
+Let $\mathcal{T}=\{t_1,t_2,\dots,t_n\}$ be a finite set of tasks. Each task $t_i$ is a non-preemptable unit of execution. Task execution times depend on the selected End System; let $PT(t_i,ES_k)$ denote the processing time (e.g., WCET) of task $t_i$ when executed on $ES_k\in\mathcal{N}$.
+
+\subsubsection{Dependency Set ($\mathcal{E}$)}
+\label{SM:deps}
+Let $\mathcal{E}\subseteq \mathcal{T}\times\mathcal{T}$ denote the set of directed edges representing precedence and data dependencies. An edge $(t_i,t_j)\in\mathcal{E}$ indicates that $t_j$ cannot start until $t_i$ completes and the produced data is delivered to the End System executing $t_j$.
+
+% \subsubsection{Partition Model ($\mathcal{P}$)}
+% \label{SM:parts}
+% To support modularity and hierarchical scheduling, the application is decomposed into partitions. Let $\mathcal{P}=\{p_1,p_2,\dots,p_z\}$ be the set of partitions, and let $Part(t)$ denote the partition of task $t$. For each $p\in\mathcal{P}$, an intra-partition subgraph $\mathcal{G}_p=(\mathcal{T}_p,\mathcal{E}_p)$ is defined, where $\mathcal{T}_p=\{t\in\mathcal{T}\mid Part(t)=p\}$ and $\mathcal{E}_p=\{(u,v)\in\mathcal{E}\mid u,v\in\mathcal{T}_p\}$.
+
+\subsubsection{Partition Model ($\mathcal{P}$)}
+\label{SM:parts}
+To support modularity and hierarchical scheduling, the application is decomposed into a set of partitions, each grouping a subset of tasks scheduled together at the partition level. Let $\mathcal{P}=\{p_1,p_2,\dots,p_z\}$ denote the set of partitions, and let $Part(t)\in\mathcal{P}$ return the partition to which a task $t\in\mathcal{T}$ belongs.
+
+For a given partition $p\in\mathcal{P}$, the corresponding task subset is:
+\begin{equation}
+\mathcal{T}_p=\{\,t\in\mathcal{T}\mid Part(t)=p\,\}.
+\end{equation}
+The dependencies internal to partition $p$ are:
+\begin{equation}
+\mathcal{E}_p=\{\, (u,v)\in\mathcal{E}\mid u\in\mathcal{T}_p \land v\in\mathcal{T}_p \,\}.
+\end{equation}
+Accordingly, the intra-partition workload is represented by the subgraph $\mathcal{G}_p=(\mathcal{T}_p,\mathcal{E}_p)$.
+
+
+\subsubsection{Message Sets ($\mathcal{M}$)}
+\label{SM:msgs}
+Communication is modeled explicitly as messages associated with dependency edges. For each edge $(u,v)\in\mathcal{E}$, a message $m_{u,v}$ represents the data transfer from the producer task $u$ to the consumer task $v$. The set of all application messages is:
+\begin{equation}
+\mathcal{M}=\{\, m_{u,v}\mid (u,v)\in\mathcal{E}\,\}.
+\end{equation}
+
+Inter- and intra-partition messages are distinguished based on whether the communicating tasks belong to different partitions:
+\begin{equation}
+\mathcal{M}_{inter}=\{\, m_{u,v}\in\mathcal{M}\mid Part(u)\neq Part(v)\,\},
+\end{equation}
+\begin{equation}
+\mathcal{M}_{intra}=\{\, m_{u,v}\in\mathcal{M}\mid Part(u)=Part(v)\,\}.
+\end{equation}
+
+Messages in $\mathcal{M}_{inter}$ traverse the deterministic communication fabric across tiers, while messages in $\mathcal{M}_{intra}$ are handled within the scope of a single partition.
+
+\subsection{Problem Definition}
+\label{SM:problem}
+Given an application DAG $\mathcal{A}=(\mathcal{T},\mathcal{E})$, a partition set $\mathcal{P}$, a heterogeneous set of End Systems $\mathcal{N}$ distributed across the Edge, Fog, and Cloud tiers, and deterministic path catalogs $\{\mathcal{P}_{s,r}\}$, the goal is to synthesize an end-to-end schedule that jointly accounts for (i) system-level partition decisions across tiers and (ii) partition-level task schedules under bounded execution and communication latencies. A global end-to-end deadline $D$ is specified for the application.
+
+\subsubsection{Decision Variables}
+\label{SM:vars}
+The following coupled decisions determine the end-to-end schedule:
+\begin{itemize}
+    \item \textbf{System-level partition allocation:} a mapping $\Phi:\mathcal{P}\rightarrow \mathcal{C}$ that assigns each partition $p$ to a selected execution location (cluster/tier endpoint) $\Phi(p)$ within the Edge--Fog--Cloud continuum. This decision fixes the partition's execution domain at the system level.
+    
+    \item \textbf{Partition-level task mapping:} for each partition $p$, a local mapping $\phi_p:\mathcal{T}_p \rightarrow \mathcal{N}_{\Phi(p)}$ that assigns the tasks of $p$ to End Systems available within the domain selected by $\Phi(p)$. This decision is produced by the partition-level scheduler, subject to the budget and feasibility constraints imposed by the system-level.
+    
+    \item \textbf{System-level execution order:} an ordered sequence $\pi$ over $\mathcal{P}$ that defines the system-level order in which partitions are integrated into the global schedule.
+    
+    \item \textbf{Deterministic routing for inter-partition messages:} for each inter-partition message $m_{u,v}\in \mathcal{M}_{inter}$, a deterministic path $\rho(m_{u,v})\in \mathcal{P}_{s,r}$ is selected, where $s=\phi_{Part(u)}(u)$ and $r=\phi_{Part(v)}(v)$ denote the End Systems executing the sender task $u$ and the receiver task $v$, respectively.
+    
+    \item \textbf{Per-partition time budgets:} a budget vector $TB=\{TB(p)\mid p\in\mathcal{P}\}$ that assigns an execution-time contract to each partition. The budgets are negotiated so they support the feasibility of the global deadline.
+\end{itemize}
+
+\subsubsection{Constraints}
+\label{SM:constraints}
+Feasibility of an end-to-end schedule requires:
+\begin{itemize}
+    \item \textbf{Precedence and data availability:} for every dependency edge $(u,v)\in\mathcal{E}$, task $v$ must not start before task $u$ completes and the associated message $m_{u,v}$ is delivered.
+    \item \textbf{Resource feasibility:} tasks mapped to the same End System must not overlap in time on the same processing resource, and each task executes with processing time $PT(t_i,ES_k)$ on its assigned End System.
+    \item \textbf{Bounded communication:} each inter-partition message $m_{u,v}\in\mathcal{M}_{inter}$ must be assigned a feasible deterministic path $\rho(m_{u,v})$ with bounded latency $L(m_{u,v},\rho(m_{u,v}))$; if no feasible path exists, the solution is infeasible.
+    \item \textbf{Partition time-budget compliance:} for each partition $p\in\mathcal{P}$, the makespan of its partition-level schedule, denoted by $MS(p)$, must satisfy $MS(p)\le TB(p)$.
+    \item \textbf{End-to-end deadline:} the global completion time (global makespan) $MS_{global}$ must satisfy $MS_{global}\le D$.
+\end{itemize}
+
+\subsubsection{Optimization Objectives}
+\label{SM:obj}
+The primary objective is to obtain feasible schedules that meet the end-to-end deadline under bounded execution and communication latencies. Among feasible solutions, the optimization targets reduced end-to-end completion time and improved feasibility margins by (i) minimizing the global makespan $MS_{global}$ and (ii) minimizing cumulative partition budget violations when infeasibilities occur during the search. This formulation motivates a hierarchical solution approach in which system-level decisions (partition placement across tiers, execution order, routing, and time budgets) constrain parallel partition-level schedulers that map and schedule tasks within each selected domain.
+
+
+\begin{algorithm}[!htbp]
+\caption{\textproc{System-Level Scheduler}}
+\label{alg:SystemLevelGA}
+\begin{algorithmic}[1]
+\Require Per-partition data $(PT^p,\mathcal{M}_{intra}^p,JD^p)$; inter-partition messages $\mathcal{M}_{inter}$;
+path catalogs $\{\mathcal{P}_{s,r}\}$; global deadline $D$; GA params $(N_{pop},N_{gen},p_{cx},p_{mut})$
+\Ensure Best evaluated individual $ind^\star$
+\State \textbf{Genome:} $ind=[\,\pi \mid \Phi \mid \rho \mid TB\,]$
+\State $Pop \gets \textproc{InitPopulation}(N_{pop},D)$
+\ForAll{$ind \in Pop$}
+  \State $ind.fit \gets \textproc{Evaluate}(ind)$ \Comment{Alg.~\ref{alg:Evaluate}}
+\EndFor
+\State $Pop \gets \textproc{NSGAIISelect}(Pop)$
+\For{$gen=1$ to $N_{gen}$}
+  \State $Parents \gets \textproc{CrowdedTournament}(Pop)$
+  \State $Offspring \gets \textproc{Clone}(Parents)$
+  \ForAll{pairs $(c_1,c_2)$ in $Off$}
+    \If{$rand < p_{cx}$}
+      \State $(c_1,c_2) \gets \textproc{CrossoverSys}(c_1,c_2)$ \Comment{Alg.~\ref{alg:CrossoverSys}}
+    \EndIf
+  \EndFor
+  \ForAll{$child \in Offspring$}
+    \If{$rand < p_{mut}$}
+      \State $child \gets \textproc{MutateSys}(child)$ \Comment{Alg.~\ref{alg:MutateSys}}
+    \EndIf
+    \State $child \gets \textproc{MutateTimeBudget}(child)$ \Comment{Alg.~\ref{alg:MutateTB}}
+    \State $child.fit \gets \textproc{Evaluate}(child)$ \Comment{Alg.~\ref{alg:Evaluate}}
+  \EndFor
+  \State $Pop \gets \textproc{NSGAIISelect}(Pop \cup Off)$
+\EndFor
+\State \Return $\arg\min_{ind \in Pop} ind.fit$
+\end{algorithmic}
+\end{algorithm}
+
+
+\section{Scheduling Framework}
+\label{sec:method}
+This section presents the proposed two-level scheduler for the problem defined in Section~\ref{SM:problem}.
+
+
+
+\subsection{Framework Overview}
+\label{sec:method_overview}
+The proposed scheduler is organized into a \emph{system-level scheduler} and multiple parallel \emph{partition-level schedulers}. The system-level scheduler determines (i) partition allocation across execution domains, (ii) the system-level execution order of partitions, (iii) deterministic route selections for inter-partition messages, and (iv) per-partition time budgets that act as scheduling contracts. Given $(\Phi(p),TB(p))$, each partition-level scheduler constructs a local schedule \emph{within the assigned time budget} by selecting a precedence-feasible task order and mapping tasks to End Systems within the allocated domain while enforcing intra-partition communication constraints. The resulting partition schedules are integrated through an end-to-end reconstruction step that inserts inter-partition transmissions using the selected deterministic paths with bounded latency; the reconstructed schedule is then evaluated to obtain the global makespan and feasibility violations for each system-level solution.
+
+
+
+\subsection{System-Level Scheduler}
+\label{sec:method_system}
+The system-level scheduler evolves a population of candidate end-to-end solutions, where each individual jointly encodes (i) a partition allocation across execution domains, (ii) a system-level partition order, (iii) deterministic route selections for inter-partition messages, and (iv) per-partition time budgets. The system-level objective is to achieve end-to-end schedulability by minimizing the global makespan of the application while satisfying the global deadline and the per-partition budget constraints. Infeasible solutions, including those with partition budget overruns or missing feasible deterministic routes for inter-partition transfers, are penalized to steer the search toward feasible schedules.
+
+The exploration covers trade-offs between computation and communication across tiers. For example, allocating a partition to a higher tier may reduce its processing time while increasing the latency of its inter-partition communications, whereas allocating it closer to the edge may reduce communication delay at the cost of longer execution times. Deterministic route selections are enforced by assigning each inter-partition message to a specific candidate path from the path catalog, thereby avoiding runtime route jitter. The resulting system-level schedule specifies where partitions execute, in what order they are integrated, how inter-partition messages are routed over deterministic paths, and which time budgets constrain the partition-level schedulers.
+
+
+
+
+The system-level scheduling procedure is summarized in Algorithm~\ref{alg:SystemLevelGA}.
+
+
+
+
+
+
+
+
+{\small
+\setlength{\textfloatsep}{6pt}
+\setlength{\intextsep}{6pt}
+\begin{algorithm}[!htbp]
+\caption{\textproc{Evaluate}}
+\label{alg:Evaluate}
+\begin{algorithmic}[1]
+\Require $ind=[\,\pi \mid \Phi \mid \rho \mid TB\,]$; per-partition data $(PT^p,\mathcal{M}_{intra}^p,JD^p)$
+\Statex \hspace{\algorithmicindent} inter-partition messages $\mathcal{M}_{inter}$; path catalogs $\{\mathcal{P}_{s,r}\}$; global deadline $D$
+\Ensure Fitness $(\sum_p \text{viol}[p],\; \max(0,MS_{global}-D))$ and evaluation artifacts attached to $ind$
+\State Build map $triple[p]=(alloc{=}\Phi[i],\ tb{=}TB[i])$ for partition $p=\pi[i]$
+\ForAll{partitions $p$ in order $\pi$}
+  \State $(sched^p, ms^p, \phi_p) \gets \textproc{PartitionLevelScheduler}$
+  \Statex \hspace{\algorithmicindent} $(p, PT^p, \mathcal{M}_{intra}^p, JD^p, triple[p], \{\mathcal{P}_{s,r}\})$
+  \State $results[p]\gets sched^p$;\ $maps[p]\gets \phi_p$;\ $makespans[p]\gets ms^p$
+  \State $viol[p]\gets \max(0, ms^p-triple[p].tb)$
+\EndFor
+\State $(globalSched, MS_{global}, IPCviol) \gets \textproc{SystemLevelReconstruction}$
+\Statex \hspace{\algorithmicindent} $(results, maps, \mathcal{M}_{inter}, \rho, \{\mathcal{P}_{s,r}\})$
+\State $latenessSigned \gets MS_{global}-D$;\quad $latenessClipped \gets \max(0, latenessSigned)$
+\State Attach to $ind$: $eval\_\pi,eval\_\Phi,eval\_\rho,eval\_{TB},$
+\Statex \hspace{\algorithmicindent} $results, maps, makespans, viol,$
+\Statex \hspace{\algorithmicindent} $MS_{global}, latenessSigned, IPCviol$
+\State \Return $\big(\sum_p \text{viol}[p],\; latenessClipped\big)$
+\end{algorithmic}
+\end{algorithm}
+}
+Each system-level individual is evaluated by invoking the partition-level scheduler for every partition and reconstructing an end-to-end schedule to compute feasibility violations and the global makespan. This evaluation procedure is summarized in Algorithm~\ref{alg:Evaluate}.
+
+The system-level search relies on genetic operators that preserve the validity of the permutation-based genome components and maintain the alignment between the partition order and the time-budget vector. The crossover operator is defined in Algorithm~\ref{alg:CrossoverSys}.
+
+{\footnotesize
+\begin{algorithm}[!htbp]
+\caption{\textproc{CrossoverSys}}
+\label{alg:CrossoverSys}
+\begin{algorithmic}[1]
+\Require Parents $c_1,c_2$ with genome $[\,\pi \mid \Phi \mid \rho \mid TB\,]$
+\Ensure Offspring $(c_1',c_2')$ with valid $\pi,\Phi$ and aligned $TB$
+\State Apply PMX on $\pi$ to obtain valid permutations
+\State Apply PMX (with repair) on $\Phi$ to preserve a valid allocation structure
+\State Realign $TB$ to the new $\pi$ (keep budgets attached to partition IDs)
+\State Apply two-point crossover on $\rho$
+\State \Return updated $(c_1,c_2)$
+\end{algorithmic}
+\end{algorithm}
+}
+
+Algorithm~\ref{alg:MutateSys} defines the structure-preserving mutation operator applied to the system-level genome, with repairs to maintain feasibility under the model constraints.
+\begin{algorithm}[!htbp]
+\caption{\textproc{MutateSys}}
+\label{alg:MutateSys}
+\begin{algorithmic}[1]
+\Require Individual $child=[\,\pi \mid \Phi \mid \rho \mid TB\,]$
+\Ensure Mutated individual with valid $\pi,\Phi$ and aligned $TB$
+\State Perform a synchronized swap on $(\pi,\Phi,TB)$ at two positions
+\State Optionally swap two entries in $\Phi$ (allocation tweak)
+\State Repair $\pi$ and $\Phi$ if validity constraints are violated
+\State \Return $child$
+\end{algorithmic}
+\end{algorithm}
+
+Deterministic routing decisions are realized by selecting a concrete path for each inter-partition message from its candidate path set. The path selection function used during evaluation and reconstruction is given in Algorithm~\ref{alg:SelectPath}.
+
+\begin{algorithm}[!htbp]
+\caption{\textproc{SelectPath}}
+\label{alg:SelectPath}
+\begin{algorithmic}[1]
+\Require route-index hint $h$; candidate paths $\mathcal{P}_{s,r}$ for endpoints $(s,r)$
+\Ensure chosen path $p^\star$
+\State $C \gets \mathcal{P}_{s,r}$
+\If{$C=\varnothing$} \State \Return penalized virtual path \EndIf
+\If{$0 \le h < |C|$} \State \Return $C[h]$
+\Else \State \Return $\arg\min_{p\in C} \text{latency}(p)$ \EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{End-to-End Reconstruction}
+\label{sec:method_reconstruct}
+{\footnotesize
+\begin{algorithm}[t]
+\caption{\textproc{SystemLevelReconstruction}}
+\label{alg:SystemReconstruct}
+\begin{algorithmic}[1]
+\Require Per-partition schedules $\{sched^p\}$ with task times and task mappings $\{\phi_p\}$
+\Statex \hspace{\algorithmicindent} inter-partition messages $\mathcal{M}_{inter}$; route-index hints $\rho$; path catalogs $\{\mathcal{P}_{s,r}\}$
+\Ensure $globalSched$ (tasks $+$ inter-partition transmissions), $MS_{global}$, set $IPCviol$
+\State \textbf{Assemble} $globalSched$ from $\{sched^p\}$
+\State $globalSched.\text{tasks} \cgets \bigcup_{p} sched^p$;\ $globalSched.\text{transmissions} \cgets \varnothing$
+\State $M \cgets \mathcal{M}_{inter}$;\ $IPCviol \cgets \varnothing$
+\State \textbf{Init arrival constraints:} for each task $v$, set $\mathsf{ArriveAfter}[v] \cgets start(v)$
+\ForAll{$m_{u,v}\in M$}
+  \State $s \cgets \phi_{Part(u)}(u)$;\ $r \cgets \phi_{Part(v)}(v)$
+  \State $C \cgets \mathcal{P}_{s,r}$
+  \If{$C=\varnothing$}
+     \State $IPCviol \cgets IPCviol \cup \{m_{u,v}\}$;\ $arr(m_{u,v}) \cgets +\infty$
+  \Else
+     \State $idx \cgets \rho[m_{u,v}]$
+        \If{$0 \le idx < |C|$}
+          \State $path(m_{u,v}) \cgets C[idx]$
+        \Else
+          \State $path(m_{u,v}) \cgets \arg\min_{p\in C}\text{latency}(p)$
+        \EndIf
+     \State $arr(m_{u,v}) \cgets end(u) + \text{latency}\big(path(m_{u,v}), m_{u,v}\big)$
+     \State add $(m_{u,v}, tx_s{=}end(u), tx_e{=}arr(m_{u,v}), path(m_{u,v}))$ to
+     \Statex \hspace{\algorithmicindent} $globalSched.\text{transmissions}$
+     \State $\mathsf{ArriveAfter}[v] \cgets \max\big(\mathsf{ArriveAfter}[v], arr(m_{u,v})\big)$
+  \EndIf
+\EndFor
+\State \textproc{EnforceArrivalConsistency}\big($globalSched.\text{tasks}$, $\mathsf{ArriveAfter}$\big)
+\State \textproc{AlignProcessorQueues}\big($globalSched.\text{tasks}$\big)
+\State $MS_{global} \cgets \max$ end-time over all tasks in $globalSched.\text{tasks}$
+\State \Return $globalSched,\, MS_{global},\, IPCviol$
+\end{algorithmic}
+\end{algorithm}
+}
+% This subsection describes the reconstruction step that integrates partition schedules and inserts inter-partition transmissions under deterministic routing. Algorithm~\ref{alg:SystemReconstruct} summarizes this procedure.
+
+% Algorithm~\ref{alg:SystemReconstruct} reconstructs an end-to-end schedule by integrating the partition schedules produced at the partition level and by explicitly accounting for inter-partition communication. For each inter-partition message $m_{u,v}\in\mathcal{M}_{inter}$, the sender and receiver End Systems are identified from the task mappings, and a feasible candidate path is selected using the route-index hint $\rho[m_{u,v}]$. If the hinted index is invalid, the path with minimum latency is selected. The message arrival time is computed as $end(u)$ plus the bounded latency of the selected path, and the consumer task is constrained to start no earlier than this arrival time. Messages for which no feasible deterministic path exists are recorded as inter-partition communication violations. The global makespan $MS_{global}$ is computed as the latest completion time over all tasks after enforcing these arrival constraints, thereby enabling consistent feasibility assessment under deterministic communication.
+
+% Here, $IPCviol$ denotes the set of inter-partition communication violations, i.e., messages in $\mathcal{M}_{inter}$ for which no feasible deterministic path exists.
+
+This subsection describes the reconstruction step that integrates partition schedules and inserts inter-partition transmissions under deterministic routing. Algorithm~\ref{alg:SystemReconstruct} summarizes this procedure.
+
+For each inter-partition message $m_{u,v}\in\mathcal{M}_{inter}$, the sender and receiver End Systems are identified from the task mappings, and a feasible candidate path is selected using the route-index hint $\rho[m_{u,v}]$. If the hinted index is invalid, the path with minimum latency is selected. The message arrival time is computed as $end(u)$ plus the bounded latency of the selected path, and the consumer task is constrained to start no earlier than this arrival time. Messages for which no feasible deterministic path exists are recorded as inter-partition communication violations. The global makespan $MS_{global}$ is computed as the latest completion time over all tasks after enforcing these arrival constraints.
+
+Here, $IPCviol$ denotes the set of inter-partition communication violations, i.e., messages in $\mathcal{M}_{inter}$ for which no feasible deterministic path exists.
+
+\subsection{Partition-Level Scheduler}
+\label{sec:method_partition}
+
+Once the system-level scheduler fixes the allocation $\Phi(p)$ and time budget $TB(p)$ for a partition $p$, a local optimization is performed to construct a feasible schedule within the assigned execution domain. Each partition-level scheduler operates independently and can be executed in parallel for different partitions. Its role is to determine a precedence-feasible task order, a task-to-End-System mapping within the allocated domain, and the corresponding intra-partition communication decisions while respecting the local time budget.
+
+For each partition $p$, the local optimization problem is to minimize the partition makespan subject to the assigned scheduling contract:
+\begin{equation}
+\min \; (ms^p)
+\qquad \text{s.t.} \qquad ms^p \le TB(p).
+\label{eq:local_obj}
+\end{equation}
+$ms^p$ denotes the completion time of the last task in partition $p$, whereas $TB(p)$ is the time budget assigned by the system-level scheduler. Schedules that exceed the assigned budget are treated as locally infeasible and contribute a violation term during the system-level evaluation.
+
+To solve this problem, a genetic search is applied at the partition level. Each local individual is encoded as
+\begin{equation}
+g^p = [\,\sigma^p \mid \phi_p \mid \eta^p \mid \xi^p\,],
+\end{equation}
+where $\sigma^p$ is a precedence-feasible task order, $\phi_p$ is the mapping of tasks to End Systems within the allocated domain $\Phi(p)$, $\eta^p$ defines local message priorities, and $\xi^p$ stores the candidate-path indices used for intra-partition communications. The fitness of a local individual is defined as
+\begin{equation}
+fit(g^p)=\left(ms^p,\; \max(0,ms^p-TB(p))\right),
+\label{eq:local_fitness}
+\end{equation}
+which simultaneously favors short makespans and penalizes budget overruns.
+
+Algorithm~\ref{alg:PartitionLevelGA} summarizes the partition-level scheduler.
+The partition-level search begins by generating an initial population of valid local individuals. The task-order component $\sigma^p$ is initialized using random topological orders derived from the precedence relations in $JD^p$, thereby ensuring that all local individuals satisfy intra-partition dependencies from the outset. The mapping component $\phi_p$ assigns tasks only to End Systems belonging to the execution domain selected by $\Phi(p)$, while $\eta^p$ and $\xi^p$ initialize message priorities and local path selections for intra-partition communications.
+
+\begin{algorithm}[H]
+\caption{\textproc{PartitionLevelScheduler}}
+\label{alg:PartitionLevelGA}
+\begin{algorithmic}[1]
+\Require partition $p$; $(PT^p,\mathcal{M}_{intra}^p,JD^p)$; $(alloc{=}\Phi(p),tb{=}TB(p))$;
+\Statex \hspace{\algorithmicindent} path catalogs $\{\mathcal{P}_{s,r}\}$; inner GA params $(N_{pop}^{(p)},N_{gen}^{(p)},p_{cx}^{(p)},p_{mut}^{(p)})$
+\Ensure Local schedule $sched^p$, local makespan $ms^p$, and task mapping $\phi_p$
+\State \textbf{Genome:} $g^p=[\,\sigma^p \mid \phi_p \mid \eta^p \mid \xi^p\,]$
+\State $Pop^p \gets \textproc{InitLocalPopulation}(p,\Phi(p))$
+\State $best^p \gets \varnothing$;\quad $bestMS^p \gets +\infty$
+\For{$gen=1$ to $N_{gen}^{(p)}$}
+  \ForAll{$g^p \in Pop^p$}
+    \State $(sched^p_g, ms^p_g, \phi^g_p) \gets \textproc{ReconstructPartition}$
+    \Statex \hspace{\algorithmicindent} $(JD^p,g^p,PT^p,\mathcal{M}_{intra}^p,\{\mathcal{P}_{s,r}\})$ \Comment{Alg.~\ref{alg:PartitionReconstruct}}
+    \State $fit(g^p) \gets \big(ms^p_g,\max(0,ms^p_g-TB(p))\big)$
+    \If{$ms^p_g < bestMS^p$}
+      \State $best^p \gets g^p$;\quad $bestMS^p \gets ms^p_g$
+    \EndIf
+  \EndFor
+  \State $Parents^p \gets \textproc{TournamentSelect}(Pop^p, fit)$
+  \State $Offspring^p \gets \textproc{CrossoverLocal}(Parents^p)$
+  \State $Offspring^p \gets \textproc{MutateLocal}(Offspring^p)$
+  \State $Pop^p \gets \textproc{SelectNextLocal}(Parents^p \cup Offspring^p, N_{pop}^{(p)})$
+\EndFor
+\State $(sched^p, ms^p, \phi_p) \gets \textproc{ReconstructPartition}$
+\Statex \hspace{\algorithmicindent} $(JD^p,best^p,PT^p,\mathcal{M}_{intra}^p,\{\mathcal{P}_{s,r}\})$
+\State \Return $(sched^p, ms^p, \phi_p)$
+\end{algorithmic}
+\end{algorithm}
+
+
+At each generation, every local individual is evaluated through a deterministic reconstruction step that converts the encoded order, mapping, and communication choices into a concrete schedule. The resulting local makespan $ms^p$ is then combined with the budget-overrun term $\max(0,ms^p-TB(p))$ to compute the local fitness according to (\ref{eq:local_fitness}). The evolutionary process then applies selection, crossover, and mutation operators that preserve precedence feasibility and allocation validity. Once the local search terminates, the best reconstructed schedule is returned to the system-level scheduler, together with its realized task mapping and makespan.
+
+
+
+
+For a fixed genome, the reconstruction procedure deterministically produces a unique local schedule. The start time of each task is
+computed solely from predecessor completion times, communication latencies along the selected paths, and the availability of the
+assigned End System. Consequently, the resulting makespan and any budget violation depend only on the decisions encoded in the genome. This determinism ensures consistent evaluation of individuals at the system level and allows scheduling decisions to be compared reliably during the evolutionary search.
+
+{\footnotesize
+\begin{algorithm}[H]
+\caption{\textproc{ReconstructPartition (Local Reconstruction)}}
+\label{alg:PartitionReconstruct}
+\begin{algorithmic}[1]
+\Require $JD^p$; genome $g^p=\langle \sigma^p,\phi_p,\eta^p,\xi^p\rangle$; $PT^p$; $\mathcal{M}_{intra}^p$; path catalogs $\{\mathcal{P}_{s,r}\}$
+\Ensure $sched^p$ (task and intra-partition message times), $ms^p$
+\State \textbf{Init} $next\_free[q]\gets 0$ for every End System $q$ used in $\phi_p$
+\ForAll{task $t$ in $\sigma^p$}
+  \State $q \gets \phi_p[t]$
+    \State $\text{predReady} \gets\quad \max\limits_{u \in Pred(t)} \Big(\qquad \underbrace{end(u)}_{\text{finish of }u}$
+    \Statex $\qquad +\;
+    \underbrace{\text{latency}\!\left(
+    \textproc{SelectPath}(\xi^p[m_{u,t}],\mathcal{P}_{\phi_p(u),q}),\, m_{u,t}
+    \right)}_{\text{path latency for }m_{u,t}}$
+    \Statex $\quad \Big)$ \Comment{$0$ if $Pred(t)=\varnothing$}
+  \State $\text{procReady} \gets next\_free[q]$
+  \State $start(t)\gets \max(\text{predReady}, \text{procReady})$
+  \State $end(t)\gets start(t) + PT^p(t,q)$
+  \State $next\_free[q] \gets end(t)$
+  \ForAll{intra-partition msgs $m: t\!\to\! v$ in $\mathcal{M}_{intra}^p$ (ordered by $\eta^p[m]$)}
+     \State $q_v \gets \phi_p[v]$
+     \State $path \gets \textproc{SelectPath}(\xi^p[m], \mathcal{P}_{q,q_v})$ \Comment{Alg.~\ref{alg:SelectPath}}
+     \State $tx\_s(m)\gets end(t)$
+     \State $tx\_e(m)\gets tx\_s(m) + \text{latency}(path,m)$
+     \State enforce $start(v)\gets \max(start(v), tx\_e(m))$ \Comment{propagate to successors if needed}
+  \EndFor
+\EndFor
+\State $ms^p \gets \max\limits_{t} \, end(t)$
+\State \Return $sched^p, ms^p$
+\end{algorithmic}
+\end{algorithm}
+}
+
+\subsection{Local Schedule Reconstruction}
+\label{sec:method_partition_reconstruct}
+
+Given a local genome $g^p=[\,\sigma^p \mid \phi_p \mid \eta^p \mid \xi^p\,]$, the reconstruction procedure deterministically constructs the
+schedule of partition $p$ by assigning start and completion times to all tasks and by inserting the corresponding intra-partition transmissions.
+
+The reconstruction must satisfy three conditions:(i) precedence feasibility between tasks, (ii) exclusive use of each End System, and (iii) causal consistency of intra-partition communications.
+
+
+
+Tasks are processed according to the precedence-feasible order encoded in $\sigma^p$. For each task $t$, the earliest feasible
+start time is computed as the maximum between processor availability and the arrival time of all incoming messages. The assigned End System is determined by $\phi_p(t)$, while the communication latency of each incoming message is derived from the candidate path selected through the path-index vector $\xi^p$.
+
+Once a task is scheduled, all outgoing intra-partition messages are inserted according to the message-priority vector $\eta^p$. The resulting message transmission times are then propagated to successor tasks to ensure that no task starts before all required data has arrived.
+
+The partition makespan $ms^p$ is finally obtained as the maximum completion time among all tasks in the reconstructed schedule. Algorithm~\ref{alg:PartitionReconstruct} summarizes this procedure.
+
+
+
+\subsection{Time-Budget Mutation and Slack Distribution}
+\label{sec:method_tb}
+
+A key innovation in the system-level GA is the time-budget mutation operator described in Algorithm~\ref{alg:MutateTB}, which dynamically
+adjusts the partition time budgets to improve convergence. Instead of applying blind mutation to the time-budget vector, the
+operator redistributes slack among partitions based on the feedback obtained from the previous evaluation.
+
+\begin{algorithm}[H]
+\caption{\textproc{MutateTimeBudget}}
+\label{alg:MutateTB}
+\begin{algorithmic}[1]
+\Require individual $ind=[\,\pi \mid \Phi \mid \rho \mid TB\,]$ with stored
+         partition makespans $makespans[p]$ and violations $viol[p]$
+\Ensure Updated $TB$ aligned with permutation $\pi$
+
+\State \textbf{Parameters:} margin ratios, stability-band limits,
+step gains, and bounded perturbation factor
+
+\For{$i=0$ to $|\pi|-1$}
+  \State $p \gets \pi[i]$
+  \State $tb \gets TB[i]$
+  \State $ms \gets makespans[p]$
+  \State $v \gets viol[p]$
+
+  \State $target \gets ms(1+\delta)$ \Comment{safety margin}
+  \State define stability band $(band_{lo}, band_{hi})$ around $target$
+
+  \If{$v>0$ \textbf{or} $tb < ms$} \Comment{deficit}
+      \State increase $TB[i]$ proportionally toward $target$
+  \ElsIf{$tb \ge band_{hi}$} \Comment{surplus}
+      \State decrease $TB[i]$ proportionally toward $band_{lo}$
+  \ElsIf{$tb < target$}
+      \State slightly increase $TB[i]$ toward $band_{lo}$
+  \Else
+      \State keep $TB[i]$ unchanged
+  \EndIf
+
+  \State optionally apply a small bounded perturbation
+\EndFor
+
+\State \Return $TB$
+\end{algorithmic}
+\end{algorithm}
+
+During mutation, partitions that finish significantly earlier than their assigned budget act as \emph{donors}, whereas partitions whose
+execution time approaches or exceeds their allocated budget act as \emph{receivers}. A portion of the slack from donor partitions is
+transferred to receiver partitions by tightening the donor budgets and relaxing the receiver budgets accordingly. This redistribution preserves
+the overall temporal structure of the schedule while shifting idle time toward partitions that require additional execution margin.
+
+By continuously balancing slack among partitions, the system-level search can escape stagnation caused by poor initial budget assignments.
+Over successive generations, the mutation operator progressively stabilizes the budget distribution so that partitions neither suffer
+from excessive deadline pressure nor accumulate unnecessary slack. Empirically, this results in faster convergence toward feasible
+end-to-end schedules because the evolutionary search avoids exploring obviously infeasible budget allocations.
+
+
+\section{Performance Evaluation}
+\label{sec:results}
+This section evaluates the proposed hierarchical genetic algorithm (HGA) with respect to end-to-end schedulability, global makespan, and convergence behavior. The evaluation is organized into two parts. First, the proposed method is benchmarked against established scheduling baselines under the baseline deadlines of the considered workloads. Second, a sensitivity analysis examines the behavior of the adaptive slack reallocation mechanism under progressively tightened deadlines.
+
+\subsection{Evaluation Setup}
+
+The proposed scheduler was implemented in Python 3.10 using the DEAP evolutionary computation framework \cite{r1}. The evaluation used synthetic directed acyclic graph (DAG) workloads with 100, 250, and 500 tasks. The use of synthetic DAGs is well established in scheduling research, where generators such as TGFF \cite{r4} and SDF3 \cite{r5} are widely used to enable controlled and repeatable benchmarking across diverse application structures. Following this methodology, the DAGs in this work were generated using the Stanford Network Analysis Platform (SNAP), which supports systematic variation in graph size and structural properties, including dependency density and in- and out-degree distributions. This enables reproducible evaluation across heterogeneous workload patterns while preserving comparability with prior DAG-based scheduling studies.
+
+These workloads were evaluated on a fixed edge--fog--cloud platform model represented as a graph of compute and communication resources. The compute infrastructure comprises one edge--fog domain (FE) and three cloud clusters (C1, C2, and C3). For the communication infrastructure, a finite set of deterministic candidate routes was computed offline on the platform graph using a K-shortest-path method for each relevant source--destination pair. During scheduling, routing decisions were then made by selecting from this precomputed path catalog. The same platform model was used across all workload sizes and deadline settings, so the observed performance differences are attributable to scheduling decisions rather than changes in the underlying execution infrastructure.
+
+Within this model, application DAG vertices represent tasks and DAG edges represent inter-task messages. Tasks are associated with execution-time parameters, such as worst-case execution times, while messages incur deterministic communication costs once routing paths are selected from the precomputed path catalog. This allows both computation placement and communication-path selection to be evaluated consistently within the same scheduling framework.
+
+The baseline application deadlines were derived from the makespan of an initial list-scheduling heuristic applied to each workload and correspond to the 100\% deadline setting used in the main benchmark comparison. The baseline deadlines were set to 2600, 2700, and 4300 TU for the 100T, 250T, and 500T workloads, respectively. Additional experiments with tightened deadlines of 90\%, 80\%, and 70\% of these baseline values are presented later in the sensitivity analysis to evaluate the robustness of the proposed approach under reduced timing slack.
+
+At the system level, the optimization jointly minimizes total partition budget violations and global lateness, where lateness is defined as the difference between the global makespan and the application deadline. At the partition level, the local scheduler minimizes partition makespan while penalizing partition budget overruns. This objective hierarchy aligns with the hierarchical feasibility model, in which partition-level schedules are treated as local temporal contracts within the end-to-end reconstruction process.
+
+Tables~\ref{tab:system_ga_params_final} and \ref{tab:partition_ga_params_final} summarize the parameters used for the system-level and partition-level genetic algorithms, respectively.
+
+\begin{table}[h]
+\centering
+\caption{System-level GA parameters.}
+\label{tab:system_ga_params_final}
+\begin{tabular}{lc}
+\hline
+\textbf{Parameter} & \textbf{Value} \\
+\hline
+Population size              & 16    \\
+Generations                  & 60    \\
+Crossover probability        & 0.80  \\
+Mutation probability         & 0.70  \\
+Fitness objective 1          & Cumulative partition budget violations \\
+Fitness objective 2          & Positive global lateness \\
+Selection strategy           & NSGA-II \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Partition-level GA parameters.}
+\label{tab:partition_ga_params_final}
+\begin{tabular}{lc}
+\hline
+\textbf{Parameter} & \textbf{Value} \\
+\hline
+Population size              & 16   \\
+Generations                  & 20   \\
+Crossover probability        & 0.70 \\
+Mutation probability         & 0.70 \\
+Fitness objective 1          & Partition makespan \\
+Fitness objective 2          & partition budget overruns \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Compared Schedulers}
+
+The proposed HGA was compared against two baseline schedulers that are commonly used as references in heterogeneous workflow scheduling.
+
+\paragraph{Heterogeneous Earliest-Finish-Time (HEFT)}
+HEFT prioritizes tasks according to upward rank and assigns each task to the processing element that minimizes its earliest finish time. It is precedence-aware and communication-aware at the cost-model level, but it does not perform hierarchical system--partition co-design, adaptive time-budget reallocation, or explicit deterministic path selection.
+
+\paragraph{Round-Robin (RR)}
+Round-Robin dispatches ready tasks cyclically according to a fixed service order. Although simple and robust, it does not exploit critical-path structure, does not coordinate decisions across partitions, and does not adapt time budgets based on feasibility feedback.
+
+Neither baseline jointly optimizes partition allocation, partition execution order, deterministic routing, and partition time budgets. Consequently, they do not provide the same end-to-end co-design capability as the proposed HGA.
+
+\subsection{Benchmark Results Under Baseline Deadlines}
+
+Table~\ref{tab:main_results} summarizes the final results obtained for the three workload sizes under the baseline deadline setting.
+
+\begin{table}[H]
+
+\caption{Global schedulability results under the baseline deadline setting (all values in TU).}
+\label{tab:main_results}
+\centering
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Workload} & \textbf{Deadline} & \textbf{HGA Makespan} & \textbf{Global Lateness} & \textbf{Violation Sum} \\
+\hline
+100T & 2600 & 2317 & 0 & 0 \\
+250T & 2700 & 2229 & 0 & 0 \\
+500T & 4300 & 4021 & 0 & 0 \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+The proposed HGA satisfies the application deadlines in all three evaluated workloads while simultaneously eliminating partition budget violations. This confirms that the hierarchical scheduler is able to construct fully feasible schedules under the considered deterministic execution and communication model.
+
+In addition to satisfying feasibility, the obtained makespans remain below the corresponding deadlines. The resulting slack margins are 283 TU for 100T, 471 TU for 250T, and 279 TU for 500T, indicating that the scheduler does not merely converge to deadline-feasible solutions but also preserves timing headroom.
+
+To further examine the behavior of the adaptive slack reallocation mechanism, Table~\ref{tab:budget_makespan_alignment} reports the final partition budgets and realized partition makespans under the baseline experiments.
+
+\begin{table}[H]
+\centering
+\caption{Partition budgets and realized partition makespans at convergence under baseline deadlines (all values in TU).}
+\label{tab:budget_makespan_alignment}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|c|cc|cc|cc|cc|}
+\hline
+\textbf{Workload} & \multicolumn{2}{c|}{\textbf{FE}} & \multicolumn{2}{c|}{\textbf{C1}} & \multicolumn{2}{c|}{\textbf{C2}} & \multicolumn{2}{c|}{\textbf{C3}} \\
+\cline{2-9}
+ & \textbf{Budget} & \textbf{MS} & \textbf{Budget} & \textbf{MS} & \textbf{Budget} & \textbf{MS} & \textbf{Budget} & \textbf{MS} \\
+\hline
+100T & 1995 & 1994 & 148 & 129 & 253 & 244 & 972 & 943 \\
+250T & 1117 & 1111 & 408 & 345 & 827 & 796 & 448 & 399 \\
+500T & 2275 & 2251 & 910 & 867 & 433 & 410 & 443 & 419 \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+% A second important observation is the convergence of partition time budgets toward the corresponding realized partition makespans, as shown in Table~\ref{tab:budget_makespan_alignment}. Across the evaluated workloads, the adaptive slack reallocation mechanism progressively adjusts each partition budget based on the execution behavior returned by the partition-level scheduler. As a result, the remaining gap between assigned budgets and realized makespans is reduced across partitions, indicating reduced under-provisioning and over-provisioning at convergence.
+
+
+% To assess the benefit of hierarchical co-design, the proposed HGA was compared with HEFT and Round-Robin using the baseline deadline setting. Table~\ref{tab:baseline_comparison} summarizes the global makespan values.
+
+
+As shown in Table~\ref{tab:budget_makespan_alignment}, the partition time budgets converge toward the corresponding realized partition makespans across the evaluated workloads. The adaptive slack reallocation mechanism progressively adjusts each partition budget based on the execution behavior returned by the partition-level scheduler. As a result, the remaining gap between assigned budgets and realized makespans is reduced across partitions, indicating reduced under-provisioning and over-provisioning at convergence.
+
+Table~\ref{tab:baseline_comparison} compares the proposed HGA against HEFT and Round-Robin under the same baseline deadline setting.
+\begin{table}[H]
+\centering
+\caption{Comparison of global makespan across scheduling methods.}
+\label{tab:baseline_comparison}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Workload} & \textbf{HGA} & \textbf{HEFT} & \textbf{RR} & \textbf{Deadline} \\
+\hline
+100T & 2317 & 4329 & 2714 & 2600 \\
+250T & 2229 & 3848 & 2698 & 2700 \\
+500T & 4021 & 4726 & 4958 & 4300 \\
+\hline
+\end{tabular}
+\end{table}
+
+The proposed HGA achieves the lowest global makespan in all evaluated cases. Relative to HEFT, the makespan reductions are 46.5\% for 100T, 42.1\% for 250T, and 14.9\% for 500T. Relative to Round-Robin, the reductions are 14.6\%, 17.4\%, and 18.9\%, respectively. Moreover, while the proposed HGA satisfies all baseline deadlines, HEFT exceeds the deadline in all three workloads and Round-Robin exceeds the deadline in the 100T and 500T workloads.
+
+These improvements stem from the coupled optimization structure of the proposed method. Unlike the baselines, the HGA jointly refines partition allocation, partition execution order, deterministic route selection, and partition time budgets. As a result, it can reduce communication-critical bottlenecks while simultaneously correcting temporal imbalance across partitions.
+
+
+
+
+\subsection{Convergence and Adaptive Budget Behavior}
+
+Table~\ref{tab:convergence_summary} reports the evolution of the cumulative partition violation sum and global lateness across the evaluated scenarios. In all cases, the partition violation sum converges to zero, indicating that partition-level feasibility is eventually achieved. The table also shows whether this local feasibility is accompanied by zero final global lateness or by a residual end-to-end timing gap at convergence.
+
+\begin{table}[H]
+\centering
+\caption{Convergence summary across evaluated scenarios.}
+\label{tab:convergence_summary}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+\textbf{Workload} & \textbf{Deadline} & \textbf{Init.} & \textbf{Final} & \textbf{First Gen.} & \textbf{Init.} & \textbf{Final} \\
+\textbf{Size} & \textbf{Setting} & \textbf{Viol.} & \textbf{Viol.} & \textbf{Zero Viol.} & \textbf{Late.} & \textbf{Late.} \\
+\hline
+100T & 100\% & 1544 & 0 & 25 & 0   & 0   \\
+100T & 90\%  & 1688 & 0 & 27 & 149 & 0   \\
+100T & 80\%  & 1755 & 0 & 28 & 117 & 91  \\
+100T & 70\%  & 1960 & 0 & 31 & 650 & 488 \\
+\hline
+250T & 100\% & 520  & 0 & 10 & 0   & 0   \\
+250T & 90\%  & 649  & 0 & 12 & 0   & 0   \\
+250T & 80\%  & 725  & 0 & 15 & 0   & 0   \\
+250T & 70\%  & 929  & 0 & 15 & 36  & 0   \\
+\hline
+500T & 100\% & 1215 & 0 & 24 & 0    & 0   \\
+500T & 90\%  & 1239 & 0 & 23 & 65   & 0   \\
+500T & 80\%  & 1292 & 0 & 30 & 1026 & 115 \\
+500T & 70\%  & 1514 & 0 & 31 & 976  & 607 \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+% With respect to end-to-end timing, zero global lateness is reached in all baseline cases and in several tightened-deadline scenarios, including 100T at 90\%, 250T at 90\%, 80\%, and 70\%, and 500T at 90\%. In the remaining tightened cases, zero lateness is not reached, and the residual final lateness equals 91 TU for 100T--80\%, 488 TU for 100T--70\%, 115 TU for 500T--80\%, and 607 TU for 500T--70\%. This shows that, although partition-level feasibility is achieved, the tightened end-to-end deadlines remain unmet in these scenarios.
+
+With respect to the end-to-end deadline, the results show a more selective behavior. Zero global lateness is achieved in all baseline cases and in several tightened-deadline scenarios, namely 100T at 90\%, 250T at 90\%, 80\%, and 70\%, and 500T at 90\%. In contrast, the 100T--80\%, 100T--70\%, 500T--80\%, and 500T--70\% cases converge with residual lateness values of 91, 488, 115, and 607~TU, respectively. These cases show that local partition feasibility does not necessarily imply end-to-end feasibility when the imposed deadline becomes too restrictive. Instead, the search converges to a stable compromise solution under the available computation and communication resources.
+
+\begin{table}[H]
+\centering
+\caption{Reduction in total budget--makespan gap across partitions.}
+\label{tab:slack_adaptation_summary}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\textbf{Workload Size} & \textbf{Deadline Setting} & \textbf{Initial} $\sum_p |TB_p-MS_p|$ & \textbf{Final} $\sum_p |TB_p-MS_p|$ & \textbf{Reduction (\%)} \\
+\hline
+100T & 100\% & 2394 & 58  & 97.6 \\
+100T & 90\%  & 2416 & 54  & 97.8 \\
+100T & 80\%  & 2421 & 79  & 96.7 \\
+100T & 70\%  & 2441 & 79  & 96.8 \\
+\hline
+250T & 100\% & 1044 & 149 & 85.7 \\
+250T & 90\%  & 1047 & 73  & 93.0 \\
+250T & 80\%  & 999  & 85  & 91.5 \\
+250T & 70\%  & 1086 & 61  & 94.4 \\
+\hline
+500T & 100\% & 2581 & 114 & 95.6 \\
+500T & 90\%  & 2304 & 119 & 94.8 \\
+500T & 80\%  & 2079 & 166 & 92.0 \\
+500T & 70\%  & 2096 & 150 & 92.8 \\
+\hline
+\end{tabular}%
+}
+\end{table}
+
+
+To quantify the adaptive budget behavior directly, Table~\ref{tab:slack_adaptation_summary} reports the aggregated budget--makespan mismatch, measured as $\sum_p |TB_p - MS_p|$ across all partitions. This quantity decreases substantially in every evaluated scenario, with reductions ranging from 85.7\% to 97.8\%. The reduction confirms that the adaptive slack reallocation mechanism progressively aligns the system-level time budgets with the realized execution demand returned by the partition-level schedulers. In other words, the mutation operator not only repairs violating partitions, but also reduces both over-provisioning and under-provisioning, thereby strengthening the temporal contract between the system level and the partition level.
+
+Figures~\ref{fig:tb_100T_100} and~\ref{fig:tb_500T_80} provide a generation-wise view of this adaptation process for representative baseline and tightened-deadline cases. In both cases, the assigned partition budgets progressively move toward the realized partition makespans returned by the partition-level schedulers. For the baseline 100T case, this alignment coincides with zero final global lateness. For the tightened 500T--80\% case, the same contract-alignment behavior is observed even though a residual global lateness remains. This confirms that the adaptive mutation operator stabilizes partition-level contracts even in scenarios where the end-to-end deadline is too restrictive to be fully satisfied.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{tb_100T_100_with_legend.pdf}
+\caption{Generation-wise evolution of partition budgets and realized partition makespans for the 100T workload under the baseline deadline setting. The progressive alignment between the assigned budgets and the partition makespans indicates convergence of the partition-level temporal contracts.}
+\label{fig:tb_100T_100}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\columnwidth]{tb_500T_80_with_legend.pdf}
+\caption{Generation-wise evolution of partition budgets and realized partition makespans for the 500T workload under the 80\% tightened deadline setting. Although a residual global lateness remains in this case, the partition budgets still converge toward the realized partition makespans, demonstrating stable adaptive contract alignment.}
+\label{fig:tb_500T_80}
+\end{figure}
+
+
+
+The results show that the adaptive slack reallocation mechanism serves two roles simultaneously. First, it acts as a feasibility-repair operator that eliminates cumulative partition budget violations. Second, it acts as a convergence aid by steering partition budgets toward stable values that closely match the realized partition makespans. This behavior explains why the proposed HGA maintains robust convergence characteristics even as the global deadline is progressively tightened.
+
+
+
+
+
+
+
+\subsection{Sensitivity to Deadline Tightening}
+
+The results further indicate that the proposed HGA is sensitive to progressively tightened end-to-end deadlines. As the deadline is reduced from the baseline setting to 90\%, 80\%, and 70\%, the feasible region of the search space shrinks, and satisfying both partition-level feasibility and global end-to-end feasibility becomes increasingly challenging.
+
+For moderate tightening, the proposed approach remains robust. Several 90\% cases and all evaluated 250T cases still achieve zero final global lateness, indicating that the adaptive time-budget negotiation mechanism can absorb a substantial reduction in the global timing margin while preserving end-to-end schedulability. This behavior suggests that, when sufficient structural slack is still available across partitions and communication paths, the HGA can successfully redistribute time budgets and recover a globally feasible solution.
+
+Under stronger tightening, however, the feasible region shrinks significantly. In particular, the 100T--80\%, 100T--70\%, 500T--80\%, and 500T--70\% scenarios converge with nonzero residual lateness. This behavior indicates that the algorithm is no longer limited by poor budget assignment alone, but by the reduced global temporal margin imposed by the end-to-end deadline itself. In such cases, the adaptive mutation operator still eliminates partition-level violations and stabilizes the partition contracts, but the remaining timing gap cannot be fully removed without relaxing the deadline or altering the available compute and communication resources.
+
+% An important observation is that the degradation is gradual rather than abrupt. Even in the scenarios with residual lateness, the search continues to reduce both the violation term and the budget--makespan mismatch, converging to stable compromise solutions rather than exhibiting oscillatory or unstable behavior. This is an important property for hierarchical scheduling, because it shows that the proposed HGA remains well-behaved even when full end-to-end feasibility is unattainable.
+
+An important observation is that the performance degradation is gradual rather than abrupt as the deadline is tightened. Even in scenarios where a nonzero residual lateness remains, the search continues to reduce both the violation term and the budget--makespan mismatch, converging to stable compromise solutions. This indicates that the algorithm does not exhibit oscillatory or unstable behavior, but instead maintains consistent convergence toward the best achievable solution under the given constraints. Such behavior is particularly important for hierarchical scheduling, as it shows that the proposed HGA remains stable and effective even when full end-to-end feasibility cannot be achieved.
+
+
+The deadline-tightening study shows that the proposed method remains effective as the timing constraints become stricter. When a feasible schedule exists, the HGA is able to find it. When the deadline is too tight to be fully satisfied, the algorithm still converges to stable solutions with zero partition-level violations and lower global lateness. This shows that the hierarchical search remains robust and that the adaptive time-budget negotiation mechanism continues to improve the solution even under tight timing constraints.
+
+\section{Discussion}
+\label{sec:discussion}
+
+The results highlight the main benefit of the proposed HGA, namely the ability to coordinate system-level optimization with partition-level schedule realization. By jointly refining partition allocation, execution order, deterministic routing, and time-budget assignment, the method addresses multiple interdependent scheduling decisions within a unified search process.
+
+An important insight is that partition-level feasibility and end-to-end feasibility must be treated as related but distinct objectives. The experiments show that adaptive time-budget negotiation is effective in repairing local infeasibility and aligning partition contracts with realized execution demand. However, once the global deadline becomes too restrictive, improving local feasibility alone is not always sufficient to remove the remaining end-to-end timing gap.
+
+The observed budget adaptation behavior also indicates that the proposed mutation mechanism contributes to search stability, not only to feasibility repair. As the partition budgets move closer to the realized partition makespans, the hierarchical search becomes better aligned with the actual execution characteristics of the workload. This helps explain the consistent convergence behavior observed across different workload sizes and deadline settings.
+
+The results show that the proposed HGA remains effective across both feasible and constrained scenarios. When end-to-end feasible schedules exist, the method can recover them. When they do not, it still improves the solution by removing partition-level violations and reducing the remaining global timing gap.
+\subsection{\textcolor{red}{Limitations and Infrastructure Assumptions}}
+\label{limit}
+\textcolor{red}{Although the proposed HGA successfully computes feasible end-to-end schedules offline, its runtime temporal guarantees are entirely dependent on the enforcement capabilities of the underlying deterministic network. Establishing the practical limits of this work requires distinguishing between infrastructure assumptions that reflect current industry capabilities and those that remain future architectural requirements.}
+
+\textcolor{red}{Currently, IEEE Time-Sensitive Networking (TSN) is an established, deployable standard for providing bounded latency and synchronization at the local edge and fog layers \cite{tsn1}, \cite{tsn3}. However, extending determinism across wide-area networks via IETF DetNet \cite{det1}, maintaining global synchronization via 3GPP TSaaS (Release 18) \cite{sys1}, and utilizing managed real-time cloud slices are currently realistic only within private, operator-managed networks. In large-scale, public deployments today, these remain future architectural requirements.}
+
+\textcolor{red}{This reliance explicitly defines the boundaries of the scheduler's capabilities. The HGA treats deterministic communication as an infrastructure-provided service exposed via the Deterministic Communication Interface (DCI). Consequently, if DCI assumptions are violated—such as through unbounded routing failures, or if synchronization errors and clock drift exceed the tolerated hardware bounds—the strict timing contracts synthesized by the scheduler can no longer be mathematically guaranteed, and the affected flows degrade to best-effort execution.}
+
+\textcolor{red}{To mitigate sensitivity to such timing uncertainties, the TTEFC architecture is designed with a fault-tolerance extension point (Section \ref{SM:fog_ft}). Rather than relying on unpredictable runtime reactive scheduling, severe violations of synchronization or communication bounds trigger deterministic schedule switching via pre-computed Multi-Schedule Graphs (MSGs) \cite{scs1}. Ultimately, the proposed framework successfully solves the offline scheduling problem, but explicitly separates the synthesis of these temporal contracts from the physical infrastructure hardware required to enforce them.}
+
+\section{Conclusion}
+\label{conc}
+This paper presented a hierarchical deterministic scheduling framework for time-triggered edge–fog–cloud (TTEFC) architectures, addressing the fundamental challenge of providing end-to-end timing guarantees in distributed systems. The proposed approach integrates computation and communication decisions within a unified optimization model, combining partition allocation, execution ordering, deterministic routing, and time-budget assignment into a single co-design problem. 
+
+To solve this NP-hard problem efficiently, a two-level hierarchical genetic algorithm (HGA) was introduced. At the system level, global scheduling decisions are optimized, while parallel partition-level schedulers construct locally feasible schedules under assigned time budgets. A key contribution of this work is the adaptive slack reallocation operator, which enables dynamic redistribution of temporal slack across partitions, thereby improving convergence toward feasible solutions without relaxing the global deadline constraint.
+
+The experimental results demonstrate that the proposed method consistently achieves full end-to-end schedulability under baseline deadlines, while significantly reducing global makespan compared to established baselines. Specifically, improvements of up to 46.5\% over HEFT and 18.9\% over Round-Robin were observed. Furthermore, the results show that the adaptive budget mechanism effectively aligns partition-level execution demand with system-level time budgets, reducing budget–makespan mismatch by up to 97.8\% and stabilizing convergence behavior across different workload sizes. 
+
+The sensitivity analysis further revealed that the proposed framework remains robust under moderate deadline tightening, successfully maintaining feasibility in several constrained scenarios. Even when full end-to-end feasibility cannot be achieved due to overly restrictive deadlines, the scheduler converges to stable solutions with minimized violations and reduced global lateness. This behavior highlights the ability of the hierarchical approach to provide meaningful and predictable solutions under constrained conditions.
+
+The results confirm that jointly optimizing computation placement, communication routing, and temporal contracts is essential for achieving deterministic end-to-end performance in multi-tier architectures. The proposed HGA provides a scalable and effective solution for this co-design problem, bridging the gap between best-effort cloud scheduling and the strict requirements of safety-critical systems.
+
+Future work will extend the proposed framework to support runtime adaptation and fault-aware scheduling by incorporating incremental metascheduling and multi-schedule graph (MSG) techniques. Additional directions include energy-aware optimization, support for heterogeneous accelerators, and validation on real TSN/DetNet platforms to strengthen the practical relevance of the approach for cyber-physical and software-defined vehicle systems.
+
+
+% \section*{REFERENCES AND FOOTNOTES}
+% \subsection{REFERENCES}
+% References need not be cited in text. When they are, they appear on the
+% line, in square brackets, inside the punctuation. Multiple references are
+% each numbered with separate brackets. When citing a section in a book,
+% please give the relevant page numbers. In text, refer simply to the
+% reference number. Do not use ``Ref.'' or ``reference'' except at the
+% beginning of a sentence: ``Reference [3] shows \textellipsis .'' Please do not use
+% automatic endnotes in \textit{Word}, rather, type the reference list at the end of the
+% paper using the ``References'' style.
+
+% Reference numbers are set flush left and form a column of their own, hanging
+% out beyond the body of the reference. The reference numbers are on the line,
+% enclosed in square brackets. In all references, the given name of the author
+% or editor is abbreviated to the initial only and precedes the last name. Use
+% them all; use \textit{et al}.\ only if names are not given.
+% Abbreviate conference titles. When citing IEEE Transactions,
+% provide the issue number, page range, volume number, year, and/or month if
+% available. When referencing a patent, provide the day and the month of
+% issue, or application. References may not include all information; please
+% obtain and include relevant information. Do not combine references. There
+% must be only one reference with each number. If there is a URL included with
+% the print reference, it can be included at the end of the reference.
+
+% Other than books, capitalize only the first word in a paper title, except
+% for proper nouns and element symbols. For papers published in translation
+% journals, please give the English citation first, followed by the original
+% foreign-language citation. See the end of this document for formats and
+% examples of common references. For a complete discussion of references and
+% their formats, see the IEEE style manual at 
+% https://\discretionary{}{}{}journals.ieeeauthorcenter.ieee.org/\discretionary{}{}{}create-your-ieee-journal-article/\discretionary{}{}{}create-the-text-of-your-article/\discretionary{}{}{}ieee-editorial-style-manual/.
+
+
+% \subsection{FOOTNOTES}
+% Number footnotes separately in superscripts (Insert\textbar
+% Footnote).\footnote{It is recommended that footnotes be avoided. Instead,
+% try to integrate the footnote information into the text.} Place the actual
+% footnote at the bottom of the column in which it is cited; do not put
+% footnotes in the reference list (endnotes). Use letters for table footnotes
+% (see Table 1).
+
+
+\section*{ACKNOWLEDGMENT}
+This work was supported by the EdgeAI-Trust project, which is funded within the Chips Joint Undertaking (Chips JU), a public-private partnership in collaboration with the European Union’s Horizon Europe research and innovation program and National Authorities under grant agreement number 101139892.
+\begin{figure}[ht]\vspace*{-6.0pt}
+\centerline{\includegraphics[scale =0.2]{BMBF_NEW_LOGO.jpg}}
+%\centerline{\includegraphics{gr1}}
+
+ \label{}
+\end{figure}
+% \section*{REFERENCES}
+
+
+\begin{thebibliography}{00}\leftskip1pc
+% Introduction
+\bibitem{in2}On Edge-Fog-Cloud Collaboration and Reaping Its Benefits: A Heterogeneous Multi-Tier Edge Computing Architecture - MDPI, accessed November 6, 2025, https://www.mdpi.com/1999-5903/17/1/22
+
+\bibitem{scs1}O. Hekal, D. Onwuchekwa and R. Obermaisser, "Incremental Multi-Schedule Graph for Memory Optimization in Adaptive Time-Triggered Systems," 2025 14th Mediterranean Conference on Embedded Computing (MECO), Budva, Montenegro, 2025, pp. 1-8, doi: 10.1109/MECO66322.2025.11049272.
+
+\bibitem{in1}Alsadie D. Advancements in heuristic task scheduling for IoT applications in fog-cloud computing: challenges and prospects. PeerJ Comput Sci. 2024 Jun 17;10:e2128. doi: 10.7717/peerj-cs.2128. PMID: 38983206; PMCID: PMC11232606.
+
+
+
+
+\bibitem{in3} What is dynamic scheduling? – Focuskeeper Glossary, https://focuskeeper.co/glossary/what-is-dynamic-scheduling
+
+\bibitem{in4} Zhang, Peiying \& Chen, Ning \& Xu, Guanjun \& Kumar, Neeraj \& Barnawi, Ahmed \& Guizani, Mohsen \& Duan, Youxiang \& Yu, Keping. (2023). Multi-Target-Aware Dynamic Resource Scheduling for Cloud-Fog-Edge Multi-Tier Computing Network. IEEE Transactions on Intelligent Transportation Systems. PP. 1-13. 10.1109/TITS.2023.3330419. 
+
+\bibitem{in5} Dechouniotis, D., Athanasopoulos, N., Leivadeas, A., Mitton, N., Jungers, R., \& Papavassiliou, S. (2020). Edge Computing Resource Allocation for Dynamic Networks: The DRUID-NET Vision and Perspective. Sensors, 20(8), 2191. https://doi.org/10.3390/s20082191.
+
+
+\bibitem{in6}Oukissou, Youssef \& Elhaou, Hamza \& Ait Omar, Driss \& Zougagh, Hicham \& Elouaham, S.. (2025). OPTIMIZED TASK SCHEDULING IN FOG-CLOUD ENVIRONMENTS USING A COST-AWARE GENETIC ALGORITHM. 
+
+
+
+\bibitem{in7} Alsadie, Deafallah. (2024). Advancements in heuristic task scheduling for IoT applications in fog-cloud computing: challenges and prospects. PeerJ Computer Science. 10. e2128. 10.7717/peerj-cs.2128. 
+
+\bibitem{in8} Wang, Shufen. (2019). Edge Computing: Applications, State-of-the-Art and Challenges. Advances in Networks. 7. 8. 10.11648/j.net.20190701.12. 
+
+\bibitem{AI1} Mangalampalli, S., Karri, G.R., Selvaraj, P. (2023). AI Enabled Resources Scheduling in Cloud Paradigm. In: Kumar, M., Gill, S.S., Samriya, J.K., Uhlig, S. (eds) 6G Enabled Fog Computing in IoT. Springer, Cham. https://doi.org/10.1007/978-3-031-30101-8\_1
+
+\bibitem{cc2} Babu ES, Rao MS, Swain G, Nikhath AK, Kaluri R. Fog-Sec: Secure end-to-end communication in fog-enabled IoT network using permissioned blockchain system. Int J Network Mgmt. 2023; 33(5):e2248. doi:10.1002/nem.2248.
+
+\bibitem{tsn1} Tianyu Zhang, Gang Wang, Chuanyu Xue, Jiachen Wang, Mark Nixon, and Song Han. 2024. Time-Sensitive Networking (TSN) for Industrial Automation: Current Advances and Future Directions. ACM Comput. Surv. 57, 2, Article 30 (February 2025), 38 pages. https://doi.org/10.1145/3695248.
+
+
+\bibitem{tsn2} Hu, S., Cai, Y., Wang, S., \& Han, X. (2024). Enhanced FRER Mechanism in Time-Sensitive Networking for Reliable Edge Computing. Sensors, 24(6), 1738. https://doi.org/10.3390/s24061738.
+
+\bibitem{tsn3} Zhang, Tianyu \& Wang, Gang \& Xue, Chuanyu \& Wang, Jiachen \& Nixon, Mark \& Han, Song. (2024). Time-Sensitive Networking (TSN) for Industrial Automation: Current Advances and Future Directions. ACM Computing Surveys. 57. 10.1145/3695248. 
+
+
+
+
+\bibitem{det1} Finn, N., Thubert, P., Varga, B., \& Farkas, J. (2019). Deterministic Networking architecture (RFC No. 8655). Internet Engineering Task Force. https://doi.org/10.17487/RFC8655.
+
+\bibitem{det2} RFC 9055: Deterministic Networking (DetNet) Security Considerations - RFC Editor, https://www.rfc-editor.org/rfc/rfc9055.pdf
+
+\bibitem{sys1}3rd Generation Partnership Project. (2024). System architecture for the 5G System (5GS); Stage 2 (Release 18) (Technical Specification TS 23.501, Version 18.0.0). https://www.3gpp.org/specifications-technologies/releases/release-18. 
+
+\bibitem{sch1}Avan, A.; Azim, A.; Mahmoud, Q.H. A State-of-the-Art Review of Task Scheduling for Edge Computing: A Delay-Sensitive Application Perspective. Electronics 2023, 12, 2599. https://doi.org/10.3390/electronics12122599.
+
+\bibitem{sch2} Huang, ZhongYI. (2025). Task scheduling in fog computing systems using deep learning. Egyptian Informatics Journal. 31. 100757. 10.1016/j.eij.2025.100757. 
+
+
+
+\bibitem{r2}Sinnen, O. Task Scheduling for Parallel Systems; John Wiley \& Sons: Hoboken, NJ, USA, 2007.
+
+
+\bibitem{sch5}Su, L., Feng, W., Kan, C., Wei, M., Su, R., Yu, P., \& Zhang, N. (2025). A Two-Stage Sustainable Optimal Scheduling Strategy for Multi-Contract Collaborative Distributed Resource Aggregators. Sustainability, 17(15), 6767. https://doi.org/10.3390/su17156767.
+
+\bibitem{jose}J. Paulachan, O. Hekal, D. Onwuchekwa and R. Obermaisser, "A Time-Triggered Edge–Fog–Cloud Architecture With Hierarchical Genetic Optimization for Safety-Critical Applications," in IEEE Access, vol. 13, pp. 217406-217422, 2025, doi: 10.1109/ACCESS.2025.3644152.
+
+
+
+
+
+\bibitem{efc2} V. Prokhorenko and M. Ali Babar, "Architectural Resilience in Cloud, Fog and Edge Systems: A Survey," in IEEE Access, vol. 8, pp. 28078-28095, 2020, doi: 10.1109/ACCESS.2020.2971007.
+
+
+
+\bibitem{scs2} G. Gala, J. Castillo Rivera and G. Fohler, "Work-in-Progress: Cloud Computing for Time-Triggered Safety-Critical Systems," 2021 IEEE Real-Time Systems Symposium (RTSS), Dortmund, DE, 2021, pp. 516-519, doi: 10.1109/RTSS52674.2021.00054.
+
+
+
+
+\bibitem{detcom1} Peserico, G., Morato, A., Tramarin, F., \& Vitturi, S. (2021). Functional Safety Networks and Protocols in the Industrial Internet of Things Era. Sensors, 21(18), 6073. https://doi.org/10.3390/s21186073.
+
+
+\bibitem{ttet1} Obermaisser, Roman. (2005). Event-Triggered and Time-Triggered Control Paradigms. 10.1007/978-0-387-23044-3. 
+
+
+\bibitem{detnet} Z. E. Ahmed, A. A. Hashim, R. A. Saeed and M. M. Saeed, "Deterministic Networking (DetNet): Architecture, Protocols, and Advanced Applications," 2024 9th International Conference on Mechatronics Engineering (ICOM), Kuala Lumpur, Malaysia, 2024, pp. 213-218, doi: 10.1109/ICOM61675.2024.10652378.
+
+
+
+
+
+
+
+% Related works citations
+
+% EFC Architetcures
+\bibitem{efc1} Cao, H.; Wachowicz, M. An Edge-Fog-Cloud Architecture of Streaming Analytics for Internet of Things Applications. Sensors 2019, 19, 3594. https://doi.org/10.3390/s19163594.
+
+% \bibitem{efc2} V. Prokhorenko and M. Ali Babar, "Architectural Resilience in Cloud, Fog and Edge Systems: A Survey," in IEEE Access, vol. 8, pp. 28078-28095, 2020, doi: 10.1109/ACCESS.2020.2971007.
+
+\bibitem{efc3} Adam A. Alli, Muhammad Mahbub Alam, The fog cloud of things: A survey on concepts, architecture, standards, tools, and applications, Internet of Things, Volume 9, 2020, 100177, ISSN 2542-6605, https://doi.org/10.1016/j.iot.2020.100177.
+
+
+\bibitem{efc4} OpenfogConsortium, OpenFog Reference Architecture for Fog Computing, Reference Architecture 1 (February) (2017) 1–162, doi: 10.1049/iet-net.2015. 0034 .
+
+\bibitem{efc5} ETSI, ETSI GS MEC 002. Mobile Edge Computing (MEC); Technical Requirements, ETSI White Paper 1 (2016) 1–40 URL http://www.etsi.org/ standards-search.
+
+
+% Communication in Cloud
+
+\bibitem{cc1} Jasenka Dizdarević, Francisco Carpio, Admela Jukan, and Xavi Masip-Bruin. 2019. A Survey of Communication Protocols for Internet of Things and Related Challenges of Fog and Cloud Computing Integration. ACM Comput. Surv. 51, 6, Article 116 (November 2019), 29 pages. https://doi.org/10.1145/3292674.
+
+
+
+\bibitem{cc3} Trupil Limbasiya, Debasis Das, and Sanjay K Sahay. 2019. Secure communication protocol for smart transportation based on vehicular cloud. In Adjunct Proceedings of the 2019 ACM International Joint Conference on Pervasive and Ubiquitous Computing and Proceedings of the 2019 ACM International Symposium on Wearable Computers (UbiComp/ISWC '19 Adjunct). Association for Computing Machinery, New York, NY, USA, 372–376. https://doi.org/10.1145/3341162.3349305.
+
+\bibitem{cc5} Zhang, J., Zhu, F., Yang, Z., Chen, C., Tian, X., \& Guan, X. (2024). Routing and scheduling co-design for holistic software-defined deterministic network. Fundamental Research, 4(1), 25–34.8
+
+
+\bibitem{cc4}  Nie, H., Wu, Y., Zhu, W., Zhong, J., Yang, H., \& Zhou, Y. (2025). Time-Triggered Task Offloading Scheduling in TSN-Based Edge Computing Power Networks. IEEE Access, 13, 85979–85996.
+
+
+
+
+
+
+% Heuristic-based scheduling 
+\bibitem{h1} Kakkottakath Valappil Thekkepuryil, J., Suseelan, D.P. \& Keerikkattil, P.M. An effective meta-heuristic based multi-objective hybrid optimization method for workflow scheduling in cloud computing environment. Cluster Comput 24, 2367–2384 (2021). https://doi.org/10.1007/s10586-021-03269-5.
+
+\bibitem{h2} Aktan MN, Bulut H. Metaheuristic task scheduling algorithms for cloud computing environments. Concurrency Computat Pract Exper. 2022; 34(9):e6513. https://doi.org/10.1002/cpe.6513.
+
+\bibitem{h3} A. S. Mohammed, V. Mallikarjunaradhya, M. D. Sreeramulu, N. Boddapati, N. Jiwani and Y. Natarajan, "Optimizing Real-time Task Scheduling in Cloud-based AI Systems using Genetic Algorithms," 2024 7th International Conference on Contemporary Computing and Informatics (IC3I), Greater Noida, India, 2024, pp. 1649-1653, doi: 10.1109/IC3I61595.2024.10829055.
+
+\bibitem{h4} Rajashekar, K.J.;Channakrishnaraju; Gowda, P.C.;
+Jayachandra, A.B. SCEHO-IPSO: A Nature-Inspired Meta Heuristic
+Optimization for Task-Scheduling Policy in Cloud Computing. Appl. Sci. 2023, 13, 10850. https://doi.org/10.3390/app131910850.
+
+\bibitem{h5} Al-Arasi, Rasha \& Saif, Anwar. (2018). Task scheduling in cloud computing based on metaheuristic techniques: A review paper. EAI Endorsed Transactions on Cloud Systems. 6. 162829. 10.4108/eai.13-7-2018.162829. 
+
+
+
+
+
+% AI-based scheduling 
+
+
+\bibitem{AI2} Chaudhary, H., Sharma, G., Nishad, D.K. et al. Advanced queueing and scheduling techniques in cloud computing using AI-based model order reduction. Discov Computing 28, 75 (2025). https://doi.org/10.1007/s10791-025-09581-7.
+
+\bibitem{AI3} Shreshth Tuli, Sukhpal Singh Gill, Minxian Xu, Peter Garraghan, Rami Bahsoon, Schahram Dustdar, Rizos Sakellariou, Omer Rana, Rajkumar Buyya, Giuliano Casale, Nicholas R. Jennings,
+HUNTER: AI based holistic resource management for sustainable cloud computing, Journal of Systems and Software, Volume 184, 2022, 111124, ISSN 0164-1212, https://doi.org/10.1016/j.jss.2021.111124.
+
+\bibitem{AI4} Sundas Iftikhar, Mirza Mohammad Mufleh Ahmad, Shreshth Tuli, Deepraj Chowdhury, Minxian Xu, Sukhpal Singh Gill, Steve Uhlig, HunterPlus: AI based energy-efficient task scheduling for cloud–fog computing environments, Internet of Things, Volume 21, 2023, 100667, ISSN 2542-6605, https://doi.org/10.1016/j.iot.2022.100667.
+
+%reservation based scheduling
+
+\bibitem{rev1} Samimi, Nasim, et al. "Enabling Containerisation of Distributed Applications with Real-Time Constraints." LEIBNIZ INTERNATIONAL PROCEEDINGS IN INFORMATICS 335 (2025).
+
+\bibitem{rev2} Nasim Samimi, Mitra Nasri, Twan Basten, and Marc Geilen. 2025. Online Admission Test for Real-Time Tasks with Arrival Curves for Server Platforms. In Proceedings of the 32nd International Conference on Real-Time Networks and Systems (RTNS '24). Association for Computing Machinery, New York, NY, USA, 266–277. https://doi.org/10.1145/3696355.3696359
+
+\bibitem{rev3}Václav Struhár, Silviu S. Craciunas, Mohammad Ashjaei, Moris Behnam, and Alessandro V. Papadopoulos. 2024. Hierarchical Resource Orchestration Framework for Real-time Containers. ACM Trans. Embed. Comput. Syst. 23, 1, Article 4 (January 2024), 24 pages. https://doi.org/10.1145/3592856
+
+\bibitem{rev4} A. Friebe, T. Cucinotta, F. Marković, A. V. Papadopoulos and T. Nolte, "Nip it in the Bud: Job Acceptance Multi-Server," 2025 IEEE 31st Real-Time and Embedded Technology and Applications Symposium (RTAS), Irvine, CA, USA, 2025, pp. 26-39, doi: 10.1109/RTAS65571.2025.00009.
+
+\bibitem{rev5}D. Casini, L. Abeni, M. Marinoni and A. Biondi, "Runtime Monitoring for Edge Applications," 2025 21st International Conference on Distributed Computing in Smart Systems and the Internet of Things (DCOSS-IoT), Lucca, Italy, 2025, pp. 405-412, doi: 10.1109/DCOSS-IoT65416.2025.00071.
+
+% Adaptation 
+%Fault Tolerance paragraph 
+\bibitem{ft1} Mehdi Nazari Cheraghlou, Ahmad Khadem-Zadeh, and Majid Haghparast. 2016. A survey of fault tolerance architecture in cloud computing. J. Netw. Comput. Appl. 61, C (February 2016), 81–92. https://doi.org/10.1016/j.jnca.2015.10.004.
+
+\bibitem{ft6} A. U. Rehman, R. L. Aguiar and J. P. Barraca, "Fault-Tolerance in the Scope of Cloud Computing," in IEEE Access, vol. 10, pp. 63422-63441, 2022, doi: 10.1109/ACCESS.2022.3182211. 
+
+
+
+% \bibitem{ft2} Moin Hasan, Major Singh Goraya,
+% Fault tolerance in cloud computing environment: A systematic survey, Computers in Industry, Volume 99, 2018, Pages 156-172, ISSN 0166-3615,
+% https://doi.org/10.1016/j.compind.2018.03.027.
+
+% \bibitem{ft3} Kirti M, Maurya AK, Yadav RS. Fault-tolerance approaches for distributed and cloud computing environments: A systematic review, taxonomy and future directions. Concurrency Computat Pract Exper. 2024; 36(13):e8081. doi: 10.1002/cpe.8081.
+
+
+\bibitem{ft4} Prasanth Rao, Adiraju. (2021). Adaptive Fault Tolerant Resource Allocation Scheme for Cloud Computing Environment. Journal of Organizational and End User Computing. 33. 136-152. 10.4018/JOEUC.20210901.oa7. 
+
+\bibitem{ft5} Alarifi A, Abdelsamie F, AmoonM (2019) A fault-tolerant aware scheduling method for fogcloud environments. PLoS ONE 14(10): e0223902.
+https://doi.org/10.1371/journal.pone.0223902.
+
+\bibitem{ft7} Chinnathambi, S., Santhanam, A., Rajarathinam, J. et al. Scheduling and checkpointing optimization algorithm for Byzantine fault tolerance in cloud clusters. Cluster Comput 22 (Suppl 6), 14637–14650 (2019). https://doi.org/10.1007/s10586-018-2375-9. 
+
+
+%System Model
+
+
+
+
+\bibitem{sys2} Gavrilut, Voica Maria. "Design optimization of IEEE time-sensitive networks (TSN) for safety-critical and real-time applications." (2018).
+% Results
+
+\bibitem{r1} DeRainville, F.M.; Fortin, F.A.; Gardner, M.A.; Parizeau, M.; Gagné, C. Deap: A python framework for evolutionary algorithms. In Proceedings of the 14th annual Conference Companion on Genetic and Evolutionary Computation, Philadelphia, PA, USA 7–11 July 2012; pp. 85–92.
+
+
+\bibitem{r3} Deb, Kalyan \& Pratap, Amrit \& Agarwal, Sameer \& Meyarivan, T.. (2002). A fast and elitist multi-objective genetic algorithm: NSGA-II. Evolutionary Computation, IEEE Transactions on. 6. 182 - 197. 10.1109/4235.996017. 
+
+\bibitem{r4} Dick, R.P.; Rhodes, D.L.; Wolf, W. TGFF: Task graphs for free. In Proceedings of the Sixth International Workshop on Hardware/Software Codesign. (CODES/CASHE’98), Seattle, WA, USA, 18 March 1998; pp. 97–101. https://doi.org/10.1109/HSC.1998.666245.
+
+\bibitem{r5} Stuijk, S.; Geilen, M.; Basten, T. SDF3: SDF For Free. In Proceedings of the Sixth International Conference on Application of Concurrency to System Design (ACSD’06), Turku, Finland, 28–30 June 2006; pp. 276–278. https://doi.org/10.1109/ACSD.2006.23.
+
+\bibitem{r6} Anubhav Choudhary, Indrajeet Gupta, Vishakha Singh, Prasanta K. Jana,
+A GSA based hybrid algorithm for bi-objective workflow scheduling in cloud computing,
+Future Generation Computer Systems,
+Volume 83,
+2018,
+Pages 14-26,
+ISSN 0167-739X,
+https://doi.org/10.1016/j.future.2018.01.005.
+
+\end{thebibliography}
+
+
+
+% \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{a1.png}}]
+% {FIRST A. AUTHOR}~(Fellow, IEEE)~and all authors may include biographies.
+% Biographies are often not included in conference-related papers. This author
+% is an IEEE Fellow. The first paragraph may contain a place and/or date of
+% birth (list place, then date). Next, the author's educational background is
+% listed. The degrees should be listed with type of degree in what field,
+% which institution, city, state, and country, and year the degree was earned.
+% The author's major field of study should be lower-cased.
+
+% The second paragraph uses the pronoun of the person (he or she) and not the
+% author's last name. It lists military and work experience, including summer
+% and fellowship jobs. Job titles are capitalized. The current job must have a
+% location; previous positions may be listed without one. Information
+% concerning previous publications may be included. Try not to list more than
+% three books or published articles. The format for listing publishers of a
+% book within the biography is: title of book (publisher name, year) similar
+% to a reference. Current and previous research interests end the paragraph.
+
+% The third paragraph begins with the author's title and last name
+% (e.g., Dr.\ Smith, Prof.\ Jones, Mr.\ Kajor, Ms.\ Hunter). List any memberships in
+% professional societies other than the IEEE. Finally, list any awards and
+% work for IEEE committees and publications. If a photograph is provided, it
+% should be of good quality, and professional-looking.
+% \end{IEEEbiography}
+
+
+% \begin{IEEEbiographynophoto}
+% {SECOND B. AUTHOR,} photograph and biography not available at the time
+% of publication.
+% \end{IEEEbiographynophoto}
+
+
+% \begin{IEEEbiographynophoto}
+% {THIRD C. AUTHOR JR.}~(Member, IEEE), photograph and biography not available
+% at the time of publication.
+
+% \end{IEEEbiographynophoto}
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{omar.jpg}}]{Omar Hekal}~received the M.Sc. degree in Mechatronics from the University of Siegen, Germany. He is currently a Ph.D. candidate and Research Assistant at the Chair of Embedded Systems, University of Siegen. In parallel to his doctoral research, he has been involved in several European-funded projects, including EcoMobility, and has supported project management and coordination activities in Capacity Building in Higher Education (CBHE) projects. His technical work focuses on scheduling, optimization, and adaptation techniques for time-triggered and safety-critical embedded systems, with a particular interest in real-time architectures and resource-aware system design.
+\end{IEEEbiography}
+\vspace{-8pt}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{jose.png}}]{Josepaul Paulachan}~holds an M.Sc.\ in Mechatronics from the University of Siegen, Germany, 
+where he is currently pursuing his Ph.D.\ at the Chair for Embedded Systems.
+His research focuses on task scheduling, graph partitioning, and reliability in heterogeneous edge--fog--cloud systems, 
+with emphasis on safety-critical and real-time applications.
+His expertise includes FPGA design, real-time operating systems, and deterministic networking.
+\end{IEEEbiography}
+\vspace{-8pt}
+
+
+%If you do not have or do not want to include a photo, you can use IEEEbiographynophoto as shown below:
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{Daniel.jpeg}}]{Daniel Onwuchekwa}~received the Ph.D.\ degree in Electrical Engineering and Computer Science from the University of Siegen, Germany, in 2020. He is currently a Postdoctoral Researcher and Project Manager at the Division of Embedded Systems, University of Siegen, Germany. His doctoral research, supervised by Prof. Roman Obermaisser, focused on developing a fault injection framework for time-triggered systems. He has contributed to several European research projects, including SAFE4RAIL, Ecomobility, and FRACTAL where he served as a Work Package Leader. His current research interests encompass system architectures for distributed embedded real-time systems, fault-tolerant design, and embedded artificial intelligence (AI) in real-time embedded systems.
+\end{IEEEbiography}
+\vspace{-8pt}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{prof.png}}]{Roman Obermaisser}~is a Full Professor at the Division for Embedded Systems of the University of Siegen.
+He studied Computer Science at the Vienna University of Technology, receiving the Master's degree in 2001 and the doctoral degree in 2004 under Prof.\ Hermann Kopetz. In 2009, he received the habilitation (``Venia docendi'') in Technical Computer Science. His research focuses on system architectures for distributed embedded real-time systems. He is the author of numerous journal and conference publications and a book on an integrated time-triggered architecture (Springer). He has participated in many EU projects (e.g., SAFEPOWER, universAAL, DECOS, NextTTA) and coordinated the projects DREAMS, GENESYS, and ACROSS.
+\end{IEEEbiography}
+\vspace{-8pt}
+\vfill\pagebreak
+
+\end{document}

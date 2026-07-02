@@ -1,0 +1,62 @@
+{
+  "application": {
+    "jobs": [
+      {
+        "id": 27,
+        "wcet_fullspeed": 84,
+        "mcet": 0,
+        "deadline": 150,
+        "can_run_on": [
+          1,
+          5,
+          6
+        ],
+        "processing_times": 129
+      },
+      {
+        "id": 96,
+        "wcet_fullspeed": 29,
+        "mcet": 0,
+        "deadline": 113,
+        "can_run_on": [
+          2
+        ],
+        "processing_times": 95
+      },
+      {
+        "id": 86,
+        "wcet_fullspeed": 29,
+        "mcet": 0,
+        "deadline": 157,
+        "can_run_on": [
+          1,
+          6
+        ],
+        "processing_times": 94
+      },
+      {
+        "id": 81,
+        "wcet_fullspeed": 91,
+        "mcet": 0,
+        "deadline": 192,
+        "can_run_on": [
+          1
+        ],
+        "processing_times": 117
+      },
+      {
+        "id": 23,
+        "wcet_fullspeed": 7,
+        "mcet": 0,
+        "deadline": 236,
+        "can_run_on": [
+          1,
+          5,
+          6
+        ],
+        "processing_times": 123
+      }
+    ],
+    "messages": []
+  }
+}

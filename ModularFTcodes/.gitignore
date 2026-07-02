@@ -1,0 +1,22 @@
+# Python / local environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Runtime outputs
+codes/logs/
+codes/PARTITION_PLOTS/
+*.out
+*.err
+*.log
+checkpoint_latest.pkl
+*.pkl
+
+# OS / editor noise
+.DS_Store
+.vscode/
+
+# Large generated reports/artifacts
+*.png

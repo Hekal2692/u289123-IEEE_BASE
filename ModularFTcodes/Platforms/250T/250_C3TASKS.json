@@ -1,0 +1,178 @@
+{
+  "application": {
+    "jobs": [
+      {
+        "id": 114,
+        "wcet_fullspeed": 4,
+        "mcet": 0,
+        "deadline": 115,
+        "can_run_on": [
+          1,
+          6
+        ],
+        "processing_times": 72
+      },
+      {
+        "id": 85,
+        "wcet_fullspeed": 20,
+        "mcet": 0,
+        "deadline": 152,
+        "can_run_on": [
+          1,
+          5
+        ],
+        "processing_times": 112
+      },
+      {
+        "id": 170,
+        "wcet_fullspeed": 85,
+        "mcet": 0,
+        "deadline": 231,
+        "can_run_on": [
+          1,
+          5,
+          6
+        ],
+        "processing_times": 96
+      },
+      {
+        "id": 0,
+        "wcet_fullspeed": 42,
+        "mcet": 0,
+        "deadline": 196,
+        "can_run_on": [
+          1
+        ],
+        "processing_times": 69
+      },
+      {
+        "id": 15,
+        "wcet_fullspeed": 74,
+        "mcet": 0,
+        "deadline": 131,
+        "can_run_on": [
+          2
+        ],
+        "processing_times": 148
+      },
+      {
+        "id": 28,
+        "wcet_fullspeed": 72,
+        "mcet": 0,
+        "deadline": 219,
+        "can_run_on": [
+          1
+        ],
+        "processing_times": 119
+      },
+      {
+        "id": 131,
+        "wcet_fullspeed": 44,
+        "mcet": 0,
+        "deadline": 112,
+        "can_run_on": [
+          1,
+          2
+        ],
+        "processing_times": 138
+      },
+      {
+        "id": 206,
+        "wcet_fullspeed": 40,
+        "mcet": 0,
+        "deadline": 183,
+        "can_run_on": [
+          1,
+          6
+        ],
+        "processing_times": 89
+      },
+      {
+        "id": 36,
+        "wcet_fullspeed": 81,
+        "mcet": 0,
+        "deadline": 187,
+        "can_run_on": [
+          1,
+          6
+        ],
+        "processing_times": 64
+      },
+      {
+        "id": 150,
+        "wcet_fullspeed": 55,
+        "mcet": 0,
+        "deadline": 221,
+        "can_run_on": [
+          1,
+          2
+        ],
+        "processing_times": 106
+      },
+      {
+        "id": 187,
+        "wcet_fullspeed": 35,
+        "mcet": 0,
+        "deadline": 207,
+        "can_run_on": [
+          1,
+          5,
+          6
+        ],
+        "processing_times": 133
+      },
+      {
+        "id": 179,
+        "wcet_fullspeed": 52,
+        "mcet": 0,
+        "deadline": 172,
+        "can_run_on": [
+          2
+        ],
+        "processing_times": 75
+      }
+    ],
+    "messages": [
+      {
+        "id": 3,
+        "sender": 28,
+        "receiver": 15,
+        "size": 18,
+        "timetriggered": true,
+        "period": 10
+      },
+      {
+        "id": 401,
+        "sender": 206,
+        "receiver": 0,
+        "size": 25,
+        "timetriggered": true,
+        "period": 50
+      },
+      {
+        "id": 403,
+        "sender": 206,
+        "receiver": 28,
+        "size": 23,
+        "timetriggered": true,
+        "period": 30
+      },
+      {
+        "id": 404,
+        "sender": 206,
+        "receiver": 131,
+        "size": 23,
+        "timetriggered": true,
+        "period": 50
+      },
+      {
+        "id": 334,
+        "sender": 187,
+        "receiver": 150,
+        "size": 16,
+        "timetriggered": true,
+        "period": 30
+      }
+    ]
+  }
+}
