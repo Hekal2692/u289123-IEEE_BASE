@@ -565,6 +565,8 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
 
     log = logging.getLogger(__name__)
     run_metadata = dict(run_metadata or {})
+    variant = str(run_metadata.get("variant") or "proposed").strip().lower()
+    no_slack_enabled = variant == "no_slack"
     ga_start_perf = time.perf_counter()
     eval_counter = {"total": 0}
 
@@ -674,6 +676,38 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         """Map partition -> TB using ordering in PO & TB_list (aligned)."""
         return {p: int(TB_list[PO.index(p)]) for p in partitions}
 
+    # no_slack keeps TB genes active, but removes the adaptive feedback path.
+    # There is no cheap deterministic partition lower-bound available here without
+    # running the partition GAs, and the current proposed flow has no TB sum
+    # normalization. For the ablation, use the existing safe independent lower
+    # bound: positive TB values, clamped per partition to the actual deadline.
+    no_slack_tb_repair_rule = "per_partition_clamp_safe_min_1_to_actual_deadline_no_sum_normalization"
+    no_slack_tb_min_by_partition = {p: 1 for p in partitions}
+    no_slack_tb_max = max(1, int(round(float(LSMS))))
+    initial_equal_budget = LSMS // num_parts
+
+    def _repair_no_slack_tb_value(partition_name, value):
+        lower = int(no_slack_tb_min_by_partition.get(partition_name, 1))
+        upper = int(no_slack_tb_max)
+        try:
+            repaired = int(round(float(value)))
+        except (TypeError, ValueError):
+            repaired = lower
+        return max(lower, min(upper, repaired))
+
+    def _repair_no_slack_tb_bounds(ind):
+        if not no_slack_enabled:
+            return ind
+        tb_st = 2 * num_parts + len(message_ids)
+        for idx, partition_name in enumerate(ind[:num_parts]):
+            ind[tb_st + idx] = _repair_no_slack_tb_value(partition_name, ind[tb_st + idx])
+        return ind
+
+    initial_partition_budgets = {
+        p: _repair_no_slack_tb_value(p, initial_equal_budget)
+        for p in partitions
+    }
+
     def _inner_runs_defaultdict(saved=None):
         d = defaultdict(lambda: {p: [] for p in partitions})
         if saved:
@@ -748,6 +782,7 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         ind = creator.SysIndividual(PO + PA + PIgenes + TB)
         _repair_po_alignment(ind, partitions, num_parts, len(message_ids))
         _repair_pa_unique(ind, num_parts)
+        _repair_no_slack_tb_bounds(ind)
         return ind
 
     toolbox.register("individual", create_aligned_individual)
@@ -760,6 +795,7 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         eval_counter["total"] += 1
         _repair_po_alignment(ind, partitions, num_parts, len(message_ids))
         _repair_pa_unique(ind, num_parts)
+        _repair_no_slack_tb_bounds(ind)
 
         PO = ind[:num_parts]
         PA = ind[num_parts:2 * num_parts]
@@ -908,6 +944,8 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         _repair_po_alignment(b, partitions, num_parts_local, len(message_ids))
         _repair_pa_unique(a, num_parts_local)
         _repair_pa_unique(b, num_parts_local)
+        _repair_no_slack_tb_bounds(a)
+        _repair_no_slack_tb_bounds(b)
         return a, b
 
     toolbox.register("mate", mate_sys)
@@ -937,6 +975,7 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
 
         _repair_po_alignment(ind, partitions, nparts, len(message_ids))
         _repair_pa_unique(ind, nparts)
+        _repair_no_slack_tb_bounds(ind)
         if getattr(cfg, "DebugAssertTB", True):
             _assert_tb_alignment_basic(ind, nparts, len(message_ids), "mutant")
         return ind,
@@ -1005,6 +1044,33 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         return ind,
 
     toolbox.register('mutate_tb', mutate_tb)
+
+    def mutate_tb_no_slack(ind):
+        """Feedback-free TB mutation for the no_slack ablation.
+
+        This preserves active TB genes and ordinary bounded TB evolution, but it
+        deliberately avoids makespan, slack, lateness, feasibility, or violation
+        feedback. Each partition budget is repaired independently; no global TB
+        sum constraint or normalization is applied.
+        """
+        nparts = num_parts
+        po = ind[:nparts]
+        tb_st = 2 * nparts + len(message_ids)
+
+        for k, partition_name in enumerate(po):
+            tb = float(ind[tb_st + k])
+            rel_cap = TBMaxStepFrac * max(1.0, tb)
+            step_cap = max(TBMinStepAbs, min(rel_cap, TBMaxStepAbs))
+            step_hi = max(1, int(round(step_cap)))
+            step_lo = min(max(1, int(TBMinStepAbs)), step_hi)
+            step = random.randint(step_lo, step_hi)
+            if random.random() < 0.5:
+                step = -step
+            ind[tb_st + k] = _repair_no_slack_tb_value(partition_name, tb + step)
+
+        return ind,
+
+    toolbox.register('mutate_tb_no_slack', mutate_tb_no_slack)
 
     # Clone that preserves parent's signals (needed for mutate_tb guidance)
     def _clone_with_attrs(src):
@@ -1175,8 +1241,13 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
                 toolbox.mutate(mutant)
                 if hasattr(mutant.fitness, 'values'):
                     del mutant.fitness.values
-            # ALWAYS mutate TBs per partition, every generation
-            toolbox.mutate_tb(mutant)
+            # ALWAYS mutate TBs per partition, every generation. proposed uses
+            # the existing adaptive feedback path; no_slack uses only bounded
+            # feedback-free TB gene mutation.
+            if no_slack_enabled:
+                toolbox.mutate_tb_no_slack(mutant)
+            else:
+                toolbox.mutate_tb(mutant)
             if hasattr(mutant.fitness, 'values'):
                 del mutant.fitness.values
 
@@ -1341,6 +1412,20 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
                    "C2": tb_by_partition["P_C2"], "C3": tb_by_partition["P_C3"]}
 
     return gglob_final, {
+        "variant": variant,
+        "adaptive_slack_reallocation_enabled": not no_slack_enabled,
+        "slack_redistribution_enabled": not no_slack_enabled,
+        "budget_feedback_repair_enabled": not no_slack_enabled,
+        "tb_gene_enabled": True,
+        "tb_mutation_enabled": True,
+        "tb_sum_constraint_enabled": False,
+        "tb_repair_rule": no_slack_tb_repair_rule if no_slack_enabled else "adaptive_feedback_guided_tb_mutation",
+        "initial_partition_budgets": initial_partition_budgets,
+        "final_partition_budgets": final_budgets,
+        "actual_deadline_value": run_metadata.get("actual_deadline_value", LSMS),
+        "am_id": run_metadata.get("am_id"),
+        "deadline_ratio": run_metadata.get("deadline_ratio"),
+        "seed": run_metadata.get("seed"),
         "time_budgets_partition": tb_by_partition,
         "time_budgets_level": tb_by_level,
         "global_makespan": int(global_makespan_final),

@@ -197,6 +197,34 @@ def _ga_config_values():
     return {name: getattr(cfg, name, None) for name in names}
 
 
+def _apply_positive_int_cfg_override(env_name, cfg_name):
+    raw = os.environ.get(env_name)
+    if raw is None or str(raw).strip() == "":
+        return
+    value = int(raw)
+    if value <= 0:
+        raise ValueError(f"{env_name} must be a positive integer, got {raw!r}")
+    setattr(cfg, cfg_name, value)
+
+
+NO_SLACK_METADATA_KEYS = (
+    "variant",
+    "adaptive_slack_reallocation_enabled",
+    "slack_redistribution_enabled",
+    "budget_feedback_repair_enabled",
+    "tb_gene_enabled",
+    "tb_mutation_enabled",
+    "tb_sum_constraint_enabled",
+    "tb_repair_rule",
+    "initial_partition_budgets",
+    "final_partition_budgets",
+    "actual_deadline_value",
+    "am_id",
+    "deadline_ratio",
+    "seed",
+)
+
+
 def _write_json(path, data):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -356,6 +384,9 @@ else:
 if seed is not None:
     random.seed(seed)
     np.random.seed(seed)
+
+_apply_positive_int_cfg_override("SYSTEM_LEVEL_GENERATIONS", "SystemLevelGenerations")
+_apply_positive_int_cfg_override("PARTITION_GENERATIONS", "PartitionGenerations")
 
 resume_checkpoint = None
 if args.resume_from is not None:
@@ -718,6 +749,12 @@ SystemSchedule, meta = sls.SystemLevelGA(processor_ids_FE,processor_ids_C1,proce
 end_sys_ga = time.perf_counter()
 print("System Level Schedule is ", SystemSchedule)
 
+meta_variant = str(meta.get("variant", variant)).strip().lower()
+if meta_variant == "no_slack":
+    run_config.update({key: meta.get(key) for key in NO_SLACK_METADATA_KEYS if key in meta})
+    _write_json(run_dir / "run_config.json", run_config)
+    log.info("[RUN] updated run_config_json with no_slack metadata=%s", run_dir / "run_config.json")
+
 schedule_path = os.path.join(log_dir, f"schedule_{timestamp}.json")
 final_schedule_path = os.path.join(log_dir, "final_schedule.json")
 plots_dir = os.path.join(log_dir, "plots")
@@ -902,6 +939,9 @@ run_summary = {
     "checkpoint_path": str(checkpoint_path),
     "generated_plot_files": sorted(set(generated_plot_files)),
 }
+if meta_variant == "no_slack":
+    run_summary.update({key: meta.get(key) for key in NO_SLACK_METADATA_KEYS if key in meta})
+
 for part in ("P_FE", "P_C1", "P_C2", "P_C3"):
     prefix = f"final_{part}"
     run_summary[f"{prefix}_budget"] = final_budgets.get(part)
