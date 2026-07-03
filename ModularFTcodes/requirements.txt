@@ -4,3 +4,4 @@ matplotlib
 deap
 plotly
 kaleido
+scipy
