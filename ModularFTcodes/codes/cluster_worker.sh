@@ -49,7 +49,7 @@ export PLATFORMS_DIR="${PLATFORMS_DIR:-$PROJECT_DIR/Platforms}"
 export OUTPUT_ROOT="${OUTPUT_ROOT:-logs}"
 export VARIANT="${VARIANT:-proposed}"
 export REQUIRE_ENV_CONFIG=1
-export AUTO_RESUME="${AUTO_RESUME:-1}"
+export AUTO_RESUME="${AUTO_RESUME:-0}"
 
 if [[ -z "${AM_ID:-}" && -n "${AM_SIZE:-}" ]]; then
   case "$AM_SIZE" in

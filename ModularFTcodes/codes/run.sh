@@ -43,7 +43,7 @@ export OUTPUT_ROOT="${OUTPUT_ROOT:-logs}"
 export PYTHONHASHSEED="${PYTHONHASHSEED:-$SEED}"
 export PLATFORMS_DIR="${PLATFORMS_DIR:-$PROJECT_DIR/Platforms}"
 export REQUIRE_ENV_CONFIG=1
-export AUTO_RESUME="${AUTO_RESUME:-1}"
+export AUTO_RESUME="${AUTO_RESUME:-0}"
 
 if [[ -z "${RUN_TIMESTAMP:-}" ]]; then
   export RUN_TIMESTAMP="$(date +"%Y-%m-%d_%H-%M-%S")"
