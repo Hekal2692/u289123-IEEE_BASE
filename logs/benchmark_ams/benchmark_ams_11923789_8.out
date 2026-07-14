@@ -1,0 +1,11 @@
+submit_pwd=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+worktree_pwd=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+Python 3.11.2
+/home/u289123/venvs/ftcodes311/bin/python
+Running WATERS100 validation for task ratio100_seed1009
+Running WATERS100 benchmark ratio100_seed1009
+Executing: /home/u289123/venvs/ftcodes311/bin/python /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py --child --seed 1009 --deadline-ratio 1.00 --variant proposed --output-root /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs --run-tag 11923789_8
+Summary CSV: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/summaries/benchmark_ams_ratio100_seed1009.csv
+Task summary: results/benchmark_ams/summaries/benchmark_ams_ratio100_seed1009.csv
+After all array tasks finish, collect one combined CSV with:
+python experiments/benchmark_ams/run_benchmark_ams.py --collect-only --output-root results/benchmark_ams/runs --summary-csv results/benchmark_ams/benchmark_ams_summary.csv

@@ -1,0 +1,12 @@
+hostname: hpc-node382
+platform: Linux-4.18.0-477.13.1.el8_8.x86_64-x86_64-with-glibc2.28
+python_version: 3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]
+python_executable: /home/u289123/venvs/ftcodes311/bin/python
+cpu_count: 128
+working_directory: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/codes
+output_dir: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs/AM100/ratio1.00/seed1007/AM100__base2600__ratio1.00__deadline2600__seed1007__proposed__job11923796__task6__WATERS100__ratio100__seed1007__11923789_6
+SLURM_JOB_ID: 11923796
+SLURM_ARRAY_TASK_ID: 6
+SLURM_CPUS_PER_TASK: None
+SLURM_MEM_PER_NODE: None
+PYTHONHASHSEED: 1007

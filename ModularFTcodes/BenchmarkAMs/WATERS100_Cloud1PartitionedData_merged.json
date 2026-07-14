@@ -1,0 +1,40 @@
+{
+  "application": {
+    "jobs": [
+      {
+        "id": 62,
+        "wcet_fullspeed": 68,
+        "mcet": 0,
+        "processing_times": 118,
+        "deadline": 172,
+        "can_run_on": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": 70,
+        "wcet_fullspeed": 77,
+        "mcet": 0,
+        "processing_times": 128,
+        "deadline": 191,
+        "can_run_on": [
+          5,
+          6
+        ]
+      },
+      {
+        "id": 97,
+        "wcet_fullspeed": 61,
+        "mcet": 0,
+        "processing_times": 112,
+        "deadline": 207,
+        "can_run_on": [
+          5,
+          6
+        ]
+      }
+    ],
+    "messages": []
+  }
+}

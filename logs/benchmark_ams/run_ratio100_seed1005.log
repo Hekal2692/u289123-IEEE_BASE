@@ -1,0 +1,38 @@
+
+=== benchmark_ams run 2026-07-05T09:02:52 ===
+worktree=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+runtime_platforms=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms
+deadline_ratios=['1.00']
+seeds=[1005]
+Executing: /usr/bin/python /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py --child --seed 1005 --deadline-ratio 1.00 --variant proposed --output-root /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs --run-tag 11923687_4
+Traceback (most recent call last):
+  File "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py", line 256, in <module>
+    raise SystemExit(main())
+  File "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py", line 251, in main
+    return run_child(args)
+  File "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py", line 110, in run_child
+    runpy.run_path(str(CODE_DIR / "main.py"), run_name="__main__")
+  File "/usr/lib64/python3.6/runpy.py", line 263, in run_path
+    pkg_name=pkg_name, script_name=fname)
+  File "/usr/lib64/python3.6/runpy.py", line 96, in _run_module_code
+    mod_name, mod_spec, pkg_name, script_name)
+  File "/usr/lib64/python3.6/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/codes/main.py", line 18, in <module>
+    import plotly.graph_objects as go
+ModuleNotFoundError: No module named 'plotly'
+FAILED deadline_ratio=1.00 seed=1005 returncode=1
+
+=== benchmark_ams run 2026-07-05T09:47:41 ===
+worktree=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+runtime_platforms=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms
+deadline_ratios=['1.00']
+seeds=[1005]
+Executing: /home/u289123/venvs/ftcodes311/bin/python /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py --child --seed 1005 --deadline-ratio 1.00 --variant proposed --output-root /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs --run-tag 11923780_4
+
+=== benchmark_ams run 2026-07-05T09:50:21 ===
+worktree=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+runtime_platforms=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms
+deadline_ratios=['1.00']
+seeds=[1005]
+Executing: /home/u289123/venvs/ftcodes311/bin/python /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py --child --seed 1005 --deadline-ratio 1.00 --variant proposed --output-root /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs --run-tag 11923789_4

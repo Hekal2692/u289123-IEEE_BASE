@@ -1,0 +1,8 @@
+worktree_root=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+benchmark_dir=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/BenchmarkAMs
+PASS: WATERS100_NewPM.json: jobs=100 messages=212 dag_acyclic=True
+PASS: WATERS100_FogEdgePartitionedTasks_merged_strict.json: jobs=72 messages=113 dag_acyclic=True
+PASS: WATERS100_Cloud1PartitionedData_merged.json: jobs=3 messages=0 dag_acyclic=True
+PASS: WATERS100_Cloud2PartitionedData_merged.json: jobs=20 messages=23 dag_acyclic=True
+PASS: WATERS100_Cloud3PartitionedData_merged.json: jobs=5 messages=1 dag_acyclic=True
+VALIDATION_PASSED

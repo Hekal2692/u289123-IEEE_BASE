@@ -1,0 +1,36 @@
+2026-07-05 09:47:49,196 - INFO - [Logger] config.py snapshot saved to: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs/AM100/ratio1.00/seed1004/AM100__base2600__ratio1.00__deadline2600__seed1004__proposed__job11923784__task3__WATERS100__ratio100__seed1004__11923780_3/config.py
+2026-07-05 09:47:49,197 - INFO - [RUN] run_id=AM100__base2600__ratio1.00__deadline2600__seed1004__proposed__job11923784__task3__WATERS100__ratio100__seed1004__11923780_3
+2026-07-05 09:47:49,197 - INFO - [RUN] seed=1004
+2026-07-05 09:47:49,197 - INFO - [RUN] PYTHONHASHSEED=1004
+2026-07-05 09:47:49,197 - INFO - [RUN] am_id=AM100
+2026-07-05 09:47:49,197 - INFO - [RUN] base_deadline=2600
+2026-07-05 09:47:49,197 - INFO - [RUN] deadline_ratio=1.00
+2026-07-05 09:47:49,197 - INFO - [RUN] actual_deadline_value=2600
+2026-07-05 09:47:49,197 - INFO - [RUN] variant=proposed
+2026-07-05 09:47:49,197 - INFO - [RUN] output_dir=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs/AM100/ratio1.00/seed1004/AM100__base2600__ratio1.00__deadline2600__seed1004__proposed__job11923784__task3__WATERS100__ratio100__seed1004__11923780_3
+2026-07-05 09:47:49,197 - INFO - [RUN] hostname=hpc-node314
+2026-07-05 09:47:49,197 - INFO - [RUN] python_version=3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]
+2026-07-05 09:47:49,197 - INFO - [RUN] working_directory=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/codes
+2026-07-05 09:47:49,197 - INFO - [RUN] slurm_job_id=11923784
+2026-07-05 09:47:49,197 - INFO - [RUN] slurm_array_task_id=3
+2026-07-05 09:47:49,199 - INFO - [MAIN] AM size: 100T
+2026-07-05 09:47:49,199 - INFO - [MAIN] Platforms directory: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms
+2026-07-05 09:47:49,199 - INFO - [MAIN] Full AM/PM input: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms/100T/TC100_NewPM.json
+2026-07-05 09:47:56,334 - INFO - Time Maksepan of the list scheduling is
+2026-07-05 09:47:56,335 - INFO - 1360
+2026-07-05 09:47:56,335 - INFO -  seconds
+2026-07-05 09:47:56,336 - INFO - List-scheduling makespan is
+2026-07-05 09:47:56,336 - INFO - 1360
+2026-07-05 09:47:56,337 - INFO - Baseline Deadline is
+2026-07-05 09:47:56,337 - INFO - 2600
+2026-07-05 09:47:56,337 - INFO - Deadline setting is
+2026-07-05 09:47:56,337 - INFO - ratio1.00
+2026-07-05 09:47:56,337 - INFO - Application Deadline is
+2026-07-05 09:47:56,337 - INFO - 2600
+2026-07-05 09:47:56,337 - INFO - [RUN] list_schedule_makespan=1360
+2026-07-05 09:47:56,337 - INFO - [MAIN] List-scheduling makespan: 1360
+2026-07-05 09:47:56,337 - INFO - [MAIN] Baseline deadline: 2600
+2026-07-05 09:47:56,337 - INFO - [MAIN] Deadline setting: ratio1.00
+2026-07-05 09:47:56,337 - INFO - [MAIN] Application deadline: 2600
+2026-07-05 09:47:56,353 - INFO - [RUN] run_config_json=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs/AM100/ratio1.00/seed1004/AM100__base2600__ratio1.00__deadline2600__seed1004__proposed__job11923784__task3__WATERS100__ratio100__seed1004__11923780_3/run_config.json
+2026-07-05 09:47:56,353 - INFO - [MAIN] System-level scheduling launched

@@ -1,0 +1,6 @@
+submit_pwd=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+worktree_pwd=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+Python 3.11.2
+/home/u289123/venvs/ftcodes311/bin/python
+Running WATERS100 validation for task ratio080_seed1003
+Running WATERS100 benchmark ratio080_seed1003

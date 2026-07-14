@@ -1,0 +1,7 @@
+submit_pwd=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+worktree_pwd=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+Python 3.6.8
+/usr/bin/python
+Running WATERS100 validation for task ratio090_seed1004
+Running WATERS100 benchmark ratio090_seed1004
+Executing: /usr/bin/python /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py --child --seed 1004 --deadline-ratio 0.90 --variant proposed --output-root /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/runs --run-tag 11923687_13

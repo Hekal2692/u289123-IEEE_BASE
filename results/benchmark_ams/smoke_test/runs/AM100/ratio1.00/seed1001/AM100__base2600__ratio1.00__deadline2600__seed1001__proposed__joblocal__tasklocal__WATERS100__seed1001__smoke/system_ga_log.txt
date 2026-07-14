@@ -1,0 +1,257 @@
+2026-07-03 15:57:24,353 - INFO - [Logger] config.py snapshot saved to: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/config.py
+2026-07-03 15:57:24,354 - INFO - [RUN] run_id=AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke
+2026-07-03 15:57:24,354 - INFO - [RUN] seed=1001
+2026-07-03 15:57:24,354 - INFO - [RUN] PYTHONHASHSEED=1001
+2026-07-03 15:57:24,354 - INFO - [RUN] am_id=AM100
+2026-07-03 15:57:24,354 - INFO - [RUN] base_deadline=2600
+2026-07-03 15:57:24,354 - INFO - [RUN] deadline_ratio=1.00
+2026-07-03 15:57:24,354 - INFO - [RUN] actual_deadline_value=2600
+2026-07-03 15:57:24,354 - INFO - [RUN] variant=proposed
+2026-07-03 15:57:24,354 - INFO - [RUN] output_dir=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke
+2026-07-03 15:57:24,354 - INFO - [RUN] hostname=hpc-login04
+2026-07-03 15:57:24,354 - INFO - [RUN] python_version=3.11.11 (main, Dec 12 2024, 16:28:23) [GCC 8.5.0 20210514 (Red Hat 8.5.0-22)]
+2026-07-03 15:57:24,354 - INFO - [RUN] working_directory=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/codes
+2026-07-03 15:57:24,354 - INFO - [RUN] slurm_job_id=None
+2026-07-03 15:57:24,354 - INFO - [RUN] slurm_array_task_id=None
+2026-07-03 15:57:24,425 - INFO - [MAIN] AM size: 100T
+2026-07-03 15:57:24,425 - INFO - [MAIN] Platforms directory: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms
+2026-07-03 15:57:24,425 - INFO - [MAIN] Full AM/PM input: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms/100T/TC100_NewPM.json
+2026-07-03 15:57:30,664 - INFO - Time Maksepan of the list scheduling is
+2026-07-03 15:57:30,664 - INFO - 1410
+2026-07-03 15:57:30,664 - INFO -  seconds
+2026-07-03 15:57:30,683 - INFO - List-scheduling makespan is
+2026-07-03 15:57:30,683 - INFO - 1410
+2026-07-03 15:57:30,683 - INFO - Baseline Deadline is
+2026-07-03 15:57:30,683 - INFO - 2600
+2026-07-03 15:57:30,683 - INFO - Deadline setting is
+2026-07-03 15:57:30,683 - INFO - ratio1.00
+2026-07-03 15:57:30,683 - INFO - Application Deadline is
+2026-07-03 15:57:30,683 - INFO - 2600
+2026-07-03 15:57:30,683 - INFO - [RUN] list_schedule_makespan=1410
+2026-07-03 15:57:30,683 - INFO - [MAIN] List-scheduling makespan: 1410
+2026-07-03 15:57:30,683 - INFO - [MAIN] Baseline deadline: 2600
+2026-07-03 15:57:30,683 - INFO - [MAIN] Deadline setting: ratio1.00
+2026-07-03 15:57:30,683 - INFO - [MAIN] Application deadline: 2600
+2026-07-03 15:57:30,819 - INFO - [RUN] run_config_json=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/run_config.json
+2026-07-03 15:57:30,819 - INFO - [MAIN] System-level scheduling launched
+2026-07-03 15:57:37,332 - INFO - [Eval] (Context: Init) P_FE -> C2 | Budget=650 | MS=1563
+2026-07-03 15:57:37,333 - INFO - [Eval] (Context: Init) P_C1 -> FE | Budget=650 | MS=128
+2026-07-03 15:57:38,692 - INFO - [Eval] (Context: Init) P_C2 -> C1 | Budget=650 | MS=579
+2026-07-03 15:57:38,749 - INFO - [Eval] (Context: Init) P_C3 -> C3 | Budget=650 | MS=158
+2026-07-03 15:57:38,771 - INFO - [Reconstruction_2][IPC] paths_used=205, tasks_shifted=162, passes=5
+2026-07-03 15:57:38,772 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2356 SignedLate=-244 Deadline=2600
+2026-07-03 15:57:45,063 - INFO - [Eval] (Context: Init) P_FE -> C1 | Budget=650 | MS=1578
+2026-07-03 15:57:45,064 - INFO - [Eval] (Context: Init) P_C1 -> C3 | Budget=650 | MS=128
+2026-07-03 15:57:46,311 - INFO - [Eval] (Context: Init) P_C2 -> FE | Budget=650 | MS=573
+2026-07-03 15:57:46,368 - INFO - [Eval] (Context: Init) P_C3 -> C2 | Budget=650 | MS=156
+2026-07-03 15:57:46,391 - INFO - [Reconstruction_2][IPC] paths_used=205, tasks_shifted=211, passes=6
+2026-07-03 15:57:46,392 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2350 SignedLate=-250 Deadline=2600
+2026-07-03 15:57:52,412 - INFO - [Eval] (Context: Init) P_FE -> C3 | Budget=650 | MS=1606
+2026-07-03 15:57:52,413 - INFO - [Eval] (Context: Init) P_C1 -> C2 | Budget=650 | MS=128
+2026-07-03 15:57:53,767 - INFO - [Eval] (Context: Init) P_C2 -> C1 | Budget=650 | MS=578
+2026-07-03 15:57:53,820 - INFO - [Eval] (Context: Init) P_C3 -> FE | Budget=650 | MS=157
+2026-07-03 15:57:53,842 - INFO - [Reconstruction_2][IPC] paths_used=209, tasks_shifted=207, passes=6
+2026-07-03 15:57:53,843 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2357 SignedLate=-243 Deadline=2600
+2026-07-03 15:58:00,330 - INFO - [Eval] (Context: Init) P_FE -> C1 | Budget=650 | MS=1569
+2026-07-03 15:58:00,331 - INFO - [Eval] (Context: Init) P_C1 -> C2 | Budget=650 | MS=128
+2026-07-03 15:58:01,651 - INFO - [Eval] (Context: Init) P_C2 -> C3 | Budget=650 | MS=575
+2026-07-03 15:58:01,704 - INFO - [Eval] (Context: Init) P_C3 -> FE | Budget=650 | MS=157
+2026-07-03 15:58:01,726 - INFO - [Reconstruction_2][IPC] paths_used=206, tasks_shifted=218, passes=6
+2026-07-03 15:58:01,727 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2567 SignedLate=-33 Deadline=2600
+2026-07-03 15:58:08,184 - INFO - [Eval] (Context: Init) P_FE -> C2 | Budget=650 | MS=1618
+2026-07-03 15:58:08,185 - INFO - [Eval] (Context: Init) P_C1 -> C1 | Budget=650 | MS=128
+2026-07-03 15:58:09,529 - INFO - [Eval] (Context: Init) P_C2 -> C3 | Budget=650 | MS=577
+2026-07-03 15:58:09,578 - INFO - [Eval] (Context: Init) P_C3 -> FE | Budget=650 | MS=156
+2026-07-03 15:58:09,652 - INFO - [Reconstruction_2][IPC] paths_used=203, tasks_shifted=216, passes=6
+2026-07-03 15:58:09,653 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2364 SignedLate=-236 Deadline=2600
+2026-07-03 15:58:16,107 - INFO - [Eval] (Context: Init) P_FE -> C2 | Budget=650 | MS=1684
+2026-07-03 15:58:16,108 - INFO - [Eval] (Context: Init) P_C1 -> FE | Budget=650 | MS=128
+2026-07-03 15:58:17,382 - INFO - [Eval] (Context: Init) P_C2 -> C1 | Budget=650 | MS=576
+2026-07-03 15:58:17,442 - INFO - [Eval] (Context: Init) P_C3 -> C3 | Budget=650 | MS=156
+2026-07-03 15:58:17,464 - INFO - [Reconstruction_2][IPC] paths_used=208, tasks_shifted=204, passes=6
+2026-07-03 15:58:17,465 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2454 SignedLate=-146 Deadline=2600
+2026-07-03 15:58:23,258 - INFO - [Eval] (Context: Init) P_FE -> FE | Budget=650 | MS=1622
+2026-07-03 15:58:23,259 - INFO - [Eval] (Context: Init) P_C1 -> C2 | Budget=650 | MS=128
+2026-07-03 15:58:24,669 - INFO - [Eval] (Context: Init) P_C2 -> C3 | Budget=650 | MS=581
+2026-07-03 15:58:24,727 - INFO - [Eval] (Context: Init) P_C3 -> C1 | Budget=650 | MS=157
+2026-07-03 15:58:24,748 - INFO - [Reconstruction_2][IPC] paths_used=205, tasks_shifted=207, passes=6
+2026-07-03 15:58:24,749 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2343 SignedLate=-257 Deadline=2600
+2026-07-03 15:58:31,406 - INFO - [Eval] (Context: Init) P_FE -> C2 | Budget=650 | MS=1626
+2026-07-03 15:58:31,407 - INFO - [Eval] (Context: Init) P_C1 -> C1 | Budget=650 | MS=128
+2026-07-03 15:58:32,759 - INFO - [Eval] (Context: Init) P_C2 -> C3 | Budget=650 | MS=578
+2026-07-03 15:58:32,811 - INFO - [Eval] (Context: Init) P_C3 -> FE | Budget=650 | MS=157
+2026-07-03 15:58:32,833 - INFO - [Reconstruction_2][IPC] paths_used=202, tasks_shifted=169, passes=6
+2026-07-03 15:58:32,834 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2357 SignedLate=-243 Deadline=2600
+2026-07-03 15:58:39,077 - INFO - [Eval] (Context: Init) P_FE -> C3 | Budget=650 | MS=1577
+2026-07-03 15:58:39,078 - INFO - [Eval] (Context: Init) P_C1 -> FE | Budget=650 | MS=128
+2026-07-03 15:58:40,345 - INFO - [Eval] (Context: Init) P_C2 -> C2 | Budget=650 | MS=578
+2026-07-03 15:58:40,406 - INFO - [Eval] (Context: Init) P_C3 -> C1 | Budget=650 | MS=156
+2026-07-03 15:58:40,428 - INFO - [Reconstruction_2][IPC] paths_used=208, tasks_shifted=249, passes=7
+2026-07-03 15:58:40,430 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2359 SignedLate=-241 Deadline=2600
+2026-07-03 15:58:47,068 - INFO - [Eval] (Context: Init) P_FE -> C3 | Budget=650 | MS=1699
+2026-07-03 15:58:47,069 - INFO - [Eval] (Context: Init) P_C1 -> C2 | Budget=650 | MS=128
+2026-07-03 15:58:48,324 - INFO - [Eval] (Context: Init) P_C2 -> FE | Budget=650 | MS=578
+2026-07-03 15:58:48,377 - INFO - [Eval] (Context: Init) P_C3 -> C1 | Budget=650 | MS=158
+2026-07-03 15:58:48,452 - INFO - [Reconstruction_2][IPC] paths_used=208, tasks_shifted=234, passes=7
+2026-07-03 15:58:48,454 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2433 SignedLate=-167 Deadline=2600
+2026-07-03 15:58:55,139 - INFO - [Eval] (Context: Init) P_FE -> C1 | Budget=650 | MS=1616
+2026-07-03 15:58:55,140 - INFO - [Eval] (Context: Init) P_C1 -> C2 | Budget=650 | MS=128
+2026-07-03 15:58:56,443 - INFO - [Eval] (Context: Init) P_C2 -> C3 | Budget=650 | MS=575
+2026-07-03 15:58:56,499 - INFO - [Eval] (Context: Init) P_C3 -> FE | Budget=650 | MS=156
+2026-07-03 15:58:56,522 - INFO - [Reconstruction_2][IPC] paths_used=204, tasks_shifted=213, passes=6
+2026-07-03 15:58:56,523 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2356 SignedLate=-244 Deadline=2600
+2026-07-03 15:59:02,580 - INFO - [Eval] (Context: Init) P_FE -> C2 | Budget=650 | MS=1577
+2026-07-03 15:59:02,581 - INFO - [Eval] (Context: Init) P_C1 -> C3 | Budget=650 | MS=128
+2026-07-03 15:59:03,775 - INFO - [Eval] (Context: Init) P_C2 -> C1 | Budget=650 | MS=577
+2026-07-03 15:59:03,832 - INFO - [Eval] (Context: Init) P_C3 -> FE | Budget=650 | MS=156
+2026-07-03 15:59:03,852 - INFO - [Reconstruction_2][IPC] paths_used=204, tasks_shifted=121, passes=4
+2026-07-03 15:59:03,853 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2516 SignedLate=-84 Deadline=2600
+2026-07-03 15:59:09,641 - INFO - [Eval] (Context: Init) P_FE -> FE | Budget=650 | MS=1738
+2026-07-03 15:59:09,642 - INFO - [Eval] (Context: Init) P_C1 -> C1 | Budget=650 | MS=128
+2026-07-03 15:59:10,985 - INFO - [Eval] (Context: Init) P_C2 -> C3 | Budget=650 | MS=578
+2026-07-03 15:59:11,039 - INFO - [Eval] (Context: Init) P_C3 -> C2 | Budget=650 | MS=158
+2026-07-03 15:59:11,060 - INFO - [Reconstruction_2][IPC] paths_used=203, tasks_shifted=199, passes=6
+2026-07-03 15:59:11,062 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2347 SignedLate=-253 Deadline=2600
+2026-07-03 15:59:17,709 - INFO - [Eval] (Context: Init) P_FE -> C2 | Budget=650 | MS=1684
+2026-07-03 15:59:17,710 - INFO - [Eval] (Context: Init) P_C1 -> C3 | Budget=650 | MS=128
+2026-07-03 15:59:18,882 - INFO - [Eval] (Context: Init) P_C2 -> FE | Budget=650 | MS=576
+2026-07-03 15:59:18,939 - INFO - [Eval] (Context: Init) P_C3 -> C1 | Budget=650 | MS=157
+2026-07-03 15:59:19,016 - INFO - [Reconstruction_2][IPC] paths_used=208, tasks_shifted=196, passes=6
+2026-07-03 15:59:19,017 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2356 SignedLate=-244 Deadline=2600
+2026-07-03 15:59:25,652 - INFO - [Eval] (Context: Init) P_FE -> C2 | Budget=650 | MS=1576
+2026-07-03 15:59:25,653 - INFO - [Eval] (Context: Init) P_C1 -> C1 | Budget=650 | MS=128
+2026-07-03 15:59:26,952 - INFO - [Eval] (Context: Init) P_C2 -> C3 | Budget=650 | MS=581
+2026-07-03 15:59:27,008 - INFO - [Eval] (Context: Init) P_C3 -> FE | Budget=650 | MS=157
+2026-07-03 15:59:27,029 - INFO - [Reconstruction_2][IPC] paths_used=208, tasks_shifted=211, passes=6
+2026-07-03 15:59:27,030 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2477 SignedLate=-123 Deadline=2600
+2026-07-03 15:59:33,440 - INFO - [Eval] (Context: Init) P_FE -> C3 | Budget=650 | MS=1650
+2026-07-03 15:59:33,441 - INFO - [Eval] (Context: Init) P_C1 -> FE | Budget=650 | MS=128
+2026-07-03 15:59:34,712 - INFO - [Eval] (Context: Init) P_C2 -> C1 | Budget=650 | MS=580
+2026-07-03 15:59:34,772 - INFO - [Eval] (Context: Init) P_C3 -> C2 | Budget=650 | MS=156
+2026-07-03 15:59:34,794 - INFO - [Reconstruction_2][IPC] paths_used=207, tasks_shifted=217, passes=6
+2026-07-03 15:59:34,795 - INFO - [Eval-Global] (gen=0, ctx=Init) GlobalMS=2524 SignedLate=-76 Deadline=2600
+2026-07-03 15:59:34,799 - INFO - [Checkpoint] Saved generation 0 to /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/checkpoint_latest.pkl
+2026-07-03 15:59:34,800 - INFO - [SystemLevelGA] Generation 1/1
+2026-07-03 15:59:41,004 - INFO - [Eval] (Context: Gen-1) P_FE -> C3 | Budget=689 | MS=1641
+2026-07-03 15:59:41,004 - INFO - [Eval] (Context: Gen-1) P_C1 -> C2 | Budget=611 | MS=128
+2026-07-03 15:59:42,355 - INFO - [Eval] (Context: Gen-1) P_C2 -> C1 | Budget=639 | MS=576
+2026-07-03 15:59:42,409 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=156
+2026-07-03 15:59:42,431 - INFO - [Reconstruction_2][IPC] paths_used=206, tasks_shifted=208, passes=6
+2026-07-03 15:59:42,432 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2355 SignedLate=-245 Deadline=2600
+2026-07-03 15:59:48,866 - INFO - [Eval] (Context: Gen-1) P_FE -> C2 | Budget=689 | MS=1576
+2026-07-03 15:59:48,867 - INFO - [Eval] (Context: Gen-1) P_C1 -> C1 | Budget=611 | MS=128
+2026-07-03 15:59:50,167 - INFO - [Eval] (Context: Gen-1) P_C2 -> C3 | Budget=639 | MS=578
+2026-07-03 15:59:50,218 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=156
+2026-07-03 15:59:50,239 - INFO - [Reconstruction_2][IPC] paths_used=200, tasks_shifted=207, passes=5
+2026-07-03 15:59:50,240 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2573 SignedLate=-27 Deadline=2600
+2026-07-03 15:59:56,876 - INFO - [Eval] (Context: Gen-1) P_FE -> C2 | Budget=689 | MS=1735
+2026-07-03 15:59:56,877 - INFO - [Eval] (Context: Gen-1) P_C1 -> C1 | Budget=611 | MS=128
+2026-07-03 15:59:58,086 - INFO - [Eval] (Context: Gen-1) P_C2 -> FE | Budget=639 | MS=576
+2026-07-03 15:59:58,146 - INFO - [Eval] (Context: Gen-1) P_C3 -> C3 | Budget=611 | MS=156
+2026-07-03 15:59:58,223 - INFO - [Reconstruction_2][IPC] paths_used=206, tasks_shifted=208, passes=5
+2026-07-03 15:59:58,224 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2449 SignedLate=-151 Deadline=2600
+2026-07-03 16:00:04,899 - INFO - [Eval] (Context: Gen-1) P_FE -> C3 | Budget=689 | MS=1676
+2026-07-03 16:00:04,900 - INFO - [Eval] (Context: Gen-1) P_C1 -> FE | Budget=611 | MS=128
+2026-07-03 16:00:06,208 - INFO - [Eval] (Context: Gen-1) P_C2 -> C2 | Budget=639 | MS=576
+2026-07-03 16:00:06,269 - INFO - [Eval] (Context: Gen-1) P_C3 -> C1 | Budget=611 | MS=156
+2026-07-03 16:00:06,290 - INFO - [Reconstruction_2][IPC] paths_used=203, tasks_shifted=206, passes=6
+2026-07-03 16:00:06,291 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2351 SignedLate=-249 Deadline=2600
+2026-07-03 16:00:12,586 - INFO - [Eval] (Context: Gen-1) P_FE -> C2 | Budget=689 | MS=1677
+2026-07-03 16:00:12,587 - INFO - [Eval] (Context: Gen-1) P_C1 -> C3 | Budget=611 | MS=128
+2026-07-03 16:00:13,856 - INFO - [Eval] (Context: Gen-1) P_C2 -> C1 | Budget=639 | MS=574
+2026-07-03 16:00:13,907 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=157
+2026-07-03 16:00:13,928 - INFO - [Reconstruction_2][IPC] paths_used=203, tasks_shifted=221, passes=6
+2026-07-03 16:00:13,930 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2443 SignedLate=-157 Deadline=2600
+2026-07-03 16:00:20,341 - INFO - [Eval] (Context: Gen-1) P_FE -> C3 | Budget=689 | MS=1629
+2026-07-03 16:00:20,342 - INFO - [Eval] (Context: Gen-1) P_C1 -> FE | Budget=611 | MS=128
+2026-07-03 16:00:21,659 - INFO - [Eval] (Context: Gen-1) P_C2 -> C1 | Budget=639 | MS=578
+2026-07-03 16:00:21,716 - INFO - [Eval] (Context: Gen-1) P_C3 -> C2 | Budget=611 | MS=156
+2026-07-03 16:00:21,738 - INFO - [Reconstruction_2][IPC] paths_used=206, tasks_shifted=207, passes=6
+2026-07-03 16:00:21,739 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2361 SignedLate=-239 Deadline=2600
+2026-07-03 16:00:28,015 - INFO - [Eval] (Context: Gen-1) P_FE -> C2 | Budget=689 | MS=1577
+2026-07-03 16:00:28,015 - INFO - [Eval] (Context: Gen-1) P_C1 -> FE | Budget=611 | MS=128
+2026-07-03 16:00:29,329 - INFO - [Eval] (Context: Gen-1) P_C2 -> C1 | Budget=639 | MS=579
+2026-07-03 16:00:29,387 - INFO - [Eval] (Context: Gen-1) P_C3 -> C3 | Budget=611 | MS=156
+2026-07-03 16:00:29,409 - INFO - [Reconstruction_2][IPC] paths_used=208, tasks_shifted=201, passes=6
+2026-07-03 16:00:29,411 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2363 SignedLate=-237 Deadline=2600
+2026-07-03 16:00:35,675 - INFO - [Eval] (Context: Gen-1) P_FE -> C1 | Budget=689 | MS=1687
+2026-07-03 16:00:35,676 - INFO - [Eval] (Context: Gen-1) P_C1 -> C3 | Budget=611 | MS=128
+2026-07-03 16:00:36,899 - INFO - [Eval] (Context: Gen-1) P_C2 -> C2 | Budget=639 | MS=579
+2026-07-03 16:00:36,951 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=158
+2026-07-03 16:00:37,020 - INFO - [Reconstruction_2][IPC] paths_used=203, tasks_shifted=207, passes=6
+2026-07-03 16:00:37,022 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2384 SignedLate=-216 Deadline=2600
+2026-07-03 16:00:43,617 - INFO - [Eval] (Context: Gen-1) P_FE -> C3 | Budget=689 | MS=1625
+2026-07-03 16:00:43,618 - INFO - [Eval] (Context: Gen-1) P_C1 -> FE | Budget=611 | MS=128
+2026-07-03 16:00:44,927 - INFO - [Eval] (Context: Gen-1) P_C2 -> C1 | Budget=638 | MS=578
+2026-07-03 16:00:44,987 - INFO - [Eval] (Context: Gen-1) P_C3 -> C2 | Budget=611 | MS=156
+2026-07-03 16:00:45,009 - INFO - [Reconstruction_2][IPC] paths_used=209, tasks_shifted=178, passes=5
+2026-07-03 16:00:45,010 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2357 SignedLate=-243 Deadline=2600
+2026-07-03 16:00:51,061 - INFO - [Eval] (Context: Gen-1) P_FE -> C1 | Budget=689 | MS=1572
+2026-07-03 16:00:51,062 - INFO - [Eval] (Context: Gen-1) P_C1 -> C2 | Budget=611 | MS=128
+2026-07-03 16:00:52,375 - INFO - [Eval] (Context: Gen-1) P_C2 -> C3 | Budget=639 | MS=576
+2026-07-03 16:00:52,435 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=156
+2026-07-03 16:00:52,458 - INFO - [Reconstruction_2][IPC] paths_used=207, tasks_shifted=204, passes=6
+2026-07-03 16:00:52,459 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2384 SignedLate=-216 Deadline=2600
+2026-07-03 16:00:59,131 - INFO - [Eval] (Context: Gen-1) P_FE -> C1 | Budget=689 | MS=1571
+2026-07-03 16:00:59,132 - INFO - [Eval] (Context: Gen-1) P_C1 -> C3 | Budget=611 | MS=128
+2026-07-03 16:01:00,223 - INFO - [Eval] (Context: Gen-1) P_C2 -> FE | Budget=638 | MS=577
+2026-07-03 16:01:00,282 - INFO - [Eval] (Context: Gen-1) P_C3 -> C2 | Budget=611 | MS=158
+2026-07-03 16:01:00,304 - INFO - [Reconstruction_2][IPC] paths_used=207, tasks_shifted=207, passes=6
+2026-07-03 16:01:00,305 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2446 SignedLate=-154 Deadline=2600
+2026-07-03 16:01:06,510 - INFO - [Eval] (Context: Gen-1) P_FE -> C3 | Budget=689 | MS=1575
+2026-07-03 16:01:06,511 - INFO - [Eval] (Context: Gen-1) P_C1 -> FE | Budget=611 | MS=128
+2026-07-03 16:01:07,824 - INFO - [Eval] (Context: Gen-1) P_C2 -> C1 | Budget=639 | MS=580
+2026-07-03 16:01:07,884 - INFO - [Eval] (Context: Gen-1) P_C3 -> C2 | Budget=611 | MS=157
+2026-07-03 16:01:07,906 - INFO - [Reconstruction_2][IPC] paths_used=208, tasks_shifted=251, passes=6
+2026-07-03 16:01:07,908 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2357 SignedLate=-243 Deadline=2600
+2026-07-03 16:01:13,932 - INFO - [Eval] (Context: Gen-1) P_FE -> C2 | Budget=689 | MS=1573
+2026-07-03 16:01:13,933 - INFO - [Eval] (Context: Gen-1) P_C1 -> C1 | Budget=611 | MS=128
+2026-07-03 16:01:15,272 - INFO - [Eval] (Context: Gen-1) P_C2 -> C3 | Budget=638 | MS=579
+2026-07-03 16:01:15,328 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=156
+2026-07-03 16:01:15,405 - INFO - [Reconstruction_2][IPC] paths_used=204, tasks_shifted=218, passes=6
+2026-07-03 16:01:15,406 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2570 SignedLate=-30 Deadline=2600
+2026-07-03 16:01:21,268 - INFO - [Eval] (Context: Gen-1) P_FE -> C1 | Budget=689 | MS=1705
+2026-07-03 16:01:21,269 - INFO - [Eval] (Context: Gen-1) P_C1 -> C2 | Budget=611 | MS=128
+2026-07-03 16:01:22,567 - INFO - [Eval] (Context: Gen-1) P_C2 -> C3 | Budget=639 | MS=579
+2026-07-03 16:01:22,624 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=156
+2026-07-03 16:01:22,646 - INFO - [Reconstruction_2][IPC] paths_used=203, tasks_shifted=212, passes=6
+2026-07-03 16:01:22,647 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2452 SignedLate=-148 Deadline=2600
+2026-07-03 16:01:29,104 - INFO - [Eval] (Context: Gen-1) P_FE -> C1 | Budget=689 | MS=1626
+2026-07-03 16:01:29,104 - INFO - [Eval] (Context: Gen-1) P_C1 -> C2 | Budget=611 | MS=128
+2026-07-03 16:01:30,321 - INFO - [Eval] (Context: Gen-1) P_C2 -> C3 | Budget=639 | MS=581
+2026-07-03 16:01:30,377 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=157
+2026-07-03 16:01:30,399 - INFO - [Reconstruction_2][IPC] paths_used=204, tasks_shifted=200, passes=6
+2026-07-03 16:01:30,400 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2358 SignedLate=-242 Deadline=2600
+2026-07-03 16:01:37,180 - INFO - [Eval] (Context: Gen-1) P_FE -> C2 | Budget=689 | MS=1572
+2026-07-03 16:01:37,181 - INFO - [Eval] (Context: Gen-1) P_C1 -> C1 | Budget=611 | MS=128
+2026-07-03 16:01:38,438 - INFO - [Eval] (Context: Gen-1) P_C2 -> C3 | Budget=638 | MS=579
+2026-07-03 16:01:38,491 - INFO - [Eval] (Context: Gen-1) P_C3 -> FE | Budget=611 | MS=156
+2026-07-03 16:01:38,513 - INFO - [Reconstruction_2][IPC] paths_used=207, tasks_shifted=200, passes=6
+2026-07-03 16:01:38,514 - INFO - [Eval-Global] (gen=1, ctx=Gen-1) GlobalMS=2576 SignedLate=-24 Deadline=2600
+2026-07-03 16:01:38,516 - INFO - [Generation 1] GlobalMS=2446 Late=-154 TB={'P_FE': 689, 'P_C1': 611, 'P_C2': 638, 'P_C3': 611} ViolSum=882 GenTime=123.71s TotalTime=247.70s PeakMemMB=111.3828125
+2026-07-03 16:01:38,520 - INFO - [Checkpoint] Saved generation 1 to /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/checkpoint_latest.pkl
+2026-07-03 16:01:38,520 - INFO -   P_FE -> C1 | TB_used=689 | MS(eval)=1571 | Violation=882
+2026-07-03 16:01:38,520 - INFO -   P_C1 -> C3 | TB_used=611 | MS(eval)=128 | Violation=0
+2026-07-03 16:01:38,520 - INFO -   P_C2 -> FE | TB_used=638 | MS(eval)=577 | Violation=0
+2026-07-03 16:01:38,520 - INFO -   P_C3 -> C2 | TB_used=611 | MS(eval)=158 | Violation=0
+2026-07-03 16:01:38,520 - INFO -   Final Global Makespan (eval) = 2446, Lateness (signed/clipped) = -154/0
+2026-07-03 16:01:38,520 - INFO -   Total runtime = 247.70s (0.0688h), peak memory = 111.3828125 MB, total evaluations = 32
+2026-07-03 16:01:38,521 - INFO - System Level Schedule is
+2026-07-03 16:01:38,521 - INFO - {68: ['P1008', 0.0, 67.0, []], 17: ['P1023', 0.0, 143.0, []], 74: ['P1019', 1627.0, 1723.0, [[53, '15800', 144], [69, '15850', 145]]], 39: ['P1005', 0.0, 85.0, []], 11: ['P1013', 0.0, 115.0, []], 45: ['P1007', 0.0, 94.0, []], 8: ['P1018', 0.0, 52.0, []], 14: ['P1022', 0.0, 100.0, []], 4: ['P1014', 225.0, 350.0, [[3, '11961', 1]]], 79: ['P1025', 0.0, 71.0, []], 77: ['P1005', 1352.0, 1420.0, [[25, '4401', 148]]], 94: ['P1025', 71.0, 128.0, []], 22: ['P1003', 272.0, 353.0, [[21, '2610', 23]]], 88: ['P1001', 1617.0, 1722.0, [[69, '821', 180]]], 12: ['P1020', 655.0, 717.0, [[3, '16552', 8], [10, '16612', 9]]], 93: ['P1005', 153.0, 230.0, []], 0: ['P1016', 0.0, 107.0, []], 31: ['P1021', 0.0, 87.0, []], 5: ['P1003', 372.0, 488.0, [[4, '1962', 2]]], 23: ['P1016', 515.0, 616.0, [[11, '10530', 25], [5, '1980', 24]]], 6: ['P1022', 509.0, 562.0, [[5, '2042', 3]]], 13: ['P1009', 738.0, 855.0, [[4, '7212', 10], [12, '7273', 11]]], 9: ['P1023', 143.0, 279.0, [[0, '12971', 5]]], 16: ['P1017', 511.0, 637.0, [[5, '1993', 13], [3, '14303', 12]]], 42: ['P1013', 659.0, 747.0, [[4, '10512', 61], [39, '3743', 63], [10, '11223', 62]]], 7: ['P1006', 370.0, 467.0, [[4, '4632', 4]]], 33: ['P1021', 661.0, 769.0, [[16, '13720', 43], [7, '4702', 42], [32, '17370', 44]]], 58: ['P1024', 1625.0, 1738.0, [[5, '2062', 108], [53, '19403', 109]]], 78: ['P1019', 1443.0, 1536.0, [[77, '3803', 151], [12, '15221', 149], [32, '15900', 150]]], 59: ['P1019', 1758.0, 1899.0, [[58, '15260', 111], [45, '5550', 110]]], 26: ['P1011', 1171.0, 1297.0, [[5, '1931', 30], [23, '8902', 31], [24, '9661', 32]]], 30: ['P1004', 584.0, 699.0, [[6, '2940', 39]]], 47: ['P1015', 1349.0, 1454.0, [[6, '12182', 73], [24, '12881', 74], [25, '12751', 75], [32, '12843', 76]]], 34: ['P1010', 798.0, 894.0, [[33, '8121', 46], [32, '8792', 45]]], 20: ['P1012', 1032.0, 1131.0, [[7, '4612', 20], [18, '10482', 21]]], 43: ['P1001', 921.0, 1035.0, [[33, '202', 64], [34, '92', 65]]], 35: ['P1018', 1149.0, 1264.0, [[31, '14481', 48], [34, '8093', 49], [20, '9741', 47]]], 27: ['P1009', 1325.0, 1400.0, [[26, '7182', 33]]], 48: ['P1004', 1059.0, 1119.0, [[43, '31', 78], [1, '3522', 77]]], 98: ['P1006', 1475.0, 1565.0, [[42, '4623', 207], [47, '4643', 208]]], 49: ['P1004', 1473.0, 1604.0, [[47, '2871', 81], [0, '2883', 79], [48, '43750', 82], [46, '3590', 80]]], 41: ['P1005', 1288.0, 1403.0, [[35, '3793', 60], [0, '3770', 58], [29, '4523', 59]]], 57: ['P1024', 914.0, 986.0, [[34, '8152', 107]]], 36: ['P1019', 913.0, 988.0, [[9, '15252', 50], [34, '8102', 51]]], 54: ['P1001', 1722.0, 1850.0, [[17, '220', 100], [36, '180', 103], [35, '170', 102], [49, '30', 104], [2, '300', 99], [32, '872', 101]]], 65: ['P1012', 1921.0, 2024.0, [[23, '9721', 126], [59, '9750', 129], [26, '8862', 127], [41, '3731', 128], [15, '10383', 125]]], 81: ['P1011', 1498.0, 1593.0, [[77, '3723', 159], [20, '8862', 156], [26, '43820', 157], [46, '9610', 158]]], 82: ['P1005', 1559.0, 1660.0, [[57, '3851', 163], [33, '3822', 162], [5, '1872', 160], [78, '3803', 164], [24, '4531', 161]]], 80: ['P1003', 1426.0, 1511.0, [[41, '1873', 155], [26, '1933', 154], [5, '43740', 152], [9, '2050', 153]]], 52: ['P1020', 1448.0, 1568.0, [[35, '14472', 90], [42, '10573', 91], [15, '16583', 88], [18, '16682', 89], [46, '16631', 92]]], 64: ['P1002', 1593.0, 1673.0, [[52, '1113', 124]]], 28: ['P1011', 1423.0, 1498.0, [[27, '7183', 35], [15, '9562', 34]]], 51: ['P1018', 1517.0, 1644.0, [[27, '7253', 85], [28, '8922', 86], [30, '2900', 87], [15, '15093', 84]]], 38: ['P1006', 1525.0, 1629.0, [[28, '4603', 55]]], 55: ['P1022', 1670.0, 1724.0, [[9, '17440', 105], [51, '14492', 106]]], 95: ['P1019', 1899.0, 2019.0, [[23, '12933', 201], [55, '15242', 202]]], 71: ['P1024', 1528.0, 1616.0, [[28, '8980', 137]]], 83: ['P1005', 1660.0, 1774.0, [[80, '1871', 165]]], 63: ['P1002', 1926.0, 2048.0, [[58, '1150', 122], [48, '950', 119], [59, '1103', 123], [55, '1132', 121], [49, '951', 120], [29, '1820', 117], [37, '1810', 118]]], 91: ['P1001', 1850.0, 1981.0, [[55, '210', 191], [51, '171', 190], [38, '52', 189], [32, '873', 188]]], 44: ['P1008', 1659.0, 1791.0, [[38, '4572', 67], [32, '7102', 66]]], 72: ['P1002', 2067.0, 2178.0, [[63, '43730', 140], [65, '1033', 141], [38, '972', 139], [28, '1020', 138]]], 90: ['P1004', 1798.0, 1920.0, [[83, '2773', 187], [3, '3513', 185], [21, '3513', 186]]], 73: ['P1014', 2068.0, 2168.0, [[63, '1053', 142], [65, '9701', 143]]], 50: ['P1017', 1813.0, 1868.0, [[44, '6390', 83]]], 60: ['P1023', 1812.0, 1930.0, [[41, '3841', 113], [44, '6453', 114], [27, '7303', 112], [46, '18792', 115], [53, '18700', 116]]], 96: ['P1017', 2001.0, 2082.0, [[60, '13741', 203], [91, '162', 205], [80, '1991', 204]]], 89: ['P1008', 1796.0, 1877.0, [[81, '6332', 181], [88, '71', 184], [83, '3691', 182], [86, '7113', 183]]], 92: ['P1016', 2204.0, 2331.0, [[52, '12941', 197], [48, '2883', 196], [90, '2881', 199], [91, '150', 200], [44, '6380', 195], [30, '2883', 192], [72, '1070', 198], [32, '13623', 193], [40, '13513', 194]]], 75: ['P1019', 2019.0, 2105.0, [[50, '13702', 146]]], 84: ['P1025', 2187.0, 2294.0, [[78, '15271', 170], [73, '11421', 168], [75, '15272', 169], [13, '7322', 166], [69, '20143', 167]]], 87: ['P1004', 2315.0, 2431.0, [[84, '2972', 178], [86, '3613', 179]]], 62: ['P3007', 0.0, 118.0, []], 70: ['P3004', 0.0, 128.0, []], 97: ['P3023', 1482.0, 1594.0, [[86, '41563', 206]]], 18: ['E32', 884.0, 1000.0, [[4, '12093', 14], [13, '7992', 15]]], 24: ['E32', 1022.0, 1142.0, [[18, '44630', 26]]], 10: ['F110', 515.0, 628.0, [[4, '12021', 6], [5, '2672', 7]]], 32: ['F113', 380.0, 462.0, [[4, '12051', 40], [31, '17370', 41]]], 85: ['E34', 1752.0, 1888.0, [[74, '15960', 171]]], 46: ['F112', 1292.0, 1421.0, [[12, '16630', 68], [20, '10431', 69], [33, '17361', 70], [34, '8780', 71], [35, '15143', 72]]], 1: ['F105', 0.0, 114.0, []], 69: ['F108', 1484.0, 1584.0, [[24, '43140', 135], [0, '13570', 134], [47, '12792', 136]]], 21: ['F104', 145.0, 242.0, [[11, '11162', 22]]], 3: ['F104', 97.0, 195.0, []], 15: ['F107', 0.0, 129.0, []], 29: ['E31', 1162.0, 1258.0, [[1, '42772', 36], [24, '43660', 38], [7, '5403', 37]]], 53: ['F103', 1484.0, 1597.0, [[46, '42440', 97], [18, '42492', 96], [15, '42392', 95], [12, '16541', 93], [13, '7853', 94], [47, '12740', 98]]], 19: ['F105', 1022.0, 1072.0, [[18, '42782', 19], [15, '42681', 18], [11, '11170', 16], [12, '16562', 17]]], 25: ['F104', 1169.0, 1319.0, [[24, '42643', 29], [15, '42540', 28], [1, '42522', 27]]], 40: ['F102', 1164.0, 1274.0, [[15, '42232', 56], [20, '10332', 57]]], 99: ['F106', 2324.0, 2446.0, [[53, '42381', 209], [78, '15832', 210], [84, '20121', 211]]], 37: ['F115', 1283.0, 1348.0, [[15, '43012', 52], [29, '43622', 53], [32, '43521', 54]]], 66: ['E33', 1616.0, 1736.0, [[25, '42651', 131], [19, '42792', 130], [53, '42503', 133], [52, '16691', 132]]], 86: ['F114', 1376.0, 1454.0, [[19, '42751', 175], [37, '43573', 176], [3, '42613', 172], [5, '2712', 173], [12, '16652', 174], [61, '20883', 177]]], 2: ['P2006', 141.0, 194.0, [[1, '24040', 0]]], 61: ['P2001', 0.0, 55.0, []], 56: ['P2017', 0.0, 55.0, []], 67: ['P2011', 0.0, 81.0, []], 76: ['P2021', 107.0, 160.0, [[67, '26702', 147]]]}
+2026-07-03 16:01:39,175 - INFO - [PLOT] Saved:
+2026-07-03 16:01:39,175 - INFO - {'system_global_makespan_png': '/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/system_global_makespan_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png', 'system_lateness_signed_png': '/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/system_lateness_signed_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png'}
+2026-07-03 16:01:39,317 - INFO - [PLOT] Time budgets:
+2026-07-03 16:01:39,317 - INFO - {'system_time_budgets_png': '/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/system_time_budgets_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png'}
+2026-07-03 16:01:39,528 - INFO - [PLOT] Saved:
+2026-07-03 16:01:39,529 - INFO - {'system_budgets_and_makespans_all_png': '/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/system_budgets_and_makespans_all_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png'}
+2026-07-03 16:01:39,986 - INFO - [PLOT] Violations/Fitness:
+2026-07-03 16:01:39,986 - INFO - {'violations_png': '/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/violations_per_partition_over_generations.png', 'fitness_evolution_png': '/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/fitness_evolution_over_generations.png'}
+2026-07-03 16:01:40,115 - INFO - [PLOT] Fitness (violation + lateness + scalar):
+2026-07-03 16:01:40,115 - INFO - {'fitness_evolution_with_scalar_png': '/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/fitness_evolution_with_scalar_signed_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png'}
+2026-07-03 16:01:40,119 - INFO - Final schedule saved as /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/schedule_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.json
+2026-07-03 16:01:40,119 - INFO - Final schedule copy saved as /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/final_schedule.json
+2026-07-03 16:01:40,119 - INFO - [SystemLevelGA] Total execution time: 247.70 seconds
+2026-07-03 16:01:40,121 - INFO - Enveloped root schedule saved as /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/S0__schedule_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.json
+2026-07-03 16:01:40,122 - INFO - [Validation] ✅ No IPC latency violations — schedule is consistent.
+2026-07-03 16:01:40,122 - INFO - [RUN-SUMMARY] {"PYTHONHASHSEED": "1001", "actual_deadline_value": 2600, "am_id": "AM100", "am_size": "100T", "base_deadline": 2600, "best_feasible_generation": null, "best_feasible_makespan_so_far": null, "best_global_makespan_so_far": 2446, "checkpoint_path": "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/checkpoint_latest.pkl", "completed_successfully": true, "deadline_feasible": true, "deadline_ratio": 1.0, "final_P_C1_budget": 611, "final_P_C1_makespan": 128, "final_P_C1_violation": 0, "final_P_C2_budget": 638, "final_P_C2_makespan": 577, "final_P_C2_violation": 0, "final_P_C3_budget": 611, "final_P_C3_makespan": 158, "final_P_C3_violation": 0, "final_P_FE_budget": 689, "final_P_FE_makespan": 1571, "final_P_FE_violation": 882, "final_fitness_lateness": 0.0, "final_generation": 1, "final_global_lateness_clipped": 0, "final_global_lateness_signed": -154, "final_global_makespan": 2446, "final_schedule_json": "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/final_schedule.json", "final_viol_sum": 882.0, "first_deadline_feasible_generation": 1, "first_fully_feasible_generation": null, "first_partition_feasible_generation": null, "fully_feasible": false, "generated_plot_files": ["/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/fitness_evolution_over_generations.png", "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/fitness_evolution_with_scalar_signed_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png", "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/system_budgets_and_makespans_all_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png", "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/system_global_makespan_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png", "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/system_lateness_signed_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png", "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/system_time_budgets_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.png", "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/plots/violations_per_partition_over_generations.png"], "hostname": "hpc-login04", "output_dir": "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke", "partition_feasible": false, "peak_memory_mb": 171.2578125, "python_executable": "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/.venv/bin/python", "python_version": "3.11.11 (main, Dec 12 2024, 16:28:23) [GCC 8.5.0 20210514 (Red Hat 8.5.0-22)]", "run_id": "AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke", "schedule_json": "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/schedule_AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke.json", "seed": 1001, "slurm_array_job_id": null, "slurm_array_task_id": null, "slurm_cpus_per_task": null, "slurm_job_id": null, "slurm_mem_per_node": null, "system_ga_summary_csv": "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke/system_ga_summary.csv", "timestamp_end": "2026-07-03T16:01:40", "timestamp_start": "2026-07-03T15:57:23", "total_runtime_h": 0.07116337863935365, "total_runtime_s": 256.1881631016731, "variant": "proposed", "working_directory": "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/codes"}
+2026-07-03 16:01:40,122 - INFO - [RUN-SUMMARY] total_runtime_s=256.188 total_runtime_h=0.071163 peak_memory_mb=171.2578125

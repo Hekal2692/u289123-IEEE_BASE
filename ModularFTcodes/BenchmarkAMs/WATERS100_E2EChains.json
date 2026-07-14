@@ -1,0 +1,118 @@
+{
+  "e2e_chains": [
+    {
+      "id": "chain_01",
+      "jobs": [
+        41,
+        60,
+        96
+      ],
+      "deadline": 160,
+      "type": "sensor_to_actuator"
+    },
+    {
+      "id": "chain_02",
+      "jobs": [
+        6,
+        30,
+        51,
+        91,
+        96
+      ],
+      "deadline": 280,
+      "type": "fault_reaction"
+    },
+    {
+      "id": "chain_03",
+      "jobs": [
+        46,
+        60,
+        96
+      ],
+      "deadline": 160,
+      "type": "sensor_to_actuator"
+    },
+    {
+      "id": "chain_04",
+      "jobs": [
+        10,
+        42,
+        52,
+        92
+      ],
+      "deadline": 220,
+      "type": "fault_reaction"
+    },
+    {
+      "id": "chain_05",
+      "jobs": [
+        23,
+        26,
+        65,
+        73,
+        84,
+        99
+      ],
+      "deadline": 340,
+      "type": "sensor_to_actuator"
+    },
+    {
+      "id": "chain_06",
+      "jobs": [
+        53,
+        58,
+        63,
+        73,
+        84,
+        99
+      ],
+      "deadline": 340,
+      "type": "fault_reaction"
+    },
+    {
+      "id": "chain_07",
+      "jobs": [
+        58,
+        63,
+        72,
+        92
+      ],
+      "deadline": 220,
+      "type": "sensor_to_actuator"
+    },
+    {
+      "id": "chain_08",
+      "jobs": [
+        33,
+        43,
+        48,
+        49,
+        54
+      ],
+      "deadline": 280,
+      "type": "fault_reaction"
+    },
+    {
+      "id": "chain_09",
+      "jobs": [
+        31,
+        32,
+        78,
+        84,
+        99
+      ],
+      "deadline": 280,
+      "type": "sensor_to_actuator"
+    },
+    {
+      "id": "chain_10",
+      "jobs": [
+        80,
+        83,
+        89
+      ],
+      "deadline": 160,
+      "type": "fault_reaction"
+    }
+  ]
+}

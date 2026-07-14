@@ -1,0 +1,29 @@
+
+=== benchmark_ams run 2026-07-03T15:55:53 ===
+worktree=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+runtime_platforms=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms
+Executing: /usr/bin/python /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py --child --seed 1001 --variant proposed --output-root /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs --run-tag smoke --system-generations 1 --partition-generations 1
+Traceback (most recent call last):
+  File "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py", line 237, in <module>
+    raise SystemExit(main())
+  File "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py", line 232, in main
+    return run_child(args)
+  File "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py", line 109, in run_child
+    runpy.run_path(str(CODE_DIR / "main.py"), run_name="__main__")
+  File "/usr/lib64/python3.6/runpy.py", line 263, in run_path
+    pkg_name=pkg_name, script_name=fname)
+  File "/usr/lib64/python3.6/runpy.py", line 96, in _run_module_code
+    mod_name, mod_spec, pkg_name, script_name)
+  File "/usr/lib64/python3.6/runpy.py", line 85, in _run_code
+    exec(code, run_globals)
+  File "/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/codes/main.py", line 18, in <module>
+    import plotly.graph_objects as go
+ModuleNotFoundError: No module named 'plotly'
+FAILED seed=1001 returncode=1
+
+=== benchmark_ams run 2026-07-03T15:56:59 ===
+worktree=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams
+runtime_platforms=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/runtime_platforms
+Executing: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/.venv/bin/python /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/experiments/benchmark_ams/run_benchmark_ams.py --child --seed 1001 --variant proposed --output-root /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs --run-tag smoke --system-generations 1 --partition-generations 1
+summary_csv=/work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/smoke_summary.csv
+summary_rows=1

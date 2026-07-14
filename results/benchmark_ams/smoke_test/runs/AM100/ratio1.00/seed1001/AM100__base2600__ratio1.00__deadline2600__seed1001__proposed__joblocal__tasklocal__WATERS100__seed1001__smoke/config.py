@@ -38,7 +38,7 @@ PartitionGenerations = 20
 
 # Population / evolution
 SystemLevelPopulationSize       = 16
-SystemLevelGenerations          = 40
+SystemLevelGenerations          = 60
 SystemLevelCrossOverProb        = 0.80
 SystemLevelMutationProb         = 0.70   
 

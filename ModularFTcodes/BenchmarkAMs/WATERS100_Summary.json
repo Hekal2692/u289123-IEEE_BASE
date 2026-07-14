@@ -1,0 +1,42 @@
+{
+  "seed": 20260703,
+  "n_jobs": 100,
+  "n_messages": 212,
+  "dag_is_acyclic": true,
+  "period_counts": {
+    "20ms": 25,
+    "100ms": 20,
+    "1000ms": 4,
+    "10ms": 25,
+    "angle-sync": 15,
+    "2ms": 2,
+    "1ms": 3,
+    "5ms": 2,
+    "50ms": 3,
+    "200ms": 1
+  },
+  "partition_job_counts": {
+    "FE": 72,
+    "C1": 3,
+    "C2": 20,
+    "C3": 5
+  },
+  "partition_message_counts": {
+    "FE": 113,
+    "C1": 0,
+    "C2": 23,
+    "C3": 1
+  },
+  "message_size_counts": {
+    "15": 69,
+    "18": 93,
+    "21": 40,
+    "23": 2,
+    "25": 3,
+    "24": 5
+  },
+  "inter_partition_messages": 75,
+  "intra_partition_messages": 137,
+  "e2e_chain_count": 10,
+  "schema_note": "Scheduler-facing JSONs match the existing TC100 jobs/messages schema. WATERS-specific fields are only in metadata files."
+}

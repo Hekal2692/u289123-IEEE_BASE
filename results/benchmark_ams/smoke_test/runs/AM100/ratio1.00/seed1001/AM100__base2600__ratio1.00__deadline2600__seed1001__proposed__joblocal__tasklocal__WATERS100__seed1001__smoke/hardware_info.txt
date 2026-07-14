@@ -1,0 +1,12 @@
+hostname: hpc-login04
+platform: Linux-4.18.0-425.13.1.el8_7.x86_64-x86_64-with-glibc2.28
+python_version: 3.11.11 (main, Dec 12 2024, 16:28:23) [GCC 8.5.0 20210514 (Red Hat 8.5.0-22)]
+python_executable: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/.venv/bin/python
+cpu_count: 64
+working_directory: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/ModularFTcodes/codes
+output_dir: /work/ws-tmp/u289123-IEEE_BASE/worktrees/benchmark_ams/results/benchmark_ams/smoke_test/runs/AM100/ratio1.00/seed1001/AM100__base2600__ratio1.00__deadline2600__seed1001__proposed__joblocal__tasklocal__WATERS100__seed1001__smoke
+SLURM_JOB_ID: None
+SLURM_ARRAY_TASK_ID: None
+SLURM_CPUS_PER_TASK: None
+SLURM_MEM_PER_NODE: None
+PYTHONHASHSEED: 1001
