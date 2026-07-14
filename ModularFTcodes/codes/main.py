@@ -834,7 +834,8 @@ log.info(f"Enveloped root schedule saved as {root_enveloped_path}")
 
 
 # After you build SystemSchedule and merged_paths_w_costs
-violations = gax.check_latency_violations(SystemSchedule, merged_paths_w_costs, message_list)
+latency_violations = gax.check_latency_violations(SystemSchedule, merged_paths_w_costs, message_list)
+processor_overlaps = gax.check_processor_overlaps(SystemSchedule)
 
 # Use logging if available; otherwise fall back to print
 try:
@@ -844,17 +845,33 @@ except NameError:
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("validation")
 
-if not violations:
-    logger.info("[Validation] ✅ No IPC latency violations — schedule is consistent.")
+if not latency_violations:
+    logger.info("[Validation] No IPC latency violations.")
 else:
-    logger.info("[Validation] Found %d IPC latency violations:", len(violations))
-    for v in violations:
+    logger.info("[Validation] Found %d IPC latency violations:", len(latency_violations))
+    for v in latency_violations:
         logger.info(
-            "Violation: Task %d starts at %.3f but depends on task %d "
+            "IPC violation: Task %d starts at %.3f but depends on task %d "
             "which delivers via path %s arriving at %.3f (late by %.3f units)",
             v["task_id"], v["starts_at"], v["violated_dep"],
             str(v["path_id"]), v["arrival_time"], v["violation_by"]
         )
+
+if not processor_overlaps:
+    logger.info("[Validation] No processor overlaps.")
+else:
+    logger.info("[Validation] Found %d processor overlaps:", len(processor_overlaps))
+    for v in processor_overlaps:
+        logger.info(
+            "Processor overlap: %s task %s [%.3f, %.3f] overlaps task %s "
+            "[%.3f, %.3f] during [%.3f, %.3f] (%.3f units)",
+            v["processor"], str(v["task_a"]), v["task_a_start"], v["task_a_end"],
+            str(v["task_b"]), v["task_b_start"], v["task_b_end"],
+            v["overlap_start"], v["overlap_end"], v["overlap_by"]
+        )
+
+if not latency_violations and not processor_overlaps:
+    logger.info("[Validation] Schedule is consistent.")
 
 run_stats = meta.get("run_stats", {}) or {}
 final_budgets = meta.get("time_budgets_partition", {}) or {}

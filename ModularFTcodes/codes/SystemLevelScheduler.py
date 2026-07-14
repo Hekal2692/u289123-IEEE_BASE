@@ -152,32 +152,23 @@ def SystemLevelReconstruction_2(PI, AML, IPM, SFE, S_C1, S_C2, S_C3, IPI, max_pa
         comm_edges[r_tid].append((s_tid, sel_id, float(msg_size.get(mid, 0.0)), mid))
         used_paths += 1
 
-    # ---- helper: linearize a processor's timeline from a given anchor
-    def _linearize_from(schedule, proc, anchor_tid, t0: float = 0.0):
+    # ---- helper: linearize a processor's whole timeline after a local shift
+    def _linearize_processor(schedule, proc, t0: float = 0.0):
         tids = [tid for tid, (p, s, e, _) in schedule.items() if p == proc]
         tids.sort(key=lambda tid: (float(schedule[tid][1]), tid))
-        if anchor_tid not in tids:
-            return
-        i = tids.index(anchor_tid)
-        prev_end = max(float(schedule[tids[i]][1]), t0)
+        prev_end = float(t0)
+        shifted = 0
 
-        # anchor
-        s0 = max(prev_end, float(schedule[tids[i]][1]))
-        dur0 = float(schedule[tids[i]][2]) - float(schedule[tids[i]][1])
-        schedule[tids[i]][1] = s0
-        schedule[tids[i]][2] = s0 + dur0
-        prev_end = schedule[tids[i]][2]
-
-        # followers
-        for j in range(i + 1, len(tids)):
-            tid = tids[j]
+        for tid in tids:
             s, e = float(schedule[tid][1]), float(schedule[tid][2])
             dur = e - s
-            if s < prev_end:
-                s = prev_end
-                schedule[tid][1] = s
-                schedule[tid][2] = s + dur
-            prev_end = schedule[tid][2]
+            if s < prev_end - eps:
+                schedule[tid][1] = prev_end
+                schedule[tid][2] = prev_end + dur
+                shifted += 1
+            prev_end = float(schedule[tid][2])
+
+        return shifted
 
     # ---- helper: dedup IPC triplets in an existing deps list by (sender,msg_id),
     #              keep intra-proc triplets untouched, keep plain precedence deps untouched.
@@ -226,6 +217,9 @@ def SystemLevelReconstruction_2(PI, AML, IPM, SFE, S_C1, S_C2, S_C3, IPI, max_pa
 
     # ---- fixed-point relaxation: push starts to satisfy all arrivals
     shifts_total = 0
+    for proc in sorted({rec[0] for rec in all_schedules.values()}):
+        shifts_total += _linearize_processor(all_schedules, proc)
+
     for _pass in range(max_passes):
         moved = 0
         order = sorted(all_schedules.keys(), key=lambda t: (float(all_schedules[t][1]), t))
@@ -297,8 +291,7 @@ def SystemLevelReconstruction_2(PI, AML, IPM, SFE, S_C1, S_C2, S_C3, IPI, max_pa
                 new_s = req_start
                 new_e = new_s + dur
                 all_schedules[tid] = [proc, new_s, new_e, deps]
-                _linearize_from(all_schedules, proc, tid, t0=0.0)
-                moved += 1
+                moved += 1 + _linearize_processor(all_schedules, proc, t0=0.0)
             else:
                 # persist deps if changed
                 if deps != list(old_deps or []):

@@ -279,3 +279,46 @@ def check_latency_violations(schedule, paths, messages=None):
                         "violation_by": float(arrival - start),
                     })
     return violations
+
+
+def check_processor_overlaps(schedule, eps=1e-9):
+    """Return task pairs that overlap on the same processor."""
+    by_processor = defaultdict(list)
+
+    for tid, rec in schedule.items():
+        if len(rec) < 3:
+            continue
+        try:
+            task_id = int(tid)
+        except Exception:
+            task_id = tid
+        by_processor[str(rec[0])].append((float(rec[1]), float(rec[2]), task_id))
+
+    overlaps = []
+    for proc, intervals in by_processor.items():
+        intervals.sort(key=lambda item: (item[0], item[1], str(item[2])))
+        if not intervals:
+            continue
+
+        prev_start, prev_end, prev_tid = intervals[0]
+        for start, end, tid in intervals[1:]:
+            overlap_start = max(prev_start, start)
+            overlap_end = min(prev_end, end)
+            if overlap_end > overlap_start + eps:
+                overlaps.append({
+                    "processor": proc,
+                    "task_a": prev_tid,
+                    "task_a_start": float(prev_start),
+                    "task_a_end": float(prev_end),
+                    "task_b": tid,
+                    "task_b_start": float(start),
+                    "task_b_end": float(end),
+                    "overlap_start": float(overlap_start),
+                    "overlap_end": float(overlap_end),
+                    "overlap_by": float(overlap_end - overlap_start),
+                })
+
+            if end > prev_end:
+                prev_start, prev_end, prev_tid = start, end, tid
+
+    return overlaps
