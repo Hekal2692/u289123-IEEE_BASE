@@ -50,7 +50,7 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
   exit 0
 fi
 
-mkdir -p "$OUTPUT_ROOT/slurm" "$REPO_ROOT/logs_proposed_all_deadlines/slurm"
+mkdir -p "$OUTPUT_ROOT/slurm" "$REPO_ROOT/logs/slurm"
 export OUTPUT_ROOT MANIFEST_PATH OMNI_STATE_DIR="${OMNI_STATE_DIR:-$HOME/.ftcodes_omni}"
 cd "$REPO_ROOT"
 RESUBMIT_JOB_ID="$(sbatch --parsable --array="$ARRAY_EXPR" "$SBATCH_SCRIPT_REL")"

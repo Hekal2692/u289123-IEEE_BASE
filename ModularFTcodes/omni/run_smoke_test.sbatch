@@ -1,11 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --job-name=hga-smoke
-#SBATCH --partition=medium
-#SBATCH --time=04:00:00
+#SBATCH --time=4-00:00:00
+#SBATCH --partition=long
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
 #SBATCH --requeue
 #SBATCH --signal=B:USR1@300
-#SBATCH --output=logs_proposed_all_deadlines/slurm/smoke-%j.out
-#SBATCH --error=logs_proposed_all_deadlines/slurm/smoke-%j.err
+#SBATCH --output=logs/slurm/%x-%j.out
+#SBATCH --error=logs/slurm/%x-%j.err
 
 set -euo pipefail
 
@@ -53,6 +56,6 @@ export MPLBACKEND=Agg
 export PYTHONPATH="$CODE_DIR:${PYTHONPATH:-}"
 export GIT_COMMIT_SHA="${GIT_COMMIT_SHA:-$(git -C "$PROJECT_DIR" rev-parse --verify HEAD 2>/dev/null || true)}"
 
-mkdir -p "$RUN_DIR" "$OUTPUT_ROOT/slurm" "$REPO_ROOT/logs_proposed_all_deadlines/slurm"
+mkdir -p "$RUN_DIR" "$OUTPUT_ROOT/slurm" "$REPO_ROOT/logs/slurm"
 cd "$CODE_DIR"
 python main.py

@@ -37,7 +37,7 @@ if [[ "$CURRENT_SHA" != "$TESTED_SHA" ]]; then
   exit 2
 fi
 
-mkdir -p "$OUTPUT_ROOT/runs" "$OUTPUT_ROOT/slurm" "$REPO_ROOT/logs_proposed_all_deadlines/slurm"
+mkdir -p "$OUTPUT_ROOT/runs" "$OUTPUT_ROOT/slurm" "$REPO_ROOT/logs/slurm"
 export OUTPUT_ROOT MANIFEST_PATH GIT_COMMIT_SHA="$CURRENT_SHA" OMNI_STATE_DIR
 
 printf 'Default MAX_CONCURRENT=%s; adjust with MAX_CONCURRENT=<n> according to Omni quotas.\n' "$MAX_CONCURRENT"

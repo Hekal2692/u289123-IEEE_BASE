@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH --job-name=AM100_r070
-#SBATCH --time=3-00:00:00
+#SBATCH --time=4-00:00:00
 #SBATCH --partition=long
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=16

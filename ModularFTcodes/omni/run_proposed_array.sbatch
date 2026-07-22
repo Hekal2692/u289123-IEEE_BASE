@@ -1,12 +1,15 @@
-#!/usr/bin/env bash
+#!/bin/bash -l
 #SBATCH --job-name=hga-proposed
-#SBATCH --partition=medium
-#SBATCH --time=1-00:00:00
-#SBATCH --array=0-119
+#SBATCH --time=4-00:00:00
+#SBATCH --partition=long
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=16
+#SBATCH --mem=128G
 #SBATCH --requeue
+#SBATCH --array=0-119
 #SBATCH --signal=B:USR1@300
-#SBATCH --output=logs_proposed_all_deadlines/slurm/%A_%a.out
-#SBATCH --error=logs_proposed_all_deadlines/slurm/%A_%a.err
+#SBATCH --output=logs/slurm/%x-%A_%a.out
+#SBATCH --error=logs/slurm/%x-%A_%a.err
 
 set -euo pipefail
 
@@ -62,7 +65,7 @@ export MPLBACKEND=Agg
 export PYTHONPATH="$CODE_DIR:${PYTHONPATH:-}"
 export GIT_COMMIT_SHA="${GIT_COMMIT_SHA:-$(git -C "$PROJECT_DIR" rev-parse --verify HEAD 2>/dev/null || true)}"
 
-mkdir -p "$RUN_DIR" "$OUTPUT_ROOT/slurm"
+mkdir -p "$RUN_DIR" "$OUTPUT_ROOT/slurm" "$REPO_ROOT/logs/slurm"
 
 if "$PYTHON_BIN" "$SCRIPT_DIR/omni_array.py" check-complete --manifest "$MANIFEST_PATH" --array-index "$TASK_ID" --output-root "$OUTPUT_ROOT"; then
   echo "already completed: $RUN_KEY"
