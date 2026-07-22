@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "version": "1.0",
+    "generated_at": "2026-05-09T10:03:53.370Z",
+    "time_unit": "ticks",
+    "levels": [
+      "FE",
+      "C1",
+      "C2",
+      "C3"
+    ],
+    "event_types": [
+      "slack",
+      "processor_failure",
+      "router_failure"
+    ],
+    "notes": "Times are taken from task start times. Router chosen from actual selected path.",
+    "parent_schedule": "S2",
+    "schedule_tag": "S2"
+  },
+  "events": [
+    {
+      "id": "EVT-PF-0001",
+      "time": 164,
+      "type": "processor_failure",
+      "level": "C2",
+      "scope": "processor",
+      "target": "P2019",
+      "window": {
+        "start": 164,
+        "end": 264
+      }
+    },
+    {
+      "id": "EVT-SL-0001",
+      "time": 187.0,
+      "type": "slack",
+      "level": "C1",
+      "scope": "task",
+      "target": "P1024",
+      "slack_percent": 52.23
+    },
+    {
+      "id": "EVT-RF-0001",
+      "time": 421,
+      "type": "router_failure",
+      "level": "FE",
+      "scope": "router",
+      "target": "R30004",
+      "window": {
+        "start": 421,
+        "end": 518
+      }
+    }
+  ]
+}

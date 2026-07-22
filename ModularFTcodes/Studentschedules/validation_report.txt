@@ -1,0 +1,97 @@
+MSG Schedule Validation Report
+==============================
+generated_at: 2026-07-15T11:06:52
+schedule_dir: /work/ws-tmp/u289123-IEEE_BASE/worktrees/MSG/ModularFTcodes/Studentschedules
+application_model: /work/ws-tmp/u289123-IEEE_BASE/worktrees/MSG/ModularFTcodes/Platforms/100T/TC100_NewPM.json
+path_k: 6
+schedules: S0, S1, S2, S3, S4
+overall_counts: PASS=14 WARN=20 FAIL=7 INFO=5
+
+Checklist Implemented
+- envelope/lineage metadata: tag, parent, event, hash, makespan
+- task-set equality with AM jobs
+- valid task records, nonnegative intervals, known processors
+- processor overlap detection
+- message enforcement for every AM message: explicit dep or same-processor implicit order
+- path catalogue presence, path endpoint compatibility, and latency feasibility
+- duplicate dependency tuple detection
+- current-code can_run_on policy warnings
+- parent-child changed-task audit
+- slack-specific target duration and affected-descendant checks
+- processor-failure post-event processor exclusion checks
+- router-failure post-event failed-router path checks and isolation warnings
+
+Additional Failure Modes To Watch
+- child schedules that rewrite pre-event history, which may be invalid for online mitigation
+- same-processor dependencies omitted but receiver starts before sender finishes
+- path IDs valid in one path catalogue version but not another k/path-generation version
+- stale metadata: moved_count/hash/makespan not matching actual schedule
+- full reschedules that satisfy timing but violate fault persistence in descendants
+- can_run_on semantics drift between older code and current code
+- router failures that should invalidate processor reachability, not only path choice
+- duplicate AM message IDs or duplicate dependency tuples masking missing messages
+- deadline/time-budget metadata passing while individual partition constraints fail
+- nondeterministic path fallback or RNG state causing non-reproducible schedule variants
+
+Schedule Summary
+tag  tasks  makespan  explicit_msg  implicit_msg  missing_msg  overlaps  dur_mismatch
+ S0    100      2323           212             0            0         1             0
+ S1    100      2093           212             0            0         1             1
+ S2    100      2310           212             0            0         1             0
+ S3    100      2338           212             0            0         1             0
+ S4    100      2248           212             0            0         1             1
+
+Parent-Child Summary
+child  parent  event_type           changed_tasks
+   S1      S0  slack                 12
+   S2      S0  processor_failure     99
+   S3      S0  router_failure       100
+   S4      S0  slack                  9
+
+Issues
+[FAIL] S0: 1 processor overlaps: [('F112', 63, 163.0, 308.0, 21, 297.0, 380.0)]
+[FAIL] S1: 1 processor overlaps: [('F112', 63, 163.0, 308.0, 21, 297.0, 380.0)]
+[FAIL] S1: 12 message latency constraints violated. examples=[('late', 0, 1, 0, '42220', '1985', '2007'), ('late', 1, 2, 2, '42250', '1849', '1873'), ('late', 2, 3, 4, '42410', '1751', '1779'), ('late', 3, 4, 6, '42470', '1677', '1699'), ('late', 4, 5, 8, '44610', '1553', '1578'), ('late', 5, 6, 12, '43520', '1413', '1432'), ('late', 5, 8, 16, '22871', '1413', '1433'), ('late', 6, 9, 17, '22851', '1288', '1320'), ('late', 8, 9, 18, '44000', '1288', '1313'), ('late', 9, 16, 40, '22341', '1147', '1176'), ('late', 16, 24, 47, '27241', '1001', '1026'), ('late', 18, 45, 78, '43242', '1058', '1080')]
+[FAIL] S2: 1 processor overlaps: [('F109', 60, 333.0, 465.0, 20, 406.0, 495.0)]
+[FAIL] S3: 1 processor overlaps: [('P2020', 43, 237.0, 355.0, 20, 276.0, 365.0)]
+[FAIL] S4: 1 processor overlaps: [('F112', 63, 163.0, 308.0, 21, 297.0, 380.0)]
+[FAIL] S4: 8 message latency constraints violated. examples=[('late', 0, 1, 0, '42220', '2140', '2162'), ('late', 1, 2, 2, '42250', '2004', '2028'), ('late', 3, 4, 6, '42470', '1765', '1787'), ('late', 4, 5, 8, '44610', '1641', '1666'), ('late', 5, 6, 12, '43520', '1501', '1520'), ('late', 5, 8, 16, '22871', '1501', '1514'), ('late', 15, 38, 70, '43083', '925.35', '945.35'), ('late', 38, 48, 88, '43142', '851.35', '874.35')]
+[WARN] S0: 117 duplicate dependency tuples by receiver/sender/message: [((83, 82, 168), ['43202', '43200']), ((49, 50, 91), ['42352', '42351']), ((54, 53, 98), ['42922', '42921']), ((87, 90, 200), ['42612', '42611']), ((60, 90, 197), ['42201', '42202']), ((69, 74, 139), ['42971', '42970']), ((43, 36, 66), ['42023', '42020']), ((77, 76, 152), ['42140', '42141']), ((75, 79, 162), ['42413', '42412']), ((75, 87, 183), ['43210', '43213']), ((78, 90, 199), ['42651', '42653']), ((42, 76, 151), ['42022', '42023'])]
+[WARN] S0: 8 tasks violate current repo can_run_on policy. Verify policy matches older code. examples=[(67, 'F101', [3]), (94, 'F105', [4]), (50, 'F102', [3]), (95, 'F110', [3]), (53, 'F106', [3]), (36, 'F103', [3]), (18, 'F109', [3]), (0, 'F106', [3, 4])]
+[WARN] S0: meta.schedule_hash does not match schedule contents using current fingerprint logic
+[WARN] S1: 1 task durations differ from AM processing_times; expected for slack targets only. examples=[(36, 39.605000000000004, 89.0)]
+[WARN] S1: 117 duplicate dependency tuples by receiver/sender/message: [((83, 82, 168), ['43202', '43200']), ((49, 50, 91), ['42352', '42351']), ((54, 53, 98), ['42922', '42921']), ((87, 90, 200), ['42612', '42611']), ((60, 90, 197), ['42201', '42202']), ((69, 74, 139), ['42971', '42970']), ((43, 36, 66), ['42023', '42020']), ((77, 76, 152), ['42140', '42141']), ((75, 79, 162), ['42413', '42412']), ((75, 87, 183), ['43210', '43213']), ((78, 90, 199), ['42651', '42653']), ((42, 76, 151), ['42022', '42023'])]
+[WARN] S1: 8 tasks violate current repo can_run_on policy. Verify policy matches older code. examples=[(67, 'F101', [3]), (94, 'F105', [4]), (50, 'F102', [3]), (95, 'F110', [3]), (53, 'F106', [3]), (36, 'F103', [3]), (18, 'F109', [3]), (0, 'F106', [3, 4])]
+[WARN] S1: meta.schedule_hash does not match schedule contents using current fingerprint logic
+[WARN] S2: 6 tasks violate current repo can_run_on policy. Verify policy matches older code. examples=[(50, 'F102', [3]), (36, 'F102', [3]), (57, 'F102', [3, 4]), (95, 'F113', [3]), (18, 'F106', [3]), (0, 'F102', [3, 4])]
+[WARN] S2: meta.schedule_hash does not match schedule contents using current fingerprint logic
+[WARN] S3: 9 tasks violate current repo can_run_on policy. Verify policy matches older code. examples=[(94, 'P2020', [4]), (67, 'P2012', [3]), (57, 'P2021', [3, 4]), (53, 'P2025', [3]), (36, 'P2012', [3]), (95, 'P2022', [3]), (50, 'P2015', [3]), (18, 'P2002', [3]), (0, 'P2017', [3, 4])]
+[WARN] S3: meta.schedule_hash does not match schedule contents using current fingerprint logic
+[WARN] S4: 1 task durations differ from AM processing_times; expected for slack targets only. examples=[(48, 64.35000000000002, 130.0)]
+[WARN] S4: 117 duplicate dependency tuples by receiver/sender/message: [((83, 82, 168), ['43202', '43200']), ((49, 50, 91), ['42352', '42351']), ((54, 53, 98), ['42922', '42921']), ((87, 90, 200), ['42612', '42611']), ((60, 90, 197), ['42201', '42202']), ((69, 74, 139), ['42971', '42970']), ((43, 36, 66), ['42023', '42020']), ((77, 76, 152), ['42140', '42141']), ((75, 79, 162), ['42413', '42412']), ((75, 87, 183), ['43210', '43213']), ((78, 90, 199), ['42651', '42653']), ((42, 76, 151), ['42022', '42023'])]
+[WARN] S4: 8 tasks violate current repo can_run_on policy. Verify policy matches older code. examples=[(67, 'F101', [3]), (94, 'F105', [4]), (50, 'F102', [3]), (95, 'F110', [3]), (53, 'F106', [3]), (36, 'F103', [3]), (18, 'F109', [3]), (0, 'F106', [3, 4])]
+[WARN] S4: meta.schedule_hash does not match schedule contents using current fingerprint logic
+[WARN] edge S0->S1: meta.moved_count=11, but 12 task records differ from parent
+[WARN] edge S0->S2: 16 pre-event task records changed. This may be unrealistic unless full offline rescheduling is intended. examples=[36, 53, 57, 67, 79, 82, 86, 88, 90, 92, 93, 94]
+[WARN] edge S0->S2: meta.moved_count=100, but 99 task records differ from parent
+[WARN] edge S0->S3: 54 pre-event task records changed. This may be unrealistic unless full offline rescheduling is intended. examples=[14, 21, 23, 26, 27, 36, 42, 43, 44, 46, 49, 50]
+[WARN] edge S0->S4: meta.moved_count=8, but 9 task records differ from parent
+[INFO] edge S0->S1: event=slack id=EVT-SL-0002 changed_tasks=12 examples=[0, 1, 2, 3, 4, 5, 6, 8, 9, 16, 18, 36]
+[INFO] edge S0->S2: event=processor_failure id=EVT-PF-0002 changed_tasks=99 examples=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+[INFO] edge S0->S3: event=router_failure id=EVT-RF-0001 changed_tasks=100 examples=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+[INFO] edge S0->S3: processors isolated by removing R1011: ['F111']
+[INFO] edge S0->S4: event=slack id=EVT-SL-0001 changed_tasks=9 examples=[0, 1, 2, 3, 4, 5, 15, 38, 48]
+[PASS] S0: all 212 AM messages represented/enforced (212 explicit deps, 0 same-processor implicit)
+[PASS] S0: task set matches application model (100 tasks)
+[PASS] S1: all 212 AM messages represented/enforced (212 explicit deps, 0 same-processor implicit)
+[PASS] S1: task set matches application model (100 tasks)
+[PASS] S2: all 212 AM messages represented/enforced (212 explicit deps, 0 same-processor implicit)
+[PASS] S2: task set matches application model (100 tasks)
+[PASS] S3: all 212 AM messages represented/enforced (212 explicit deps, 0 same-processor implicit)
+[PASS] S3: task set matches application model (100 tasks)
+[PASS] S4: all 212 AM messages represented/enforced (212 explicit deps, 0 same-processor implicit)
+[PASS] S4: task set matches application model (100 tasks)
+[PASS] edge S0->S1: slack target task 36 duration reduced as expected
+[PASS] edge S0->S2: failed processor F107 not used by tasks starting after failure time
+[PASS] edge S0->S3: no post-failure dependency paths use failed router R1011
+[PASS] edge S0->S4: slack target task 48 duration reduced as expected

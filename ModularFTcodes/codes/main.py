@@ -186,6 +186,7 @@ def _ga_config_values():
         "PartitionMakespanWeight", "PartitionLatenessWeight",
         "PartitionCrossoverProb", "PartitionMutationProb",
         "PartitionPopulationSize", "PartitionGenerations",
+        "PathChoiceCount",
         "SystemLevelPopulationSize", "SystemLevelGenerations",
         "SystemLevelCrossOverProb", "SystemLevelMutationProb",
         "SystemLevelWeightViolationSum", "SystemLevelWeightGlobalLateness",
@@ -294,6 +295,12 @@ parser.add_argument(
     help='Where to save the latest system-GA checkpoint. Defaults to <run-log-dir>/checkpoint_latest.pkl.',
 )
 parser.add_argument(
+    '--path-k',
+    type=int,
+    default=getattr(cfg, "PathChoiceCount", 6),
+    help='Number of candidate communication paths to generate per processor pair.',
+)
+parser.add_argument(
     '--resume-from',
     type=Path,
     default=None,
@@ -385,6 +392,11 @@ else:
     if not checkpoint_path.is_absolute():
         checkpoint_path = (Path.cwd() / checkpoint_path).resolve()
 
+path_k = int(os.environ.get("PATH_K", args.path_k))
+if path_k <= 0:
+    raise ValueError(f"--path-k/PATH_K must be positive, got {path_k}")
+cfg.PathChoiceCount = path_k
+
 log.info("[RUN] run_id=%s", run_id)
 log.info("[RUN] seed=%s", seed)
 log.info("[RUN] PYTHONHASHSEED=%s", os.environ.get("PYTHONHASHSEED"))
@@ -393,6 +405,7 @@ log.info("[RUN] base_deadline=%s", _nice_number(deadline_base))
 log.info("[RUN] deadline_ratio=%s", _format_ratio(deadline_ratio))
 log.info("[RUN] actual_deadline_value=%s", _nice_number(deadline_value))
 log.info("[RUN] variant=%s", variant)
+log.info("[RUN] path_k=%s", path_k)
 log.info("[RUN] output_dir=%s", run_dir)
 log.info("[RUN] hostname=%s", socket.gethostname())
 log.info("[RUN] python_version=%s", sys.version.replace("\n", " "))
@@ -450,7 +463,10 @@ message_list = hf.extract_message_list(AMx)
 n_tasks = len(processing_times)
 processor_ids = hf.get_processor_ids(json_data)
 job_data = {job["id"]: job["can_run_on"] for job in json_data["application"]["jobs"]}
-merged_paths_w_costs = hf.compute_paths_cloud_costs_2(json_data, k=4) # same path function for all partitions
+merged_paths_w_costs = hf.compute_paths_cloud_costs_2(json_data, k=path_k) # same path function for all partitions
+paths_json_path = run_dir / f"merged_paths_k{path_k}_{timestamp}.json"
+_write_json(paths_json_path, merged_paths_w_costs)
+log.info("[RUN] generated_paths_json=%s", paths_json_path)
 
 
 
@@ -697,6 +713,8 @@ run_config = {
     "checkpoint_path": str(checkpoint_path),
     "auto_resume": bool(args.auto_resume),
     "resume_from": str(resume_checkpoint) if resume_checkpoint else None,
+    "path_k": path_k,
+    "generated_paths_json": str(paths_json_path),
 }
 _write_json(run_dir / "run_config.json", run_config)
 log.info("[RUN] run_config_json=%s", run_dir / "run_config.json")
@@ -1016,34 +1034,100 @@ log.info("[RUN-SUMMARY] total_runtime_s=%.3f total_runtime_h=%.6f peak_memory_mb
 # #     },
 # # )
 
-# # # --- MSG expansion with per-level calendar generation + per-level branch caps ---
+# # # --- MSG expansion tuning template ---
+# # This block controls the size and shape of the Multi-Schedule Graph (MSG).
+# #
+# # Main idea:
+# #   - rounds controls MSG depth.
+# #   - gen_params_per_level controls how many candidate events are GENERATED
+# #     inside each newly created child calendar.
+# #   - branch_limits_per_level controls how many events are SELECTED from a
+# #     node's calendar to actually create child schedules.
+# #   - allowed_types filters which event types are allowed to branch.
+# #
+# # Approximate size rule:
+# #   schedules_at_depth_0 = 1  # root S0
+# #   schedules_at_depth_d = schedules_at_depth_(d-1) * selected_events_per_node
+# #   total_schedules = 1 + schedules_at_depth_1 + schedules_at_depth_2 + ...
+# #
+# # Example below:
+# #   rounds=3
+# #   round 1 branch factor = 3  -> S0 creates 3 children
+# #   round 2 branch factor = 3  -> those 3 children create 9 children
+# #   round 3 branch factor = 2  -> those 9 children create 18 children
+# #   total including S0 = 1 + 3 + 9 + 18 = 31 schedules
+# #
+# # Small example:
+# #   rounds=2
+# #   gen_params_per_level=[
+# #       {"n_slack": 1, "n_proc_fail": 0, "n_router_fail": 0, "slack_pct_range": (0.5, 0.7), "seed": seed},
+# #       {"n_slack": 1, "n_proc_fail": 0, "n_router_fail": 0, "slack_pct_range": (0.5, 0.7), "seed": seed},
+# #   ]
+# #   branch_limits_per_level=[{"slack": 1}, {"slack": 1}]
+# #   allowed_types=("slack",)
+# #   total including S0 ~= 1 + 1 + 1 = 3 schedules
+# #
+# # Medium example:
+# #   rounds=3
+# #   branch_limits_per_level=[
+# #       {"slack": 2, "processor_failure": 1},  # 3 children from each node
+# #       {"slack": 1, "processor_failure": 1},  # 2 children from each node
+# #       {"slack": 1},                          # 1 child from each node
+# #   ]
+# #   total including S0 ~= 1 + 3 + 6 + 6 = 16 schedules
+# #
+# # Note:
+# #   gen_params_per_level[0] is used to generate calendars for round-1 children.
+# #   Those calendars are consumed in round 2. Therefore, for each level, generate
+# #   at least as many events as branch_limits_per_level will later request.
+# #
+# # Router failures can be fewer than requested if no eligible dependency path
+# # contains a router. Also, the current router-failure handler records the event
+# # context but is still a placeholder for true mitigation.
 # nodes = eh.build_schedule_tree(
+#     # Root schedule and its event calendar. S0 itself is not returned in nodes;
+#     # nodes contains the generated child schedules S1, S2, ...
 #     base_schedule=sorted_schedule,
 #     base_calendar=base_calendar,
 #     merged_paths=merged_paths_w_costs,
-#     rounds=3,                         # depth 0->1, 1->2, 2->3
+
+#     # MSG depth. rounds=3 means S0->level1->level2->level3.
+#     rounds=3,
+
+#     # Where generated child schedules and calendars are saved.
 #     log_dir=log_dir,
 #     timestamp=timestamp,
 #     root_tag=ROOT_TAG,
 
-#     # Put INTO each child calendar (per level):
-#     # depth 0 children (Round 1):   1+1+1
-#     # depth 1 children (Round 2):   1+1+1
-#     # depth 2 children (Round 3):   2 total (choose mix: 1 slack + 1 PF here)
+#     # Event-generation budget for calendars created at each depth.
+#     # Each dictionary says how many events of each type to put in each child
+#     # calendar. This does not directly create child schedules; it creates the
+#     # event pool that can be used by the next expansion round.
 #     gen_params_per_level=[
-#         {"n_slack": 1, "n_proc_fail": 1, "n_router_fail": 1, "slack_pct_range": (0.5, 0.7), "seed": 42},
-#         {"n_slack": 1, "n_proc_fail": 1, "n_router_fail": 1, "slack_pct_range": (0.5, 0.7), "seed": 42},
-#         {"n_slack": 1, "n_proc_fail": 1, "n_router_fail": 0, "slack_pct_range": (0.5, 0.7), "seed": 42},
+#         # Calendars for round-1 children.
+#         {"n_slack": 1, "n_proc_fail": 1, "n_router_fail": 1, "slack_pct_range": (0.5, 0.7), "seed": seed},
+
+#         # Calendars for round-2 children.
+#         {"n_slack": 1, "n_proc_fail": 1, "n_router_fail": 1, "slack_pct_range": (0.5, 0.7), "seed": seed},
+
+#         # Calendars for round-3 children. No router failures here.
+#         {"n_slack": 1, "n_proc_fail": 1, "n_router_fail": 0, "slack_pct_range": (0.5, 0.7), "seed": seed},
 #     ],
 
-#     # TAKE from each node’s calendar (per level):
+#     # Branching budget for each parent node at each depth.
+#     # Dict form means "take up to this many events per type".
+#     # Integer form means "take up to this many events total, any allowed type".
 #     branch_limits_per_level=[
-#         {"slack": 1, "processor_failure": 1, "router_failure": 1},  # Round 1: 3 children from S0
-#         {"slack": 1, "processor_failure": 1, "router_failure": 1},  # Round 2: 3 children per node
-#         2,                                                          # Round 3: 2 children per node (any mix)
+#         {"slack": 1, "processor_failure": 1, "router_failure": 1},  # Round 1: S0 -> 3 children
+#         {"slack": 1, "processor_failure": 1, "router_failure": 1},  # Round 2: 3 children per parent
+#         2,                                                          # Round 3: 2 children per parent
 #     ],
 
+#     # Event types allowed to create branches. Remove a type here to disable it
+#     # even if it exists in the event calendar.
 #     allowed_types=("slack", "processor_failure", "router_failure"),
+
+#     # Metadata copied into each saved schedule envelope.
 #     meta_static={"time_budgets_partition": meta.get("time_budgets_partition")},
 # )
 

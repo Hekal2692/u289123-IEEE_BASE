@@ -573,6 +573,8 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
     # from SystemLevelScheduler import SystemLevelReconstruction_2
 
     message_ids = [m['id'] for m in ML]
+    path_choice_count = int(getattr(cfg, "PathChoiceCount", 4))
+    path_choices = list(range(max(1, path_choice_count)))
     partitions = ['P_FE', 'P_C1', 'P_C2', 'P_C3']
     num_parts = len(partitions)
 
@@ -737,7 +739,7 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         PA = random.sample(['FE', 'C1', 'C2', 'C3'][:num_parts], num_parts)
         equal_budget = LSMS // num_parts
         TB = [equal_budget for _ in range(num_parts)]
-        PIgenes = [random.choice([0, 1, 2, 3]) for _ in range(len(message_ids))]
+        PIgenes = [random.choice(path_choices) for _ in range(len(message_ids))]
         ind = creator.SysIndividual(PO + PA + PIgenes + TB)
         _repair_po_alignment(ind, partitions, num_parts, len(message_ids))
         _repair_pa_unique(ind, num_parts)
@@ -926,7 +928,7 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         pi_st, pi_ed = 2 * nparts, 2 * nparts + len(message_ids)
         for idx in range(pi_st, pi_ed):
             if random.random() < 0.05:
-                ind[idx] = random.choice([0, 1, 2, 3])
+                ind[idx] = random.choice(path_choices)
 
         _repair_po_alignment(ind, partitions, nparts, len(message_ids))
         _repair_pa_unique(ind, nparts)

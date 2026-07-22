@@ -42,6 +42,9 @@ SystemLevelGenerations          = 60
 SystemLevelCrossOverProb        = 0.80
 SystemLevelMutationProb         = 0.70   
 
+# Number of candidate communication paths encoded by GA path-choice genes.
+PathChoiceCount                 = 6
+
 # Fitness weights (minimize both)
 SystemLevelWeightViolationSum   = -1.0
 SystemLevelWeightGlobalLateness = -1.0

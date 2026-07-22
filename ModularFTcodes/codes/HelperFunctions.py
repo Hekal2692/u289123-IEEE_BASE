@@ -459,6 +459,7 @@ def list_scheduling(graph, processing_time, communication_costs, processors ):
     for task in nx.topological_sort(graph):
         min_finish_time =    float('inf')
         selected_processor = None
+        selected_start_time = None
         #print("Min Finish Time",min_finish_time)
          
         
@@ -483,15 +484,16 @@ def list_scheduling(graph, processing_time, communication_costs, processors ):
             if finish_time_task < min_finish_time:
                 min_finish_time = finish_time_task
                 selected_processor = processor
+                selected_start_time = start_time
             
         
         # Update finish time for the selected processor
         finish_time[selected_processor] = min_finish_time
         #print("Finish Time",finish_time)
-        mk.append(finish_time_task)
+        mk.append(min_finish_time)
         
         # Append task and processor to the schedule
-        schedule.append((task, selected_processor, start_time, finish_time_task))
+        schedule.append((task, selected_processor, selected_start_time, min_finish_time))
         max_time = max(mk)
     return schedule, max_time
 ##################################################################################################################################

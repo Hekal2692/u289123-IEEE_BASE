@@ -407,6 +407,8 @@ def NEW_GA_V2(processor_ids, processing_times, message_list, all_path_indexes_wi
     predefined_processors = processor_ids
     message_list_ids = [message['id'] for message in message_list]
     valid_task_ids = list(job_data.keys())
+    path_choice_count = int(getattr(cfg, "PathChoiceCount", 4))
+    path_choices = list(range(max(1, path_choice_count)))
 
     def init_task_order():
         return random.sample(valid_task_ids, len(valid_task_ids))
@@ -418,12 +420,20 @@ def NEW_GA_V2(processor_ids, processing_times, message_list, all_path_indexes_wi
         return random.sample(defined_values, n_messages)
 
     def init_message_path_index(n_messages):
-        return [random.choice([0, 1, 2, 3]) for _ in range(n_messages)]
+        return [random.choice(path_choices) for _ in range(n_messages)]
+
+    def _repair_processor_allocation(task_order, raw_allocation):
+        return gax.enforce_can_run_on_constraints(
+            task_order, raw_allocation, processor_ids, job_data, strict=True
+        )
 
     def create_individual():
         individual = []
-        individual.extend(toolbox.task_order())
-        individual.extend(toolbox.processor_allocation())
+        task_order = toolbox.task_order()
+        raw_allocation = toolbox.processor_allocation()
+        processor_allocation, _hard_violations = _repair_processor_allocation(task_order, raw_allocation)
+        individual.extend(task_order)
+        individual.extend(processor_allocation)
         if num_message > 0:
             individual.extend(toolbox.message_priority_ordering())
             individual.extend(toolbox.message_path_index())
@@ -442,12 +452,13 @@ def NEW_GA_V2(processor_ids, processing_times, message_list, all_path_indexes_wi
     def evaluate(individual , time_budget):
         task_order = gax.repair_task_order(individual[:num_tasks], valid_task_ids)
         raw_processor_allocation = individual[num_tasks:2 * num_tasks]
+        processor_allocation, hard_violations = _repair_processor_allocation(task_order, raw_processor_allocation)
         
         if num_message == 0:
             schedule = {}
             current_time_per_processor = {pid: 0 for pid in processor_ids}
             for i, task_id in enumerate(task_order):
-                proc = raw_processor_allocation[i]
+                proc = processor_allocation[i]
                 start = current_time_per_processor[proc]
                 end = start + processing_times[task_id]
                 schedule[task_id] = (proc, start, end, [])
@@ -455,18 +466,20 @@ def NEW_GA_V2(processor_ids, processing_times, message_list, all_path_indexes_wi
         else:
             message_priority_ordering = individual[2 * num_tasks:2 * num_tasks + num_message]
             message_path_index = individual[2 * num_tasks + num_message:]
-            updated_list = gax.ComputeMappingsAndPaths(message_list, task_order, raw_processor_allocation,
+            updated_list = gax.ComputeMappingsAndPaths(message_list, task_order, processor_allocation,
                                                    message_priority_ordering, message_path_index)
             selected_paths = gax.find_suitable_paths(updated_list, all_path_indexes_with_costs)
             schedule = reconstruct_schedule_with_precedenceX_updated(
-                processor_ids, raw_processor_allocation, task_order, processing_times,
+                processor_ids, processor_allocation, task_order, processing_times,
                 message_list, selected_paths, all_path_indexes_with_costs, message_priority_ordering)
             
         makespan = gax.compute_makespan(schedule)
-        lateness = max(0, makespan - time_budget)
+        lateness = max(0, makespan - time_budget) if time_budget is not None else 0
+        hard_penalty = 1000000 * int(hard_violations)
 
-        # Multi-objective fitness: (makespan, lateness), both minimized
-        return (makespan, lateness)
+        # Multi-objective fitness: (makespan, lateness), both minimized.
+        # Impossible can_run_on mappings stay schedulable but are made decisively unattractive.
+        return (makespan + hard_penalty, lateness + hard_penalty)
 
     # toolbox.register("evaluate", evaluate)
     toolbox.register("evaluate", lambda ind: evaluate(ind, time_budget))
@@ -504,7 +517,7 @@ def NEW_GA_V2(processor_ids, processing_times, message_list, all_path_indexes_wi
     def mutation_message_path_index(ind, start_idx, length):
         for i in range(start_idx, start_idx + length):
             if random.random() < 0.1:
-                ind[i] = random.choice([0, 1, 2, 3])
+                ind[i] = random.choice(path_choices)
         return ind,
 
     toolbox.register("mate", custom_mate)
@@ -520,6 +533,7 @@ def NEW_GA_V2(processor_ids, processing_times, message_list, all_path_indexes_wi
     fitness_evolution = []
     lateness_evolution = []      # NEW
     makespan_evolution = []      # NEW
+    hard_violation_evolution = []
 
     for g in range(NGEN):
         offspring = toolbox.select(pop, len(pop))
@@ -558,21 +572,22 @@ def NEW_GA_V2(processor_ids, processing_times, message_list, all_path_indexes_wi
         best = min(pop, key=lambda ind: ind.fitness.values)
         task_order_b = gax.repair_task_order(best[:num_tasks], valid_task_ids)
         raw_alloc_b  = best[num_tasks:2 * num_tasks]
+        alloc_b, hard_violations_b = _repair_processor_allocation(task_order_b, raw_alloc_b)
 
         if num_message > 0:
             mpo_b = best[2 * num_tasks:2 * num_tasks + num_message]
             mpi_b = best[2 * num_tasks + num_message:]
-            upd_b = gax.ComputeMappingsAndPaths(message_list, task_order_b, raw_alloc_b, mpo_b, mpi_b)
+            upd_b = gax.ComputeMappingsAndPaths(message_list, task_order_b, alloc_b, mpo_b, mpi_b)
             sel_b = gax.find_suitable_paths(upd_b, all_path_indexes_with_costs)
             sched_b = reconstruct_schedule_with_precedenceX_updated(
-                processor_ids, raw_alloc_b, task_order_b, processing_times,
+                processor_ids, alloc_b, task_order_b, processing_times,
                 message_list, sel_b, all_path_indexes_with_costs, mpo_b
             )
         else:
             sched_b = {}
             current_time_per_processor = {pid: 0 for pid in processor_ids}
             for i, tid in enumerate(task_order_b):
-                p = raw_alloc_b[i]
+                p = alloc_b[i]
                 s = current_time_per_processor[p]
                 e = s + processing_times[tid]
                 sched_b[tid] = (p, s, e, [])
@@ -582,11 +597,13 @@ def NEW_GA_V2(processor_ids, processing_times, message_list, all_path_indexes_wi
         lat_b = max(0, ms_b - (time_budget if time_budget is not None else ms_b))
         makespan_evolution.append(float(ms_b))
         lateness_evolution.append(float(lat_b))
+        hard_violation_evolution.append(int(hard_violations_b))
 
     part_history = {
         "fitness_evolution": fitness_evolution,
         "lateness_evolution": lateness_evolution,
         "makespan_evolution": makespan_evolution,
+        "hard_violation_evolution": hard_violation_evolution,
         "generations": int(NGEN)
     }
     return sched_b, part_history

@@ -86,9 +86,9 @@ def find_suitable_paths(updated_message_list, merged_paths_dict):
 
         # Use an index‐matching one if possible; otherwise fall back to any endpoint match
         if index_matches:
-            chosen = next(iter(index_matches))
+            chosen = sorted(index_matches)[0]
         elif endpoint_matches:
-            chosen = next(iter(endpoint_matches))
+            chosen = sorted(endpoint_matches)[0]
         else:
             chosen = None
 

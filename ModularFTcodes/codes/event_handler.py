@@ -166,6 +166,41 @@ def _save_schedule_enveloped(schedule: Dict[int, List[Any]],
 #     allowed_types: Tuple[str, ...] = ("slack", "processor_failure", "router_failure"),
 # ):
 
+def _clone_replanner_context(ctx: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    if ctx is None:
+        return None
+    out = copy.copy(ctx)
+    out["pid_by_level"] = {
+        level: list(pids or [])
+        for level, pids in (ctx.get("pid_by_level", {}) or {}).items()
+    }
+    out["failed_processors"] = list(ctx.get("failed_processors", []) or [])
+    out["failed_routers"] = list(ctx.get("failed_routers", []) or [])
+    return out
+
+
+def _context_summary(ctx: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    if not ctx:
+        return {}
+    return {
+        "failed_processors": list(ctx.get("failed_processors", []) or []),
+        "failed_routers": list(ctx.get("failed_routers", []) or []),
+    }
+
+
+def _paths_without_failed_routers(paths: Optional[Dict[str, Any]],
+                                  failed_routers: List[str]) -> Optional[Dict[str, Any]]:
+    if not paths or not failed_routers:
+        return paths
+    failed = set(str(r) for r in failed_routers)
+    filtered = {}
+    for pid, details in paths.items():
+        path_nodes = details.get("path", []) if isinstance(details, dict) else []
+        if not any(str(node) in failed for node in path_nodes):
+            filtered[pid] = details
+    return filtered
+
+
 def build_schedule_tree(
     base_schedule: Dict[int, List[Any]],
     base_calendar: Dict[str, Any],
@@ -175,16 +210,20 @@ def build_schedule_tree(
     timestamp: Optional[str] = None,
     root_tag: str = "S0",
     gen_params: Optional[Dict[str, Any]] = None,
+    gen_params_per_level: Optional[List[Dict[str, Any]]] = None,
     branch_limits_per_level: Optional[List[Union[int, Dict[str, int]]]] = None,
     allowed_types: Tuple[str, ...] = ("slack", "processor_failure", "router_failure"),
-    meta_static: Optional[Dict[str, Any]] = None,  # <-- NEW: attach to every child
+    meta_static: Optional[Dict[str, Any]] = None,
+    branch_context: Optional[Dict[str, Any]] = None,
 ):
 
     """
     Independent-branching MSG expansion:
-      - For each node, EACH SELECTED EVENT creates ONE child from the SAME parent schedule (no chaining).
-      - After creating a child, generate & save its own calendar, then use those children as the frontier.
-      - Repeat for `rounds` levels.
+      - For each node, EACH SELECTED EVENT creates ONE child from the SAME parent schedule.
+      - Each child inherits a branch-local failure context from its parent.
+      - gen_params applies to every generated child calendar unless gen_params_per_level is set.
+      - gen_params_per_level[depth] controls the calendar generated for children created at that depth.
+      - branch_limits_per_level controls how many events are taken from each node's calendar.
 
     Returns: flat list of node metadata dicts (one per child).
     """
@@ -193,60 +232,75 @@ def build_schedule_tree(
     _ensure_int_keys(base_schedule)
     nodes: List[Dict[str, Any]] = []
 
-    # tag generator S1, S2, ... (starts after root)
     next_tag = make_schedule_tagger(start=int(root_tag[1:]) if root_tag.startswith("S") else 0)
 
-    # helper: pick branch limits for a given depth
     def _limits_for_level(depth: int) -> Optional[Union[int, Dict[str, int]]]:
         if not branch_limits_per_level:
             return None
         if depth < len(branch_limits_per_level):
             return branch_limits_per_level[depth]
-        # if not enough entries, reuse the last one
         return branch_limits_per_level[-1]
 
-    # seed frontier with root
-    frontier: List[Tuple[str, Dict[int, List[Any]], Dict[str, Any]]] = [
-        (root_tag, copy.deepcopy(base_schedule), base_calendar)
+    def _gen_params_for_level(depth: int) -> Dict[str, Any]:
+        if gen_params_per_level:
+            if depth < len(gen_params_per_level):
+                return dict(gen_params_per_level[depth] or {})
+            return dict(gen_params_per_level[-1] or {})
+        return dict(gen_params or {})
+
+    root_ctx = _clone_replanner_context(branch_context)
+    if root_ctx is None:
+        root_ctx = _clone_replanner_context(_REPLAN_CTX)
+    if root_ctx is not None and merged_paths is not None and root_ctx.get("paths") is None:
+        root_ctx["paths"] = merged_paths
+
+    frontier: List[Tuple[str, Dict[int, List[Any]], Dict[str, Any], Optional[Dict[str, Any]]]] = [
+        (root_tag, copy.deepcopy(base_schedule), base_calendar, root_ctx)
     ]
 
     for depth in range(rounds):
-        next_frontier: List[Tuple[str, Dict[int, List[Any]], Dict[str, Any]]] = []
+        next_frontier: List[Tuple[str, Dict[int, List[Any]], Dict[str, Any], Optional[Dict[str, Any]]]] = []
         limits = _limits_for_level(depth)
 
-        for parent_tag, sched, cal in frontier:
+        for parent_tag, sched, cal, parent_ctx in frontier:
             events = list(cal.get("events", []))
-            # filter by allowed types and sort by time/id
             events = [e for e in events if e.get("type") in allowed_types]
             events.sort(key=lambda e: (e.get("time", 0.0), e.get("id", "")))
-
-            # select which events spawn children at THIS node
             selected = _select_events_for_branching(events, limits)
 
-            # INDEPENDENT BRANCHING: each event applied on a fresh copy of the SAME parent schedule
             for ev in selected:
                 etype, level, t = ev.get("type"), ev.get("level"), float(ev.get("time", 0.0))
-
                 parent_sched_copy = copy.deepcopy(sched)
+                child_ctx = _clone_replanner_context(parent_ctx)
+
                 if etype == "slack":
                     child_sched, node = _apply_slack_successors_only(parent_sched_copy, ev, level, t, parent_tag)
                 elif etype == "processor_failure":
-                    child_sched, node = _placeholder_processor_failure(parent_sched_copy, ev, level, t, parent_tag)
+                    child_sched, node = _placeholder_processor_failure(
+                        parent_sched_copy, ev, level, t, parent_tag, branch_context=child_ctx
+                    )
+                    child_ctx = node.pop("_branch_context", child_ctx)
                 elif etype == "router_failure":
-                    child_sched, node = _placeholder_router_failure(parent_sched_copy, ev, level, t, parent_tag)
+                    child_sched, node = _placeholder_router_failure(
+                        parent_sched_copy, ev, level, t, parent_tag, branch_context=child_ctx
+                    )
+                    child_ctx = node.pop("_branch_context", child_ctx)
                 else:
                     continue
 
-                # tag & lineage
                 child_tag = next_tag()
                 node["schedule_tag"] = child_tag
                 node["parent_schedule"] = parent_tag
+                node.update(_context_summary(child_ctx))
 
-                # generate child calendar (controls what goes into the calendar)
-                gp = gen_params or {}  # defaults to whatever you pass (e.g., {"n_slack":2,...})
+                gp = _gen_params_for_level(depth)
+                paths_for_calendar = merged_paths
+                if child_ctx is not None and child_ctx.get("paths") is not None:
+                    paths_for_calendar = child_ctx.get("paths")
+
                 child_calendar = ec.generate_event_calendar(
                     _to_json_keys(child_sched),
-                    merged_paths,
+                    paths_for_calendar,
                     n_slack=gp.get("n_slack", 0),
                     n_proc_fail=gp.get("n_proc_fail", 0),
                     n_router_fail=gp.get("n_router_fail", 0),
@@ -256,27 +310,28 @@ def build_schedule_tree(
                     schedule_tag=child_tag
                 )
 
-                # save both schedule & calendar
                 if log_dir and timestamp:
                     cal_path = os.path.join(log_dir, f"{child_tag}__event_calendar_{timestamp}.json")
                     _save_calendar(child_calendar, cal_path)
                     sch_path = os.path.join(log_dir, f"{child_tag}__schedule_{timestamp}.json")
+                    meta_extra = dict(meta_static or {})
+                    meta_extra.update(_context_summary(child_ctx))
                     _save_schedule_enveloped(
                         schedule=child_sched,
                         path=sch_path,
                         schedule_tag=child_tag,
                         parent_schedule=parent_tag,
-                        event=ev,  # edge that produced this child
+                        event=ev,
                         schedule_hash=_schedule_fingerprint(child_sched),
                         calendar_path=cal_path,
                         moved=node.get("moved", []),
-                        meta_extra=meta_static,                 # <-- NEW
+                        meta_extra=meta_extra,
                     )
                     node["event_calendar_path"] = cal_path
                     node["schedule_path"] = sch_path
 
                 nodes.append(node)
-                next_frontier.append((child_tag, child_sched, child_calendar))
+                next_frontier.append((child_tag, child_sched, child_calendar, child_ctx))
 
         frontier = next_frontier
 
@@ -590,8 +645,8 @@ def configure_replanner(ctx: Dict[str, Any]) -> None:
         })
     """
     global _REPLAN_CTX
-    _REPLAN_CTX = ctx
-    log.info("[PF] Replanning context configured: keys=%s", list(ctx.keys()))
+    _REPLAN_CTX = _clone_replanner_context(ctx)
+    log.info("[PF] Replanning context configured: keys=%s", list((_REPLAN_CTX or {}).keys()))
 
 # ---------- small helpers ----------
 def _level_from_proc(pid: str) -> str:
@@ -1358,16 +1413,17 @@ def _pf_check_constraints(
 
 def _handle_processor_failure(schedule_in: Dict[int, List[Any]],
                               event: Dict[str, Any], level: str, t: float,
-                              parent_tag: str):
+                              parent_tag: str,
+                              branch_context: Optional[Dict[str, Any]] = None):
 
-    if _REPLAN_CTX is None:
+    ctx_base = branch_context if branch_context is not None else _REPLAN_CTX
+    if ctx_base is None:
         log.warning("[PF] Replanner context is not configured; returning parent schedule unchanged.")
         s = _norm_copy(schedule_in)
         node = _mk_node("PF", parent_tag, event, level, float(t), s, moved=[],
                         note="no replanner context")
         return s, node
 
-    ctx = _REPLAN_CTX
     parent = _norm_copy(schedule_in)
 
     faulty = str(event.get("target"))
@@ -1377,11 +1433,15 @@ def _handle_processor_failure(schedule_in: Dict[int, List[Any]],
     log.info("[PF] START: faulty=%s (derived_level=%s) t_fault=%.3f", faulty, fault_level, t0)
 
     # ---- Mandatory platform update: exclude faulty FIRST ----
-    ctx_local = copy.deepcopy(ctx)
+    ctx_local = _clone_replanner_context(ctx_base)
     pid_by_level_new = copy.deepcopy(ctx_local.get("pid_by_level", {}))
     for L in pid_by_level_new:
         pid_by_level_new[L] = [p for p in pid_by_level_new[L] if str(p) != faulty]
     ctx_local["pid_by_level"] = pid_by_level_new
+    failed_processors = list(ctx_local.get("failed_processors", []) or [])
+    if faulty not in failed_processors:
+        failed_processors.append(faulty)
+    ctx_local["failed_processors"] = failed_processors
     log.info("[PF] Catalogue updated: removed faulty=%s from pid_by_level.", faulty)
 
     deadline = float(ctx_local.get("deadline", float("inf")))
@@ -1436,8 +1496,11 @@ def _handle_processor_failure(schedule_in: Dict[int, List[Any]],
             strategy_used="STRAT1_FREEZE_REBUILD",
             checks=checks1,
             comm_stats=comm_stats1,
-            part_stats=part_stats
+            part_stats=part_stats,
+            failed_processors=list(ctx_local.get("failed_processors", []) or []),
+            failed_routers=list(ctx_local.get("failed_routers", []) or [])
         )
+        node["_branch_context"] = ctx_local
         return merged, node
 
     # ============================================================
@@ -1497,12 +1560,31 @@ def _handle_processor_failure(schedule_in: Dict[int, List[Any]],
     checks2 = _pf_check_constraints(merged2, deadline, TB)
     log.info("[PF][STRAT2][CHECK] any_violation=%s details=%s", checks2["any_violation"], checks2)
 
+    node = _mk_node(
+        "PF", parent_tag, event, fault_level, t0, merged2, moved=list(merged2.keys()),
+        strategy_used="STRAT2_FULL_RESCHEDULE",
+        checks=checks2,
+        comm_stats=comm_stats2,
+        part_stats={
+            "STRAT1": part_stats,
+            "STRAT2": {
+                "global_makespan": meta2.get("global_makespan") if isinstance(meta2, dict) else None,
+                "final_generation": meta2.get("final_generation") if isinstance(meta2, dict) else None,
+            },
+        },
+        failed_processors=list(ctx_local.get("failed_processors", []) or []),
+        failed_routers=list(ctx_local.get("failed_routers", []) or [])
+    )
+    node["_branch_context"] = ctx_local
+    return merged2, node
+
 # ---------- wire the new handler into the existing switch ----------
 def _placeholder_processor_failure(schedule_in: Dict[int, List[Any]],
                                    event: Dict[str, Any], level: str, t: float,
-                                   parent_tag: str):
+                                   parent_tag: str,
+                                   branch_context: Optional[Dict[str, Any]] = None):
     # redirect to real handler
-    return _handle_processor_failure(schedule_in, event, level, t, parent_tag)
+    return _handle_processor_failure(schedule_in, event, level, t, parent_tag, branch_context=branch_context)
 
 # --------------- Placeholders (no logic yet) --------------
 
@@ -1512,10 +1594,29 @@ def _placeholder_processor_failure(schedule_in: Dict[int, List[Any]],
 
 def _placeholder_router_failure(schedule_in: Dict[int, List[Any]],
                                 event: Dict[str, Any], level: str, t: float,
-                                parent_tag: str):
+                                parent_tag: str,
+                                branch_context: Optional[Dict[str, Any]] = None):
     """
     PLACEHOLDER ONLY. Router failure handling to be provided later.
+    The branch context still records the failed router and filters it from future path sets.
     """
     s = _norm_copy(schedule_in)
-    node = _mk_node("RF", parent_tag, event, level, t, s, moved=[], note="router failure handler TBD")
+    ctx_base = branch_context if branch_context is not None else _REPLAN_CTX
+    ctx_local = _clone_replanner_context(ctx_base)
+    failed_router = str(event.get("target"))
+    if ctx_local is not None:
+        failed_routers = list(ctx_local.get("failed_routers", []) or [])
+        if failed_router not in failed_routers:
+            failed_routers.append(failed_router)
+        ctx_local["failed_routers"] = failed_routers
+        ctx_local["paths"] = _paths_without_failed_routers(ctx_local.get("paths"), failed_routers)
+
+    node = _mk_node(
+        "RF", parent_tag, event, level, t, s, moved=[],
+        note="router failure handler TBD",
+        failed_processors=list((ctx_local or {}).get("failed_processors", []) or []),
+        failed_routers=list((ctx_local or {}).get("failed_routers", []) or [])
+    )
+    if ctx_local is not None:
+        node["_branch_context"] = ctx_local
     return s, node
