@@ -60,6 +60,16 @@ import logging
 log = logging.getLogger(__name__)
 
 
+class CheckpointCompatibilityError(RuntimeError):
+    pass
+
+
+class GracefulTermination(RuntimeError):
+    def __init__(self, message, status_payload=None):
+        super().__init__(message)
+        self.status_payload = status_payload or {}
+
+
 def SystemLevelReconstruction_2(PI, AML, IPM, SFE, S_C1, S_C2, S_C3, IPI, max_passes=20, eps=1e-9):
     """
     System-level reconstruction (IPC-only path handling, no duplicate messages).
@@ -553,13 +563,34 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
       P_C3_budget,P_C3_makespan,P_C3_violation
     """
     from deap import base, creator, tools
-    import random, os, csv, logging, pickle
+    import random, os, csv, logging, pickle, signal
     from collections import defaultdict
 
     log = logging.getLogger(__name__)
     run_metadata = dict(run_metadata or {})
     ga_start_perf = time.perf_counter()
     eval_counter = {"total": 0}
+    termination_requested = {"requested": False, "signal": None, "generation": None}
+
+    def _handle_termination_signal(signum, _frame):
+        try:
+            signal_name = signal.Signals(signum).name
+        except Exception:
+            signal_name = str(signum)
+        termination_requested["requested"] = True
+        termination_requested["signal"] = signal_name
+        log.warning(
+            "[Signal] Received %s; will checkpoint and stop at the next completed system generation.",
+            signal_name,
+        )
+
+    for _sig_name in ("SIGUSR1", "SIGTERM", "SIGINT"):
+        _sig = getattr(signal, _sig_name, None)
+        if _sig is not None:
+            try:
+                signal.signal(_sig, _handle_termination_signal)
+            except Exception as exc:
+                log.warning("[Signal] Could not install handler for %s: %s", _sig_name, exc)
 
     def _peak_memory_mb():
         try:
@@ -674,21 +705,109 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
                 d[k] = v
         return d
 
+    attempt_count = 1
+    interruption_count = 0
+    resumed = False
+    resume_generation = None
+    accumulated_runtime_before_attempt = 0.0
     checkpoint_path = os.fspath(checkpoint_path) if checkpoint_path else None
     resume_checkpoint = os.fspath(resume_checkpoint) if resume_checkpoint else None
+
+    def _normalize_identity_value(value):
+        if isinstance(value, float):
+            return round(value, 10)
+        if isinstance(value, dict):
+            return {str(k): _normalize_identity_value(v) for k, v in sorted(value.items())}
+        if isinstance(value, (list, tuple)):
+            return [_normalize_identity_value(v) for v in value]
+        return value
+
+    def _checkpoint_identity(metadata):
+        return {
+            "run_key": metadata.get("run_key") or metadata.get("run_id"),
+            "workload": metadata.get("workload") or metadata.get("am_id"),
+            "am_id": metadata.get("am_id"),
+            "am_size": metadata.get("am_size"),
+            "base_deadline": _normalize_identity_value(metadata.get("base_deadline")),
+            "deadline_ratio": _normalize_identity_value(metadata.get("deadline_ratio")),
+            "actual_deadline_value": _normalize_identity_value(metadata.get("actual_deadline_value")),
+            "seed": metadata.get("seed"),
+            "variant": metadata.get("variant"),
+            "ga_configuration": _normalize_identity_value(metadata.get("ga_configuration")),
+            "git_commit_sha": metadata.get("git_commit_sha"),
+            "input_file_fingerprints": _normalize_identity_value(metadata.get("input_file_fingerprints")),
+        }
+
+    checkpoint_identity = _checkpoint_identity(run_metadata)
+
+    def _identity_mismatches(saved_identity):
+        mismatches = []
+        for key, expected in checkpoint_identity.items():
+            actual = (saved_identity or {}).get(key)
+            if _normalize_identity_value(actual) != _normalize_identity_value(expected):
+                mismatches.append(key)
+        return mismatches
+
+    def _checkpoint_sidecar_path(path):
+        root, ext = os.path.splitext(path)
+        return f"{root}.json" if ext else f"{path}.json"
+
+    def _attempt_runtime_s():
+        return time.perf_counter() - ga_start_perf
+
+    def _accumulated_runtime_s():
+        return accumulated_runtime_before_attempt + _attempt_runtime_s()
+
+    def _json_safe_checkpoint_summary(state):
+        keys = (
+            "version", "completed_generation", "run_key", "workload", "am_id", "am_size",
+            "base_deadline", "deadline_ratio", "actual_deadline", "actual_deadline_value",
+            "seed", "variant", "ga_configuration", "git_commit_sha", "input_file_fingerprints",
+            "attempt_count", "interruption_count", "resumed", "resume_generation",
+            "final_attempt_system_ga_runtime_s", "accumulated_system_ga_runtime_s",
+            "checkpoint_identity",
+        )
+        return {key: state.get(key) for key in keys}
 
     def _save_checkpoint(completed_generation, population, history):
         if not checkpoint_path:
             return
+        attempt_runtime = _attempt_runtime_s()
+        accumulated_runtime = accumulated_runtime_before_attempt + attempt_runtime
         state = {
-            "version": 1,
+            "version": 2,
             "completed_generation": int(completed_generation),
             "population": population,
             "sys_history": history,
+            "system_level_history": history,
             "inner_runs_by_sysgen": dict(inner_runs_by_sysgen),
+            "required_partition_histories": dict(inner_runs_by_sysgen),
             "budgets_per_run_by_sysgen": dict(budgets_per_run_by_sysgen),
+            "budget_histories": dict(budgets_per_run_by_sysgen),
             "random_state": random.getstate(),
+            "python_random_state": random.getstate(),
             "numpy_random_state": np.random.get_state(),
+            "run_metadata": run_metadata,
+            "checkpoint_identity": checkpoint_identity,
+            "run_key": checkpoint_identity.get("run_key"),
+            "workload": checkpoint_identity.get("workload"),
+            "am_id": checkpoint_identity.get("am_id"),
+            "am_size": checkpoint_identity.get("am_size"),
+            "base_deadline": checkpoint_identity.get("base_deadline"),
+            "deadline_ratio": checkpoint_identity.get("deadline_ratio"),
+            "actual_deadline": checkpoint_identity.get("actual_deadline_value"),
+            "actual_deadline_value": checkpoint_identity.get("actual_deadline_value"),
+            "seed": checkpoint_identity.get("seed"),
+            "variant": checkpoint_identity.get("variant"),
+            "ga_configuration": checkpoint_identity.get("ga_configuration"),
+            "git_commit_sha": checkpoint_identity.get("git_commit_sha"),
+            "input_file_fingerprints": checkpoint_identity.get("input_file_fingerprints"),
+            "attempt_count": int(attempt_count),
+            "interruption_count": int(interruption_count),
+            "resumed": bool(resumed),
+            "resume_generation": resume_generation,
+            "final_attempt_system_ga_runtime_s": float(attempt_runtime),
+            "accumulated_system_ga_runtime_s": float(accumulated_runtime),
         }
         checkpoint_dir = os.path.dirname(checkpoint_path)
         if checkpoint_dir:
@@ -697,16 +816,89 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         with open(tmp_path, "wb") as f:
             pickle.dump(state, f, protocol=pickle.HIGHEST_PROTOCOL)
         os.replace(tmp_path, checkpoint_path)
+        sidecar_path = _checkpoint_sidecar_path(checkpoint_path)
+        tmp_sidecar_path = f"{sidecar_path}.tmp"
+        with open(tmp_sidecar_path, "w", encoding="utf-8") as f:
+            json.dump(_json_safe_checkpoint_summary(state), f, indent=2, default=str)
+        os.replace(tmp_sidecar_path, sidecar_path)
         log.info("[Checkpoint] Saved generation %s to %s", completed_generation, checkpoint_path)
+
+    def _trim_history_to_generation(history, completed_generation):
+        completed_generation = int(completed_generation)
+        if completed_generation <= 0:
+            for key, value in list(history.items()):
+                if isinstance(value, list):
+                    history[key] = []
+            return history
+        gens = [int(g) for g in history.get("gen", [])]
+        index_by_generation = {}
+        for idx, generation in enumerate(gens):
+            if 1 <= generation <= completed_generation:
+                index_by_generation[generation] = idx
+        missing = [g for g in range(1, completed_generation + 1) if g not in index_by_generation]
+        if missing:
+            raise CheckpointCompatibilityError(
+                "Checkpoint history is missing completed generation row(s): " +
+                ", ".join(str(g) for g in missing)
+            )
+        keep_indices = [index_by_generation[g] for g in range(1, completed_generation + 1)]
+        original_len = len(gens)
+        for key, value in list(history.items()):
+            if isinstance(value, list) and len(value) == original_len:
+                history[key] = [value[idx] for idx in keep_indices]
+        history["gen"] = list(range(1, completed_generation + 1))
+        return history
+
+    def _trim_generation_mapping(mapping, completed_generation):
+        trimmed = {}
+        for key, value in dict(mapping or {}).items():
+            try:
+                gen = int(key)
+            except Exception:
+                continue
+            if 0 <= gen <= int(completed_generation):
+                trimmed[str(gen)] = value
+        return trimmed
+
+    def _rewrite_csv_to_completed_generation(csv_path, csv_columns, completed_generation):
+        completed_generation = int(completed_generation)
+        rows_by_generation = {}
+        if os.path.exists(csv_path):
+            with open(csv_path, "r", newline="") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    try:
+                        generation = int(row.get("generation", ""))
+                    except Exception:
+                        continue
+                    if 1 <= generation <= completed_generation:
+                        rows_by_generation[generation] = row
+        with open(csv_path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=csv_columns)
+            writer.writeheader()
+            for generation in range(1, completed_generation + 1):
+                row = rows_by_generation.get(generation)
+                if row:
+                    writer.writerow({col: row.get(col) for col in csv_columns})
 
     def _load_checkpoint(path):
         if os.path.isdir(path):
             path = os.path.join(path, "checkpoint_latest.pkl")
         with open(path, "rb") as f:
             state = pickle.load(f)
-        if state.get("version") != 1:
-            raise ValueError(f"Unsupported checkpoint version in {path}: {state.get('version')}")
-        if "random_state" in state:
+        if state.get("version") != 2:
+            raise CheckpointCompatibilityError(
+                f"Unsupported or metadata-incomplete checkpoint version in {path}: {state.get('version')}"
+            )
+        mismatches = _identity_mismatches(state.get("checkpoint_identity"))
+        if mismatches:
+            raise CheckpointCompatibilityError(
+                "Checkpoint does not match this manifest/configuration; mismatched field(s): " +
+                ", ".join(mismatches)
+            )
+        if "python_random_state" in state:
+            random.setstate(state["python_random_state"])
+        elif "random_state" in state:
             random.setstate(state["random_state"])
         if "numpy_random_state" in state:
             np.random.set_state(state["numpy_random_state"])
@@ -1092,10 +1284,20 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         if os.path.exists(resume_path):
             state = _load_checkpoint(resume_path)
             pop = state["population"]
-            sys_history = state.get("sys_history", sys_history)
-            inner_runs_by_sysgen = _inner_runs_defaultdict(state.get("inner_runs_by_sysgen"))
-            budgets_per_run_by_sysgen = defaultdict(list, state.get("budgets_per_run_by_sysgen", {}))
             start_gen = int(state.get("completed_generation", 0))
+            sys_history = _trim_history_to_generation(state.get("sys_history", sys_history), start_gen)
+            inner_runs_by_sysgen = _inner_runs_defaultdict(
+                _trim_generation_mapping(state.get("inner_runs_by_sysgen"), start_gen)
+            )
+            budgets_per_run_by_sysgen = defaultdict(
+                list,
+                _trim_generation_mapping(state.get("budgets_per_run_by_sysgen", {}), start_gen),
+            )
+            accumulated_runtime_before_attempt = float(state.get("accumulated_system_ga_runtime_s", 0.0) or 0.0)
+            attempt_count = int(state.get("attempt_count", 1) or 1) + 1
+            interruption_count = int(state.get("interruption_count", 0) or 0)
+            resumed = True
+            resume_generation = start_gen
         else:
             raise FileNotFoundError(f"Resume checkpoint was not found: {resume_path}")
     else:
@@ -1118,7 +1320,8 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
     csv_columns = [
         "run_id", "am_id", "am_size", "base_deadline", "deadline_ratio", "actual_deadline_value",
         "seed", "variant", "slurm_job_id", "slurm_array_job_id", "slurm_array_task_id",
-        "generation", "elapsed_generation_s", "cumulative_runtime_s",
+        "attempt_count", "interruption_count", "resumed", "resume_generation",
+        "generation", "elapsed_generation_s", "cumulative_runtime_s", "attempt_runtime_s",
         "evaluated_individuals_this_generation", "total_evaluated_individuals",
         "global_makespan", "global_lateness", "global_lateness_signed", "global_lateness_clipped",
         "fitness_vsum", "fitness_lateness",
@@ -1143,6 +1346,8 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         with open(csv_path, "w", newline="") as f:
             w = csv.DictWriter(f, fieldnames=csv_columns)
             w.writeheader()
+    if start_gen > 0:
+        _rewrite_csv_to_completed_generation(csv_path, csv_columns, start_gen)
 
     ngen = getattr(cfg, "SystemLevelGenerations", 80)
     for gen in range(start_gen, ngen):
@@ -1225,7 +1430,8 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         sys_history["fitness_lateness"].append(float(bf1))
 
         elapsed_generation_s = time.perf_counter() - gen_start_perf
-        cumulative_runtime_s = time.perf_counter() - ga_start_perf
+        attempt_runtime_s = _attempt_runtime_s()
+        cumulative_runtime_s = accumulated_runtime_before_attempt + attempt_runtime_s
         evaluated_this_generation = eval_counter["total"] - gen_eval_start
         total_evaluated_individuals = eval_counter["total"]
         peak_memory_mb = _peak_memory_mb()
@@ -1259,9 +1465,14 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
             "slurm_job_id": run_metadata.get("slurm_job_id"),
             "slurm_array_job_id": run_metadata.get("slurm_array_job_id"),
             "slurm_array_task_id": run_metadata.get("slurm_array_task_id"),
+            "attempt_count": int(attempt_count),
+            "interruption_count": int(interruption_count),
+            "resumed": bool(resumed),
+            "resume_generation": resume_generation,
             "generation": gen + 1,
             "elapsed_generation_s": elapsed_generation_s,
             "cumulative_runtime_s": cumulative_runtime_s,
+            "attempt_runtime_s": attempt_runtime_s,
             "evaluated_individuals_this_generation": evaluated_this_generation,
             "total_evaluated_individuals": total_evaluated_individuals,
             "global_makespan": int(global_makespan),
@@ -1303,6 +1514,21 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
                  f"TotalTime={cumulative_runtime_s:.2f}s PeakMemMB={peak_memory_mb}")
 
         _save_checkpoint(gen + 1, pop, sys_history)
+        if termination_requested["requested"]:
+            termination_requested["generation"] = gen + 1
+            interruption_count += 1
+            _save_checkpoint(gen + 1, pop, sys_history)
+            raise GracefulTermination(
+                f"Termination requested by {termination_requested['signal']} after generation {gen + 1}",
+                {
+                    "signal": termination_requested["signal"],
+                    "completed_generation": gen + 1,
+                    "resume_generation": gen + 1,
+                    "attempt_count": int(attempt_count),
+                    "interruption_count": int(interruption_count),
+                    "system_ga_runtime_s": _accumulated_runtime_s(),
+                },
+            )
 
     # Final artifacts
     final_best = min(pop, key=lambda ind: ind.fitness.values)
@@ -1316,7 +1542,9 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
     final_budgets = {p: int(final_best.triple_map[p][1]) for p in partitions}
     final_violations = {p: int(max(0, final_makespans_eval[p] - final_budgets[p])) for p in partitions}
     final_generation = int(sys_history["gen"][-1]) if sys_history.get("gen") else int(start_gen)
-    total_runtime_s = time.perf_counter() - ga_start_perf
+    final_attempt_runtime_s = _attempt_runtime_s()
+    accumulated_system_ga_runtime_s = accumulated_runtime_before_attempt + final_attempt_runtime_s
+    total_runtime_s = final_attempt_runtime_s
     peak_memory_mb = _peak_memory_mb()
     cluster_for = {final_best.eval_PO[i]: final_best.eval_PA[i] for i in range(num_parts)}
 
@@ -1350,6 +1578,12 @@ def SystemLevelGA(PIDFE, PIDC1, PIDC2, PIDC3,
         "run_metadata": run_metadata,
         "total_runtime_s": total_runtime_s,
         "total_runtime_h": total_runtime_s / 3600.0,
+        "final_attempt_system_ga_runtime_s": final_attempt_runtime_s,
+        "system_ga_runtime_s": accumulated_system_ga_runtime_s,
+        "attempt_count": int(attempt_count),
+        "interruption_count": int(interruption_count),
+        "resumed": bool(resumed),
+        "resume_generation": resume_generation,
         "peak_memory_mb": peak_memory_mb,
         "total_evaluated_individuals": eval_counter["total"],
         "histories": {

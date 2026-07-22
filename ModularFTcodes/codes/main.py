@@ -32,7 +32,7 @@ import SysGAAux as sysgax
 
 import event_calendar as ec
 import event_handler as eh
-import json, os, sys, socket, platform, shutil
+import json, os, sys, socket, platform, shutil, hashlib, subprocess
 from msg_builder import build_msg_from_dir
 from msg_builder import build_msg_artifacts
 from LoggerUtility import setup_logger
@@ -204,6 +204,74 @@ def _write_json(path, data):
         json.dump(data, f, indent=2, default=str)
 
 
+def _atomic_write_json(path, data):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = path.with_name(path.name + ".tmp")
+    with tmp_path.open("w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, default=str)
+    os.replace(tmp_path, path)
+
+
+def _git_commit_sha(repo_dir):
+    env_sha = os.environ.get("GIT_COMMIT_SHA")
+    if env_sha:
+        return env_sha
+    try:
+        return subprocess.check_output(
+            ["git", "-C", str(repo_dir), "rev-parse", "--verify", "HEAD"],
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+    except Exception:
+        return None
+
+
+def _fingerprint_file(path):
+    path = Path(path)
+    digest = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            digest.update(chunk)
+    stat = path.stat()
+    return {
+        "path": str(path),
+        "sha256": digest.hexdigest(),
+        "size_bytes": stat.st_size,
+    }
+
+
+def _fingerprint_files(paths_by_name):
+    return {name: _fingerprint_file(path) for name, path in paths_by_name.items()}
+
+
+def _write_run_status(run_dir, state, run_metadata=None, message=None, **extra):
+    payload = {
+        "state": state,
+        "message": message,
+        "updated_at": datetime.now().isoformat(timespec="seconds"),
+        "run_dir": str(Path(run_dir).resolve()),
+    }
+    if run_metadata:
+        payload.update(run_metadata)
+    payload.update(extra)
+    _atomic_write_json(Path(run_dir) / "run_status.json", payload)
+
+
+def _write_success_marker(run_dir, run_summary):
+    payload = {
+        "completed_successfully": True,
+        "run_key": run_summary.get("run_key"),
+        "run_id": run_summary.get("run_id"),
+        "completed_at": run_summary.get("timestamp_end"),
+        "final_generation": run_summary.get("final_generation"),
+    }
+    marker = Path(run_dir) / "_SUCCESS"
+    tmp_path = marker.with_name(marker.name + ".tmp")
+    tmp_path.write_text(json.dumps(payload, indent=2, default=str) + "\n", encoding="utf-8")
+    os.replace(tmp_path, marker)
+
+
 def _copy_requirements_snapshot(requirements_path, run_dir):
     src = Path(requirements_path)
     if not src.exists():
@@ -329,13 +397,22 @@ if env_config_mode:
     deadline_ratio = float(os.environ["DEADLINE_RATIO"])
     seed = int(os.environ["SEED"])
     variant = os.environ.get("VARIANT", "proposed")
+    workload = os.environ.get("WORKLOAD", am_id)
     output_root = Path(os.environ.get("OUTPUT_ROOT", "logs")).expanduser()
     if not output_root.is_absolute():
         output_root = (Path.cwd() / output_root).resolve()
     run_timestamp = os.environ.get("RUN_TIMESTAMP") or datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     deadline_value = deadline_base * deadline_ratio
-    run_id = _make_run_id(am_id, deadline_base, deadline_ratio, deadline_value, seed, variant, slurm_meta, run_timestamp)
-    run_output_dir = output_root / am_id / f"ratio{_format_ratio(deadline_ratio)}" / f"seed{seed}" / run_id
+    run_key_env = os.environ.get("RUN_KEY")
+    run_id = run_key_env or _make_run_id(am_id, deadline_base, deadline_ratio, deadline_value, seed, variant, slurm_meta, run_timestamp)
+    if os.environ.get("RUN_DIR"):
+        run_output_dir = Path(os.environ["RUN_DIR"]).expanduser()
+        if not run_output_dir.is_absolute():
+            run_output_dir = (Path.cwd() / run_output_dir).resolve()
+    elif run_key_env:
+        run_output_dir = output_root / "runs" / run_id
+    else:
+        run_output_dir = output_root / am_id / f"ratio{_format_ratio(deadline_ratio)}" / f"seed{seed}" / run_id
     args.log_dir = str(run_output_dir.parent)
     args.timestamp = run_output_dir.name
 else:
@@ -349,6 +426,7 @@ else:
         deadline_value = deadline_base * deadline_ratio
     seed = int(os.environ["SEED"]) if os.environ.get("SEED") else None
     variant = os.environ.get("VARIANT", "proposed")
+    workload = os.environ.get("WORKLOAD", am_id)
     run_id = args.timestamp or datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if args.timestamp is None:
         args.timestamp = run_id
@@ -374,6 +452,8 @@ if args.resume_from is not None:
         args.log_dir = str(resume_run_dir.parent)
         run_id = resume_run_dir.name
 
+run_key = os.environ.get("RUN_KEY") or run_id
+
 log, log_dir, timestamp = setup_logger(base_log_dir=args.log_dir, timestamp=args.timestamp)
 run_dir = Path(log_dir).resolve()
 
@@ -386,6 +466,7 @@ else:
         checkpoint_path = (Path.cwd() / checkpoint_path).resolve()
 
 log.info("[RUN] run_id=%s", run_id)
+log.info("[RUN] run_key=%s", run_key)
 log.info("[RUN] seed=%s", seed)
 log.info("[RUN] PYTHONHASHSEED=%s", os.environ.get("PYTHONHASHSEED"))
 log.info("[RUN] am_id=%s", am_id)
@@ -631,12 +712,17 @@ log.info("[MAIN] Baseline deadline: %s", _nice_number(deadline_base))
 log.info("[MAIN] Deadline setting: %s", deadline_setting)
 log.info("[MAIN] Application deadline: %s", DEADLINE)
 
+git_commit_sha = _git_commit_sha(PROJECT_DIR)
+ga_configuration = _ga_config_values()
 run_metadata = {
     "run_id": run_id,
+    "run_key": run_key,
     "am_id": am_id,
+    "workload": workload,
     "am_size": args.am_size,
     "base_deadline": _nice_number(deadline_base),
     "deadline_ratio": float(deadline_ratio),
+    "actual_deadline": DEADLINE,
     "actual_deadline_value": DEADLINE,
     "seed": seed,
     "variant": variant,
@@ -647,6 +733,8 @@ run_metadata = {
     "python_version": sys.version,
     "python_executable": sys.executable,
     "PYTHONHASHSEED": os.environ.get("PYTHONHASHSEED"),
+    "git_commit_sha": git_commit_sha,
+    "ga_configuration": ga_configuration,
     **slurm_meta,
 }
 input_files = {
@@ -660,6 +748,9 @@ input_files = {
     "platform_cloud2": str(PM_PATH_C2),
     "platform_cloud3": str(PM_PATH_C3),
 }
+input_file_fingerprints = _fingerprint_files(input_files)
+run_metadata["input_files"] = input_files
+run_metadata["input_file_fingerprints"] = input_file_fingerprints
 requirements_snapshot = _copy_requirements_snapshot(PROJECT_DIR / "requirements.txt", run_dir)
 hardware_info_path = run_dir / "hardware_info.txt"
 _write_hardware_info(hardware_info_path, run_metadata)
@@ -667,6 +758,7 @@ run_config = {
     **run_metadata,
     "timestamp": timestamp,
     "input_files": input_files,
+    "input_file_fingerprints": input_file_fingerprints,
     "number_of_tasks": n_tasks,
     "number_of_messages": len(message_list),
     "number_of_partitions": 4,
@@ -678,7 +770,7 @@ run_config = {
         "P_C2": _nice_number(Cloud2PartitionTime),
         "P_C3": _nice_number(Cloud3PartitionTime),
     },
-    "GA_parameters": _ga_config_values(),
+    "GA_parameters": ga_configuration,
     "time_budget_mutation_parameters": {
         key: getattr(cfg, key, None)
         for key in (
@@ -700,20 +792,49 @@ run_config = {
 }
 _write_json(run_dir / "run_config.json", run_config)
 log.info("[RUN] run_config_json=%s", run_dir / "run_config.json")
+_write_run_status(
+    run_dir,
+    "RUNNING",
+    run_metadata,
+    message="system-level GA starting",
+    checkpoint_path=str(checkpoint_path),
+    resume_from=str(resume_checkpoint) if resume_checkpoint else None,
+)
 
 start_sys_ga = time.perf_counter()
 log.info("[MAIN] System-level scheduling launched")
 
-
-SystemSchedule, meta = sls.SystemLevelGA(processor_ids_FE,processor_ids_C1,processor_ids_C2,processor_ids_C3,
-                                      processing_times_FE,processing_times_C1,processing_times_C2,processing_times_C3,
-                                      message_list_FE,message_list_C1,message_list_C2,message_list_C3,
-                                      job_data_FE,job_data_C1,job_data_C2,job_data_C3,
-                                      DEADLINE, message_list, merged_paths_w_costs,log_dir,
-                                      checkpoint_path=checkpoint_path,
-                                      resume_checkpoint=resume_checkpoint,
-                                      auto_resume=args.auto_resume,
-                                      run_metadata=run_metadata )
+try:
+    SystemSchedule, meta = sls.SystemLevelGA(processor_ids_FE,processor_ids_C1,processor_ids_C2,processor_ids_C3,
+                                          processing_times_FE,processing_times_C1,processing_times_C2,processing_times_C3,
+                                          message_list_FE,message_list_C1,message_list_C2,message_list_C3,
+                                          job_data_FE,job_data_C1,job_data_C2,job_data_C3,
+                                          DEADLINE, message_list, merged_paths_w_costs,log_dir,
+                                          checkpoint_path=checkpoint_path,
+                                          resume_checkpoint=resume_checkpoint,
+                                          auto_resume=args.auto_resume,
+                                          run_metadata=run_metadata )
+except sls.CheckpointCompatibilityError as exc:
+    _write_run_status(
+        run_dir,
+        "CHECKPOINT_INCOMPATIBLE",
+        run_metadata,
+        message=str(exc),
+        checkpoint_path=str(checkpoint_path),
+    )
+    log.error("[Checkpoint] Incompatible checkpoint: %s", exc)
+    raise SystemExit(2)
+except sls.GracefulTermination as exc:
+    _write_run_status(
+        run_dir,
+        "INTERRUPTED",
+        run_metadata,
+        message=str(exc),
+        checkpoint_path=str(checkpoint_path),
+        **getattr(exc, "status_payload", {}),
+    )
+    log.warning("[RUN] Graceful termination requested: %s", exc)
+    raise SystemExit(99)
 
 end_sys_ga = time.perf_counter()
 print("System Level Schedule is ", SystemSchedule)
@@ -917,6 +1038,12 @@ run_summary = {
     "final_schedule_json": final_schedule_path,
     "schedule_json": schedule_path,
     "checkpoint_path": str(checkpoint_path),
+    "attempt_count": meta.get("attempt_count"),
+    "interruption_count": meta.get("interruption_count"),
+    "resumed": meta.get("resumed"),
+    "resume_generation": meta.get("resume_generation"),
+    "final_attempt_system_ga_runtime_s": meta.get("final_attempt_system_ga_runtime_s"),
+    "system_ga_runtime_s": meta.get("system_ga_runtime_s"),
     "generated_plot_files": sorted(set(generated_plot_files)),
 }
 for part in ("P_FE", "P_C1", "P_C2", "P_C3"):
@@ -926,6 +1053,21 @@ for part in ("P_FE", "P_C1", "P_C2", "P_C3"):
     run_summary[f"{prefix}_violation"] = final_violations.get(part)
 
 _write_json(run_dir / "run_summary.json", run_summary)
+_write_success_marker(run_dir, run_summary)
+_write_run_status(
+    run_dir,
+    "COMPLETE",
+    run_metadata,
+    message="completed successfully",
+    completed_successfully=True,
+    final_generation=final_generation,
+    checkpoint_path=str(checkpoint_path),
+    system_ga_runtime_s=meta.get("system_ga_runtime_s"),
+    attempt_count=meta.get("attempt_count"),
+    interruption_count=meta.get("interruption_count"),
+    resumed=meta.get("resumed"),
+    resume_generation=meta.get("resume_generation"),
+)
 log.info("[RUN-SUMMARY] %s", json.dumps(run_summary, sort_keys=True, default=str))
 log.info("[RUN-SUMMARY] total_runtime_s=%.3f total_runtime_h=%.6f peak_memory_mb=%s", total_runtime_s, total_runtime_h, peak_memory_mb)
 
