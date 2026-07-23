@@ -18,21 +18,42 @@ REPO_ROOT="$(cd "$PROJECT_DIR/.." && pwd)"
 CODE_DIR="$PROJECT_DIR/codes"
 OUTPUT_ROOT="${OUTPUT_ROOT:-$REPO_ROOT/logs_proposed_all_deadlines}"
 OMNI_STATE_DIR="${OMNI_STATE_DIR:-$HOME/.ftcodes_omni}"
-READY_MARKER="${READY_MARKER:-$OMNI_STATE_DIR/environment_ready.json}"
+PYTHON_MODULE="${PYTHON_MODULE:-python/3.11.2}"
+PYTHON_BIN="${PYTHON_BIN:-python3.11}"
 VENV="${VENV:-$HOME/venvs/ftcodes311}"
+REQ_FILE="$PROJECT_DIR/requirements.txt"
 
-if [[ -f "$READY_MARKER" ]]; then
-  MARKER_VENV="$(python3 "$SCRIPT_DIR/omni_array.py" marker-value --marker "$READY_MARKER" --key venv 2>/dev/null || true)"
-  if [[ -n "$MARKER_VENV" ]]; then
-    VENV="$MARKER_VENV"
+if command -v module >/dev/null 2>&1; then
+  module --ignore-cache purge
+  module --ignore-cache load "$PYTHON_MODULE"
+fi
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  PYTHON_BIN="python3"
+fi
+if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  PYTHON_BIN="python"
+fi
+"$PYTHON_BIN" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else "Python 3.11+ is required")'
+
+mkdir -p "$OMNI_STATE_DIR" "$(dirname "$VENV")"
+LOCK_FILE="$OMNI_STATE_DIR/environment.lock"
+(
+  flock 9
+  if [[ ! -d "$VENV" ]]; then
+    "$PYTHON_BIN" -m venv "$VENV"
   fi
-fi
-if [[ ! -d "$VENV" ]]; then
-  echo "ERROR: Omni environment is not ready; missing venv: $VENV" >&2
-  exit 2
-fi
+  source "$VENV/bin/activate"
+  REQ_HASH="$(sha256sum "$REQ_FILE" | awk '{print $1}')"
+  MARKER="$VENV/.requirements-$REQ_HASH.installed"
+  if [[ ! -f "$MARKER" ]]; then
+    python -m pip install -U pip
+    python -m pip install -r "$REQ_FILE"
+    rm -f "$VENV"/.requirements-*.installed
+    touch "$MARKER"
+  fi
+) 9>"$LOCK_FILE"
+
 source "$VENV/bin/activate"
-python "$SCRIPT_DIR/omni_array.py" check-environment --marker "$READY_MARKER" --project-dir "$PROJECT_DIR"
 
 export AM_ID=AM100
 export WORKLOAD=AM100
