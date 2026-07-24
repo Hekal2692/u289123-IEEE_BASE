@@ -12,9 +12,15 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-REPO_ROOT="$(cd "$PROJECT_DIR/.." && pwd)"
+if [[ -n "${SLURM_SUBMIT_DIR:-}" && -d "$SLURM_SUBMIT_DIR/ModularFTcodes/omni" ]]; then
+  REPO_ROOT="$(cd "$SLURM_SUBMIT_DIR" && pwd)"
+  PROJECT_DIR="$REPO_ROOT/ModularFTcodes"
+  SCRIPT_DIR="$PROJECT_DIR/omni"
+else
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+  REPO_ROOT="$(cd "$PROJECT_DIR/.." && pwd)"
+fi
 CODE_DIR="$PROJECT_DIR/codes"
 OUTPUT_ROOT="${OUTPUT_ROOT:-$REPO_ROOT/logs_proposed_all_deadlines}"
 OMNI_STATE_DIR="${OMNI_STATE_DIR:-$HOME/.ftcodes_omni}"

@@ -1,0 +1,11 @@
+{
+  "array_job_id": "12037076",
+  "raw_sbatch_id": "12037076",
+  "submitted_at": "2026-07-23T07:50:59",
+  "manifest": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/omni/proposed_am500_medium_manifest.tsv",
+  "manifest_sha256": "82c38fadc4088d97c6854635a5fb877d84df531de6411ca3ae7c2d1c517093d3",
+  "output_root": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium",
+  "max_concurrent": 40,
+  "git_commit_sha": "0b74be8bb5547c0c0ca809a763c9403b1b3864dc",
+  "array_expression": "0-39%40"
+}

@@ -1,0 +1,14 @@
+{
+  "submitted_at": "2026-07-23T07:50:59",
+  "attempt_count": 4,
+  "job_ids": [
+    "12037076",
+    "12037077",
+    "12037078",
+    "12037079"
+  ],
+  "dependency": "afterany chain",
+  "max_concurrent": 40,
+  "sbatch_script": "ModularFTcodes/omni/run_proposed_am500_medium.sbatch",
+  "output_root": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium"
+}

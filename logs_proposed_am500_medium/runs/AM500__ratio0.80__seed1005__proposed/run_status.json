@@ -1,0 +1,116 @@
+{
+  "state": "RUNNING",
+  "message": "system-level GA starting",
+  "updated_at": "2026-07-23T09:19:04",
+  "run_dir": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio0.80__seed1005__proposed",
+  "run_id": "AM500__ratio0.80__seed1005__proposed",
+  "run_key": "AM500__ratio0.80__seed1005__proposed",
+  "am_id": "AM500",
+  "workload": "AM500",
+  "am_size": "500T",
+  "base_deadline": 4300,
+  "deadline_ratio": 0.8,
+  "actual_deadline": 3440,
+  "actual_deadline_value": 3440,
+  "seed": 1005,
+  "variant": "proposed",
+  "timestamp_start": "2026-07-23T09:18:50",
+  "output_dir": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio0.80__seed1005__proposed",
+  "working_directory": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/codes",
+  "hostname": "hpc-node194",
+  "python_version": "3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]",
+  "python_executable": "/home/u289123/venvs/ftcodes311/bin/python",
+  "PYTHONHASHSEED": "1005",
+  "git_commit_sha": "0b74be8bb5547c0c0ca809a763c9403b1b3864dc",
+  "ga_configuration": {
+    "APPLCATION_DEADLINE_FACTOR": 0.9,
+    "PartitionMakespanWeight": -10,
+    "PartitionLatenessWeight": -1,
+    "PartitionCrossoverProb": 0.7,
+    "PartitionMutationProb": 0.7,
+    "PartitionPopulationSize": 16,
+    "PartitionGenerations": 20,
+    "SystemLevelPopulationSize": 16,
+    "SystemLevelGenerations": 40,
+    "SystemLevelCrossOverProb": 0.8,
+    "SystemLevelMutationProb": 0.7,
+    "SystemLevelWeightViolationSum": -1.0,
+    "SystemLevelWeightGlobalLateness": -1.0,
+    "TBMinMarginRatio": 0.03,
+    "TBDeadbandRatio": 0.02,
+    "TBStepGainUp": 0.33,
+    "TBStepGainDown": 0.22,
+    "TBMinStepAbs": 6,
+    "TBMaxStepAbs": 60,
+    "TBMaxStepFrac": 0.06,
+    "TBHoldSlackRatioLo": 0.006,
+    "TBHoldSlackRatioHi": 0.018,
+    "TBMutNoiseFrac": 0.007,
+    "TBSlackPenaltyWeight": 0.01
+  },
+  "slurm_job_id": "12037175",
+  "slurm_array_job_id": "12037076",
+  "slurm_array_task_id": "24",
+  "slurm_cpus_per_task": "16",
+  "slurm_mem_per_node": "131072",
+  "input_files": {
+    "application_model": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/TC500.json",
+    "partition_fog_edge": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/500_FETASKS.json",
+    "partition_cloud1": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/500_C1TASKS.json",
+    "partition_cloud2": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/500_C2TASKS.json",
+    "partition_cloud3": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/500_C3TASKS.json",
+    "platform_fog_edge": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/FEPlatform.json",
+    "platform_cloud1": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel1.json",
+    "platform_cloud2": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel2.json",
+    "platform_cloud3": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel3.json"
+  },
+  "input_file_fingerprints": {
+    "application_model": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/TC500.json",
+      "sha256": "b5c5191bcaad4b0ad97f606e99200622ea362ac46e9056ceed38a16859b8e930",
+      "size_bytes": 407287
+    },
+    "partition_fog_edge": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/500_FETASKS.json",
+      "sha256": "1eb931687489d142219bde667f5edd9aabdb8a0ce14293746683af9df09b622b",
+      "size_bytes": 138356
+    },
+    "partition_cloud1": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/500_C1TASKS.json",
+      "sha256": "452df09fa1498e81a5dd7bb06b0d29d2d5aae4ae558c70e6e643da618b5bf859",
+      "size_bytes": 26480
+    },
+    "partition_cloud2": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/500_C2TASKS.json",
+      "sha256": "4c4d82c9c629b5f6b95364bc6d5c659b6c6ded29f176fb99bc99a1d099d7105c",
+      "size_bytes": 9933
+    },
+    "partition_cloud3": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/500_C3TASKS.json",
+      "sha256": "0e766279cc81052fd07ebf415920842de6a259afbb8643b020dac7f0a9c8e37e",
+      "size_bytes": 4068
+    },
+    "platform_fog_edge": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/FEPlatform.json",
+      "sha256": "2e28a13fb98841fbed53dc6f6204e8283bbedbe0cdc55f849e6aa54fa930126f",
+      "size_bytes": 9649
+    },
+    "platform_cloud1": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel1.json",
+      "sha256": "5761d28baf4c73aa59b14423adee7e052da056589cdf487bd7d219869119f1fa",
+      "size_bytes": 9414
+    },
+    "platform_cloud2": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel2.json",
+      "sha256": "01a2504909d37480f0b8943068f3dfc71f937e37c493ddd5ba54ccb96bc8c4da",
+      "size_bytes": 8919
+    },
+    "platform_cloud3": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel3.json",
+      "sha256": "71455250ae481e70aa8f12db3189244be9fafd2968ee27d07c858651fa780c91",
+      "size_bytes": 8907
+    }
+  },
+  "checkpoint_path": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio0.80__seed1005__proposed/checkpoint_latest.pkl",
+  "resume_from": null
+}

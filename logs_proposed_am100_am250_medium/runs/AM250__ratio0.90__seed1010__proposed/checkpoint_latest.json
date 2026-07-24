@@ -1,0 +1,179 @@
+{
+  "version": 2,
+  "completed_generation": 40,
+  "run_key": "AM250__ratio0.90__seed1010__proposed",
+  "workload": "AM250",
+  "am_id": "AM250",
+  "am_size": "250T",
+  "base_deadline": 2700,
+  "deadline_ratio": 0.9,
+  "actual_deadline": 2430,
+  "actual_deadline_value": 2430,
+  "seed": 1010,
+  "variant": "proposed",
+  "ga_configuration": {
+    "APPLCATION_DEADLINE_FACTOR": 0.9,
+    "PartitionCrossoverProb": 0.7,
+    "PartitionGenerations": 20,
+    "PartitionLatenessWeight": -1,
+    "PartitionMakespanWeight": -10,
+    "PartitionMutationProb": 0.7,
+    "PartitionPopulationSize": 16,
+    "SystemLevelCrossOverProb": 0.8,
+    "SystemLevelGenerations": 40,
+    "SystemLevelMutationProb": 0.7,
+    "SystemLevelPopulationSize": 16,
+    "SystemLevelWeightGlobalLateness": -1.0,
+    "SystemLevelWeightViolationSum": -1.0,
+    "TBDeadbandRatio": 0.02,
+    "TBHoldSlackRatioHi": 0.018,
+    "TBHoldSlackRatioLo": 0.006,
+    "TBMaxStepAbs": 60,
+    "TBMaxStepFrac": 0.06,
+    "TBMinMarginRatio": 0.03,
+    "TBMinStepAbs": 6,
+    "TBMutNoiseFrac": 0.007,
+    "TBSlackPenaltyWeight": 0.01,
+    "TBStepGainDown": 0.22,
+    "TBStepGainUp": 0.33
+  },
+  "git_commit_sha": "0b74be8bb5547c0c0ca809a763c9403b1b3864dc",
+  "input_file_fingerprints": {
+    "application_model": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/TC250.json",
+      "sha256": "2e595ca4b641f3d2992bbe1073fa96d29e553484bff56a65d819aedc40faf2c8",
+      "size_bytes": 223048
+    },
+    "partition_cloud1": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/250_C1TASKS.json",
+      "sha256": "2c603ca0ae4fa15f62c724a3342aa6d910f1c05ab9ea53c44c149530064cee03",
+      "size_bytes": 5161
+    },
+    "partition_cloud2": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/250_C2TASKS.json",
+      "sha256": "8e28f150d8ea79f843e3da0e55df480c3089ab875a0adb7ffcea212d3f52f657",
+      "size_bytes": 15244
+    },
+    "partition_cloud3": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/250_C3TASKS.json",
+      "sha256": "856ae90f4f3f43f3fadd86a81d8c1a5f1f15e0d44dd065423e381fb9e719526f",
+      "size_bytes": 3404
+    },
+    "partition_fog_edge": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/250_FETASKS.json",
+      "sha256": "f98de82c3fa2ef823ed8fd6026e7715040d7db2534958465c4c03f8bacb7f9ee",
+      "size_bytes": 52524
+    },
+    "platform_cloud1": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel1.json",
+      "sha256": "5761d28baf4c73aa59b14423adee7e052da056589cdf487bd7d219869119f1fa",
+      "size_bytes": 9414
+    },
+    "platform_cloud2": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel2.json",
+      "sha256": "01a2504909d37480f0b8943068f3dfc71f937e37c493ddd5ba54ccb96bc8c4da",
+      "size_bytes": 8919
+    },
+    "platform_cloud3": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel3.json",
+      "sha256": "71455250ae481e70aa8f12db3189244be9fafd2968ee27d07c858651fa780c91",
+      "size_bytes": 8907
+    },
+    "platform_fog_edge": {
+      "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/FEPlatform.json",
+      "sha256": "2e28a13fb98841fbed53dc6f6204e8283bbedbe0cdc55f849e6aa54fa930126f",
+      "size_bytes": 9649
+    }
+  },
+  "attempt_count": 1,
+  "interruption_count": 0,
+  "resumed": false,
+  "resume_generation": null,
+  "final_attempt_system_ga_runtime_s": 50724.20784317702,
+  "accumulated_system_ga_runtime_s": 50724.20784317702,
+  "checkpoint_identity": {
+    "run_key": "AM250__ratio0.90__seed1010__proposed",
+    "workload": "AM250",
+    "am_id": "AM250",
+    "am_size": "250T",
+    "base_deadline": 2700,
+    "deadline_ratio": 0.9,
+    "actual_deadline_value": 2430,
+    "seed": 1010,
+    "variant": "proposed",
+    "ga_configuration": {
+      "APPLCATION_DEADLINE_FACTOR": 0.9,
+      "PartitionCrossoverProb": 0.7,
+      "PartitionGenerations": 20,
+      "PartitionLatenessWeight": -1,
+      "PartitionMakespanWeight": -10,
+      "PartitionMutationProb": 0.7,
+      "PartitionPopulationSize": 16,
+      "SystemLevelCrossOverProb": 0.8,
+      "SystemLevelGenerations": 40,
+      "SystemLevelMutationProb": 0.7,
+      "SystemLevelPopulationSize": 16,
+      "SystemLevelWeightGlobalLateness": -1.0,
+      "SystemLevelWeightViolationSum": -1.0,
+      "TBDeadbandRatio": 0.02,
+      "TBHoldSlackRatioHi": 0.018,
+      "TBHoldSlackRatioLo": 0.006,
+      "TBMaxStepAbs": 60,
+      "TBMaxStepFrac": 0.06,
+      "TBMinMarginRatio": 0.03,
+      "TBMinStepAbs": 6,
+      "TBMutNoiseFrac": 0.007,
+      "TBSlackPenaltyWeight": 0.01,
+      "TBStepGainDown": 0.22,
+      "TBStepGainUp": 0.33
+    },
+    "git_commit_sha": "0b74be8bb5547c0c0ca809a763c9403b1b3864dc",
+    "input_file_fingerprints": {
+      "application_model": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/TC250.json",
+        "sha256": "2e595ca4b641f3d2992bbe1073fa96d29e553484bff56a65d819aedc40faf2c8",
+        "size_bytes": 223048
+      },
+      "partition_cloud1": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/250_C1TASKS.json",
+        "sha256": "2c603ca0ae4fa15f62c724a3342aa6d910f1c05ab9ea53c44c149530064cee03",
+        "size_bytes": 5161
+      },
+      "partition_cloud2": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/250_C2TASKS.json",
+        "sha256": "8e28f150d8ea79f843e3da0e55df480c3089ab875a0adb7ffcea212d3f52f657",
+        "size_bytes": 15244
+      },
+      "partition_cloud3": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/250_C3TASKS.json",
+        "sha256": "856ae90f4f3f43f3fadd86a81d8c1a5f1f15e0d44dd065423e381fb9e719526f",
+        "size_bytes": 3404
+      },
+      "partition_fog_edge": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/250T/250_FETASKS.json",
+        "sha256": "f98de82c3fa2ef823ed8fd6026e7715040d7db2534958465c4c03f8bacb7f9ee",
+        "size_bytes": 52524
+      },
+      "platform_cloud1": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel1.json",
+        "sha256": "5761d28baf4c73aa59b14423adee7e052da056589cdf487bd7d219869119f1fa",
+        "size_bytes": 9414
+      },
+      "platform_cloud2": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel2.json",
+        "sha256": "01a2504909d37480f0b8943068f3dfc71f937e37c493ddd5ba54ccb96bc8c4da",
+        "size_bytes": 8919
+      },
+      "platform_cloud3": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/CloudModel3.json",
+        "sha256": "71455250ae481e70aa8f12db3189244be9fafd2968ee27d07c858651fa780c91",
+        "size_bytes": 8907
+      },
+      "platform_fog_edge": {
+        "path": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/FEPlatform.json",
+        "sha256": "2e28a13fb98841fbed53dc6f6204e8283bbedbe0cdc55f849e6aa54fa930126f",
+        "size_bytes": 9649
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+OK: validated 80-row manifest: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/omni/proposed_am100_am250_medium_manifest.tsv
+Selected configuration:
+  SLURM_ARRAY_TASK_ID=59
+  RUN_KEY=AM250__ratio0.90__seed1010__proposed
+  AM_ID=AM250
+  workload=AM250
+  BASE_DEADLINE=2700
+  DEADLINE_RATIO=0.90
+  actual_deadline=2430
+  SEED=1010
+  VARIANT=proposed
+  RUN_DIR=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am100_am250_medium/runs/AM250__ratio0.90__seed1010__proposed
+  CHECKPOINT_PATH=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am100_am250_medium/runs/AM250__ratio0.90__seed1010__proposed/checkpoint_latest.pkl
+  RESUME_FROM=

@@ -121,6 +121,30 @@ def expected_rows():
     return rows
 
 
+def expected_rows_for_workloads(workload_ids):
+    wanted = list(workload_ids)
+    rows = []
+    index = 0
+    for am_id, base_deadline, ratios in WORKLOADS:
+        if am_id not in wanted:
+            continue
+        for ratio, actual_deadline in ratios:
+            for seed in SEEDS:
+                rows.append({
+                    "array_index": str(index),
+                    "run_key": f"{am_id}__ratio{ratio}__seed{seed}__proposed",
+                    "AM_ID": am_id,
+                    "workload": am_id,
+                    "BASE_DEADLINE": base_deadline,
+                    "DEADLINE_RATIO": ratio,
+                    "actual_deadline": actual_deadline,
+                    "SEED": seed,
+                    "VARIANT": "proposed",
+                })
+                index += 1
+    return rows
+
+
 EXPECTED_BY_INDEX = {row["array_index"]: row for row in expected_rows()}
 
 
@@ -149,20 +173,36 @@ def required_files(project_dir):
 def validate_manifest(path, project_dir):
     rows = read_manifest(path)
     errors = []
-    if len(rows) != 120:
-        errors.append(f"expected exactly 120 data rows, found {len(rows)}")
+    if not rows:
+        errors.append("manifest has no data rows")
     indices = [row["array_index"] for row in rows]
-    if sorted(indices, key=lambda value: int(value) if value.isdigit() else -1) != [str(i) for i in range(120)]:
-        errors.append("array indices are not exactly 0 through 119")
+    expected_indices = [str(i) for i in range(len(rows))]
+    if sorted(indices, key=lambda value: int(value) if value.isdigit() else -1) != expected_indices:
+        errors.append(f"array indices are not exactly 0 through {len(rows) - 1}")
     if len(indices) != len(set(indices)):
         errors.append("array indices are not unique")
     run_keys = [row["run_key"] for row in rows]
     if len(run_keys) != len(set(run_keys)):
         errors.append("run keys are not unique")
 
+    manifest_workloads = []
+    for row in rows:
+        workload = row["workload"]
+        if workload not in manifest_workloads:
+            manifest_workloads.append(workload)
+    known_workloads = [am_id for am_id, _base, _ratios in WORKLOADS]
+    unknown_workloads = [workload for workload in manifest_workloads if workload not in known_workloads]
+    if unknown_workloads:
+        errors.append("unknown workload(s): " + ", ".join(unknown_workloads))
+    expected_subset = expected_rows_for_workloads(manifest_workloads)
+    if len(rows) != len(expected_subset):
+        errors.append(
+            f"expected {len(expected_subset)} rows for workload set {manifest_workloads}, found {len(rows)}"
+        )
+    expected_by_index = {row["array_index"]: row for row in expected_subset}
     for row in rows:
         index = row["array_index"]
-        expected = EXPECTED_BY_INDEX.get(index)
+        expected = expected_by_index.get(index)
         if expected is None:
             errors.append(f"row has unexpected array_index={index!r}")
             continue
@@ -185,8 +225,12 @@ def validate_manifest(path, project_dir):
         groups[(row["workload"], row["DEADLINE_RATIO"], row["actual_deadline"])].add(row["SEED"])
         if row["VARIANT"] != "proposed":
             errors.append(f"row {row['array_index']} has VARIANT={row['VARIANT']!r}, expected 'proposed'")
-    if len(groups) != 12:
-        errors.append(f"expected 12 workload-deadline groups, found {len(groups)}")
+    expected_group_count = len({
+        (row["workload"], row["DEADLINE_RATIO"], row["actual_deadline"])
+        for row in expected_subset
+    })
+    if len(groups) != expected_group_count:
+        errors.append(f"expected {expected_group_count} workload-deadline groups, found {len(groups)}")
     for group, seeds in sorted(groups.items()):
         if seeds != set(SEEDS):
             missing = sorted(set(SEEDS) - seeds)
@@ -208,11 +252,7 @@ def row_by_index(manifest_path, array_index, project_dir=None, validate=False):
     matches = [row for row in rows if row["array_index"] == wanted]
     if len(matches) != 1:
         raise SystemExit(f"ERROR: expected one manifest row for array_index={wanted}, found {len(matches)}")
-    row = matches[0]
-    expected = EXPECTED_BY_INDEX.get(wanted)
-    if expected is None or any(row[field] != expected[field] for field in FIELDS):
-        raise SystemExit(f"ERROR: manifest row {wanted} does not match the validated expected grid")
-    return row
+    return matches[0]
 
 
 def run_dir_for(output_root, row):
@@ -509,8 +549,8 @@ def classification_table(manifest_path, output_root, array_job_id=None):
 
 
 def cmd_validate(args):
-    validate_manifest(args.manifest, args.project_dir)
-    print(f"OK: validated 120-row manifest: {args.manifest}")
+    rows = validate_manifest(args.manifest, args.project_dir)
+    print(f"OK: validated {len(rows)}-row manifest: {args.manifest}")
 
 
 def cmd_export_row(args):
@@ -590,7 +630,7 @@ def cmd_status(args):
             groups_with_missing.append((group, incomplete))
 
     print(f"SLURM array job ID: {array_job_id or 'unknown'}")
-    print("total expected tasks: 120")
+    print(f"total expected tasks: {len(table)}")
     print(f"completed tasks: {counts['complete']}")
     print(f"pending tasks: {counts['pending']}")
     print(f"running tasks: {counts['running']}")
@@ -600,7 +640,7 @@ def cmd_status(args):
     print(f"interrupted tasks with checkpoints: {counts['interrupted with checkpoint']}")
     print(f"missing tasks: {counts['missing']}")
     print(f"incompatible checkpoints: {counts['checkpoint incompatible']}")
-    print(f"complete workload-deadline groups: {complete_groups}/12")
+    print(f"complete workload-deadline groups: {complete_groups}/{len(groups)}")
     print(f"squeue checked: {str(queue_checked).lower()}")
     print(f"sacct checked: {str(sacct_checked).lower()}")
     if groups_with_missing:

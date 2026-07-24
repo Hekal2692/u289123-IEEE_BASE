@@ -1,0 +1,14 @@
+OK: validated 40-row manifest: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/omni/proposed_am500_medium_manifest.tsv
+Selected configuration:
+  SLURM_ARRAY_TASK_ID=32
+  RUN_KEY=AM500__ratio0.70__seed1003__proposed
+  AM_ID=AM500
+  workload=AM500
+  BASE_DEADLINE=4300
+  DEADLINE_RATIO=0.70
+  actual_deadline=3010
+  SEED=1003
+  VARIANT=proposed
+  RUN_DIR=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio0.70__seed1003__proposed
+  CHECKPOINT_PATH=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio0.70__seed1003__proposed/checkpoint_latest.pkl
+  RESUME_FROM=
