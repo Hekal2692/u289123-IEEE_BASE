@@ -3059,3 +3059,140 @@
 2026-07-24 06:33:30,302 - INFO - [Reconstruction_2][IPC] paths_used=1024, tasks_shifted=2006, passes=6
 2026-07-24 06:33:30,305 - INFO - [Eval-Global] (gen=30, ctx=Gen-30) GlobalMS=4172 SignedLate=-128 Deadline=4300
 2026-07-24 06:35:33,616 - INFO - [Eval] (Context: Gen-30) P_FE -> C2 | Budget=2382 | MS=2488
+2026-07-24 06:36:02,753 - INFO - [Eval] (Context: Gen-30) P_C1 -> C3 | Budget=909 | MS=873
+2026-07-24 06:36:08,323 - INFO - [Eval] (Context: Gen-30) P_C2 -> C1 | Budget=422 | MS=409
+2026-07-24 06:36:10,468 - INFO - [Eval] (Context: Gen-30) P_C3 -> FE | Budget=437 | MS=421
+2026-07-24 06:36:10,783 - INFO - [Reconstruction_2][IPC] paths_used=1017, tasks_shifted=2311, passes=6
+2026-07-24 06:36:10,787 - INFO - [Eval-Global] (gen=30, ctx=Gen-30) GlobalMS=4852 SignedLate=552 Deadline=4300
+2026-07-24 06:38:15,229 - INFO - [Eval] (Context: Gen-30) P_FE -> C2 | Budget=2387 | MS=2521
+2026-07-24 06:38:45,181 - INFO - [Eval] (Context: Gen-30) P_C1 -> C3 | Budget=909 | MS=873
+2026-07-24 06:38:50,657 - INFO - [Eval] (Context: Gen-30) P_C2 -> C1 | Budget=427 | MS=407
+2026-07-24 06:38:52,775 - INFO - [Eval] (Context: Gen-30) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 06:38:52,842 - INFO - [Reconstruction_2][IPC] paths_used=1015, tasks_shifted=2067, passes=5
+2026-07-24 06:38:52,846 - INFO - [Eval-Global] (gen=30, ctx=Gen-30) GlobalMS=4536 SignedLate=236 Deadline=4300
+2026-07-24 06:40:54,872 - INFO - [Eval] (Context: Gen-30) P_FE -> C3 | Budget=2455 | MS=2384
+2026-07-24 06:41:24,508 - INFO - [Eval] (Context: Gen-30) P_C1 -> C2 | Budget=909 | MS=874
+2026-07-24 06:41:30,028 - INFO - [Eval] (Context: Gen-30) P_C2 -> C1 | Budget=427 | MS=410
+2026-07-24 06:41:32,105 - INFO - [Eval] (Context: Gen-30) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 06:41:32,174 - INFO - [Reconstruction_2][IPC] paths_used=1018, tasks_shifted=2045, passes=5
+2026-07-24 06:41:32,177 - INFO - [Eval-Global] (gen=30, ctx=Gen-30) GlobalMS=4185 SignedLate=-115 Deadline=4300
+2026-07-24 06:43:33,218 - INFO - [Eval] (Context: Gen-30) P_FE -> C2 | Budget=2387 | MS=2344
+2026-07-24 06:44:02,603 - INFO - [Eval] (Context: Gen-30) P_C1 -> C3 | Budget=909 | MS=875
+2026-07-24 06:44:08,101 - INFO - [Eval] (Context: Gen-30) P_C2 -> C1 | Budget=427 | MS=410
+2026-07-24 06:44:10,157 - INFO - [Eval] (Context: Gen-30) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 06:44:10,229 - INFO - [Reconstruction_2][IPC] paths_used=1016, tasks_shifted=1900, passes=6
+2026-07-24 06:44:10,232 - INFO - [Eval-Global] (gen=30, ctx=Gen-30) GlobalMS=4538 SignedLate=238 Deadline=4300
+2026-07-24 09:27:52,151 - INFO - [Logger] config.py snapshot saved to: /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed/config.py
+2026-07-24 09:27:52,307 - INFO - [RUN] run_id=AM500__ratio1.00__seed1010__proposed
+2026-07-24 09:27:52,308 - INFO - [RUN] run_key=AM500__ratio1.00__seed1010__proposed
+2026-07-24 09:27:52,308 - INFO - [RUN] seed=1010
+2026-07-24 09:27:52,308 - INFO - [RUN] PYTHONHASHSEED=1010
+2026-07-24 09:27:52,308 - INFO - [RUN] am_id=AM500
+2026-07-24 09:27:52,308 - INFO - [RUN] base_deadline=4300
+2026-07-24 09:27:52,308 - INFO - [RUN] deadline_ratio=1.00
+2026-07-24 09:27:52,308 - INFO - [RUN] actual_deadline_value=4300
+2026-07-24 09:27:52,308 - INFO - [RUN] variant=proposed
+2026-07-24 09:27:52,308 - INFO - [RUN] output_dir=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed
+2026-07-24 09:27:52,308 - INFO - [RUN] hostname=fat-node006
+2026-07-24 09:27:52,308 - INFO - [RUN] python_version=3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]
+2026-07-24 09:27:52,308 - INFO - [RUN] working_directory=/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/codes
+2026-07-24 09:27:52,308 - INFO - [RUN] slurm_job_id=12042025
+2026-07-24 09:27:52,308 - INFO - [RUN] slurm_array_task_id=9
+2026-07-24 09:27:52,313 - INFO - [MAIN] AM size: 500T
+2026-07-24 09:27:52,313 - INFO - [MAIN] Platforms directory: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms
+2026-07-24 09:27:52,313 - INFO - [MAIN] Full AM/PM input: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/TC500.json
+2026-07-24 09:28:03,779 - INFO - Time Maksepan of the list scheduling is
+2026-07-24 09:28:03,779 - INFO - 6397
+2026-07-24 09:28:03,779 - INFO -  seconds
+2026-07-24 09:28:03,933 - INFO - List-scheduling makespan is
+2026-07-24 09:28:03,949 - INFO - 6397
+2026-07-24 09:28:03,949 - INFO - Baseline Deadline is
+2026-07-24 09:28:03,949 - INFO - 4300
+2026-07-24 09:28:03,949 - INFO - Deadline setting is
+2026-07-24 09:28:03,949 - INFO - ratio1.00
+2026-07-24 09:28:03,949 - INFO - Application Deadline is
+2026-07-24 09:28:03,949 - INFO - 4300
+2026-07-24 09:28:03,949 - INFO - [RUN] list_schedule_makespan=6397
+2026-07-24 09:28:03,949 - INFO - [MAIN] List-scheduling makespan: 6397
+2026-07-24 09:28:03,949 - INFO - [MAIN] Baseline deadline: 4300
+2026-07-24 09:28:03,949 - INFO - [MAIN] Deadline setting: ratio1.00
+2026-07-24 09:28:03,950 - INFO - [MAIN] Application deadline: 4300
+2026-07-24 09:28:04,051 - INFO - [RUN] run_config_json=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed/run_config.json
+2026-07-24 09:28:04,052 - INFO - [MAIN] System-level scheduling launched
+2026-07-24 09:28:04,125 - ERROR - [Checkpoint] Incompatible checkpoint: Checkpoint does not match this manifest/configuration; mismatched field(s): git_commit_sha
+2026-07-25 09:31:50,468 - INFO - [Logger] config.py snapshot saved to: /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed/config.py
+2026-07-25 09:31:50,505 - INFO - [RUN] run_id=AM500__ratio1.00__seed1010__proposed
+2026-07-25 09:31:50,505 - INFO - [RUN] run_key=AM500__ratio1.00__seed1010__proposed
+2026-07-25 09:31:50,505 - INFO - [RUN] seed=1010
+2026-07-25 09:31:50,505 - INFO - [RUN] PYTHONHASHSEED=1010
+2026-07-25 09:31:50,505 - INFO - [RUN] am_id=AM500
+2026-07-25 09:31:50,505 - INFO - [RUN] base_deadline=4300
+2026-07-25 09:31:50,505 - INFO - [RUN] deadline_ratio=1.00
+2026-07-25 09:31:50,505 - INFO - [RUN] actual_deadline_value=4300
+2026-07-25 09:31:50,505 - INFO - [RUN] variant=proposed
+2026-07-25 09:31:50,505 - INFO - [RUN] output_dir=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed
+2026-07-25 09:31:50,506 - INFO - [RUN] hostname=hpc-node102
+2026-07-25 09:31:50,506 - INFO - [RUN] python_version=3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]
+2026-07-25 09:31:50,506 - INFO - [RUN] working_directory=/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/codes
+2026-07-25 09:31:50,506 - INFO - [RUN] slurm_job_id=12049488
+2026-07-25 09:31:50,506 - INFO - [RUN] slurm_array_task_id=9
+2026-07-25 09:31:50,545 - INFO - [MAIN] AM size: 500T
+2026-07-25 09:31:50,545 - INFO - [MAIN] Platforms directory: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms
+2026-07-25 09:31:50,545 - INFO - [MAIN] Full AM/PM input: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/TC500.json
+2026-07-25 09:32:01,490 - INFO - Time Maksepan of the list scheduling is
+2026-07-25 09:32:01,491 - INFO - 6397
+2026-07-25 09:32:01,491 - INFO -  seconds
+2026-07-25 09:32:01,568 - INFO - List-scheduling makespan is
+2026-07-25 09:32:01,568 - INFO - 6397
+2026-07-25 09:32:01,568 - INFO - Baseline Deadline is
+2026-07-25 09:32:01,568 - INFO - 4300
+2026-07-25 09:32:01,568 - INFO - Deadline setting is
+2026-07-25 09:32:01,568 - INFO - ratio1.00
+2026-07-25 09:32:01,568 - INFO - Application Deadline is
+2026-07-25 09:32:01,568 - INFO - 4300
+2026-07-25 09:32:01,568 - INFO - [RUN] list_schedule_makespan=6397
+2026-07-25 09:32:01,568 - INFO - [MAIN] List-scheduling makespan: 6397
+2026-07-25 09:32:01,568 - INFO - [MAIN] Baseline deadline: 4300
+2026-07-25 09:32:01,568 - INFO - [MAIN] Deadline setting: ratio1.00
+2026-07-25 09:32:01,568 - INFO - [MAIN] Application deadline: 4300
+2026-07-25 09:32:01,663 - INFO - [RUN] run_config_json=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed/run_config.json
+2026-07-25 09:32:01,664 - INFO - [MAIN] System-level scheduling launched
+2026-07-25 09:32:01,745 - ERROR - [Checkpoint] Incompatible checkpoint: Checkpoint does not match this manifest/configuration; mismatched field(s): git_commit_sha
+2026-07-25 16:10:23,332 - INFO - [Logger] config.py snapshot saved to: /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed/config.py
+2026-07-25 16:10:23,346 - INFO - [RUN] run_id=AM500__ratio1.00__seed1010__proposed
+2026-07-25 16:10:23,346 - INFO - [RUN] run_key=AM500__ratio1.00__seed1010__proposed
+2026-07-25 16:10:23,346 - INFO - [RUN] seed=1010
+2026-07-25 16:10:23,346 - INFO - [RUN] PYTHONHASHSEED=1010
+2026-07-25 16:10:23,346 - INFO - [RUN] am_id=AM500
+2026-07-25 16:10:23,346 - INFO - [RUN] base_deadline=4300
+2026-07-25 16:10:23,346 - INFO - [RUN] deadline_ratio=1.00
+2026-07-25 16:10:23,346 - INFO - [RUN] actual_deadline_value=4300
+2026-07-25 16:10:23,346 - INFO - [RUN] variant=proposed
+2026-07-25 16:10:23,346 - INFO - [RUN] output_dir=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed
+2026-07-25 16:10:23,346 - INFO - [RUN] hostname=hpc-node148
+2026-07-25 16:10:23,346 - INFO - [RUN] python_version=3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]
+2026-07-25 16:10:23,346 - INFO - [RUN] working_directory=/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/codes
+2026-07-25 16:10:23,346 - INFO - [RUN] slurm_job_id=12051924
+2026-07-25 16:10:23,346 - INFO - [RUN] slurm_array_task_id=9
+2026-07-25 16:10:23,351 - INFO - [MAIN] AM size: 500T
+2026-07-25 16:10:23,351 - INFO - [MAIN] Platforms directory: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms
+2026-07-25 16:10:23,351 - INFO - [MAIN] Full AM/PM input: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/TC500.json
+2026-07-25 16:10:34,249 - INFO - Time Maksepan of the list scheduling is
+2026-07-25 16:10:34,249 - INFO - 6397
+2026-07-25 16:10:34,249 - INFO -  seconds
+2026-07-25 16:10:34,329 - INFO - List-scheduling makespan is
+2026-07-25 16:10:34,329 - INFO - 6397
+2026-07-25 16:10:34,329 - INFO - Baseline Deadline is
+2026-07-25 16:10:34,329 - INFO - 4300
+2026-07-25 16:10:34,329 - INFO - Deadline setting is
+2026-07-25 16:10:34,329 - INFO - ratio1.00
+2026-07-25 16:10:34,329 - INFO - Application Deadline is
+2026-07-25 16:10:34,329 - INFO - 4300
+2026-07-25 16:10:34,329 - INFO - [RUN] list_schedule_makespan=6397
+2026-07-25 16:10:34,329 - INFO - [MAIN] List-scheduling makespan: 6397
+2026-07-25 16:10:34,329 - INFO - [MAIN] Baseline deadline: 4300
+2026-07-25 16:10:34,329 - INFO - [MAIN] Deadline setting: ratio1.00
+2026-07-25 16:10:34,329 - INFO - [MAIN] Application deadline: 4300
+2026-07-25 16:10:34,377 - INFO - [RUN] run_config_json=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1010__proposed/run_config.json
+2026-07-25 16:10:34,378 - INFO - [MAIN] System-level scheduling launched
+2026-07-25 16:10:34,443 - ERROR - [Checkpoint] Incompatible checkpoint: Checkpoint does not match this manifest/configuration; mismatched field(s): git_commit_sha

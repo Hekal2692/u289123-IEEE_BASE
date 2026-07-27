@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "completed_generation": 28,
+  "completed_generation": 31,
   "run_key": "AM500__ratio0.90__seed1009__proposed",
   "workload": "AM500",
   "am_id": "AM500",
@@ -89,8 +89,8 @@
   "interruption_count": 0,
   "resumed": false,
   "resume_generation": null,
-  "final_attempt_system_ga_runtime_s": 76299.82816753397,
-  "accumulated_system_ga_runtime_s": 76299.82816753397,
+  "final_attempt_system_ga_runtime_s": 83937.3002815987,
+  "accumulated_system_ga_runtime_s": 83937.3002815987,
   "checkpoint_identity": {
     "run_key": "AM500__ratio0.90__seed1009__proposed",
     "workload": "AM500",

@@ -1,7 +1,7 @@
 {
-  "state": "RUNNING",
-  "message": "system-level GA starting",
-  "updated_at": "2026-07-23T09:19:04",
+  "state": "CHECKPOINT_INCOMPATIBLE",
+  "message": "Checkpoint does not match this manifest/configuration; mismatched field(s): git_commit_sha",
+  "updated_at": "2026-07-25T16:10:03",
   "run_dir": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1008__proposed",
   "run_id": "AM500__ratio1.00__seed1008__proposed",
   "run_key": "AM500__ratio1.00__seed1008__proposed",
@@ -14,14 +14,14 @@
   "actual_deadline_value": 4300,
   "seed": 1008,
   "variant": "proposed",
-  "timestamp_start": "2026-07-23T09:18:49",
+  "timestamp_start": "2026-07-25T16:09:52",
   "output_dir": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1008__proposed",
   "working_directory": "/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/codes",
-  "hostname": "hpc-node126",
+  "hostname": "hpc-node265",
   "python_version": "3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]",
   "python_executable": "/home/u289123/venvs/ftcodes311/bin/python",
   "PYTHONHASHSEED": "1008",
-  "git_commit_sha": "0b74be8bb5547c0c0ca809a763c9403b1b3864dc",
+  "git_commit_sha": "145605bfcf6f552ce2db2baea10bb01f2c94af2e",
   "ga_configuration": {
     "APPLCATION_DEADLINE_FACTOR": 0.9,
     "PartitionMakespanWeight": -10,
@@ -48,8 +48,8 @@
     "TBMutNoiseFrac": 0.007,
     "TBSlackPenaltyWeight": 0.01
   },
-  "slurm_job_id": "12037158",
-  "slurm_array_job_id": "12037076",
+  "slurm_job_id": "12051922",
+  "slurm_array_job_id": "12037079",
   "slurm_array_task_id": "7",
   "slurm_cpus_per_task": "16",
   "slurm_mem_per_node": "131072",
@@ -111,6 +111,5 @@
       "size_bytes": 8907
     }
   },
-  "checkpoint_path": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1008__proposed/checkpoint_latest.pkl",
-  "resume_from": null
+  "checkpoint_path": "/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1008__proposed/checkpoint_latest.pkl"
 }

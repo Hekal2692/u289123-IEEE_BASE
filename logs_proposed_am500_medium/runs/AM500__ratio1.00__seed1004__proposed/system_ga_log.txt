@@ -3094,3 +3094,503 @@
 2026-07-24 06:35:09,902 - INFO - [Eval] (Context: Gen-30) P_C3 -> FE | Budget=437 | MS=421
 2026-07-24 06:35:09,979 - INFO - [Reconstruction_2][IPC] paths_used=1019, tasks_shifted=2183, passes=7
 2026-07-24 06:35:09,983 - INFO - [Eval-Global] (gen=30, ctx=Gen-30) GlobalMS=4736 SignedLate=436 Deadline=4300
+2026-07-24 06:37:09,389 - INFO - [Eval] (Context: Gen-30) P_FE -> C1 | Budget=2551 | MS=2452
+2026-07-24 06:37:38,960 - INFO - [Eval] (Context: Gen-30) P_C1 -> C2 | Budget=903 | MS=874
+2026-07-24 06:37:44,262 - INFO - [Eval] (Context: Gen-30) P_C2 -> FE | Budget=423 | MS=410
+2026-07-24 06:37:46,400 - INFO - [Eval] (Context: Gen-30) P_C3 -> C3 | Budget=437 | MS=420
+2026-07-24 06:37:46,466 - INFO - [Reconstruction_2][IPC] paths_used=1021, tasks_shifted=1946, passes=5
+2026-07-24 06:37:46,470 - INFO - [Eval-Global] (gen=30, ctx=Gen-30) GlobalMS=4105 SignedLate=-195 Deadline=4300
+2026-07-24 06:37:46,473 - INFO - [Generation 30] GlobalMS=4219 Late=-81 TB={'P_FE': 2394, 'P_C1': 903, 'P_C2': 428, 'P_C3': 437} ViolSum=0 GenTime=2564.04s TotalTime=76721.93s PeakMemMB=207.125
+2026-07-24 06:37:46,507 - INFO - [Checkpoint] Saved generation 30 to /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/checkpoint_latest.pkl
+2026-07-24 06:37:46,507 - INFO - [SystemLevelGA] Generation 31/40
+2026-07-24 06:39:45,789 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2488 | MS=2600
+2026-07-24 06:40:16,162 - INFO - [Eval] (Context: Gen-31) P_C1 -> C2 | Budget=903 | MS=875
+2026-07-24 06:40:21,795 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=412
+2026-07-24 06:40:23,927 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 06:40:24,191 - INFO - [Reconstruction_2][IPC] paths_used=1014, tasks_shifted=2148, passes=5
+2026-07-24 06:40:24,196 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4341 SignedLate=41 Deadline=4300
+2026-07-24 06:42:28,007 - INFO - [Eval] (Context: Gen-31) P_FE -> C2 | Budget=2409 | MS=2324
+2026-07-24 06:42:58,838 - INFO - [Eval] (Context: Gen-31) P_C1 -> C1 | Budget=903 | MS=871
+2026-07-24 06:43:04,097 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=409
+2026-07-24 06:43:06,132 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 06:43:06,203 - INFO - [Reconstruction_2][IPC] paths_used=1023, tasks_shifted=2012, passes=6
+2026-07-24 06:43:06,206 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4287 SignedLate=-13 Deadline=4300
+2026-07-24 06:45:06,903 - INFO - [Eval] (Context: Gen-31) P_FE -> C2 | Budget=2516 | MS=2321
+2026-07-24 06:45:33,350 - INFO - [Eval] (Context: Gen-31) P_C1 -> FE | Budget=903 | MS=870
+2026-07-24 06:45:38,518 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=411
+2026-07-24 06:45:40,586 - INFO - [Eval] (Context: Gen-31) P_C3 -> C1 | Budget=437 | MS=420
+2026-07-24 06:45:40,650 - INFO - [Reconstruction_2][IPC] paths_used=1007, tasks_shifted=1904, passes=5
+2026-07-24 06:45:40,653 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4276 SignedLate=-24 Deadline=4300
+2026-07-24 06:47:42,927 - INFO - [Eval] (Context: Gen-31) P_FE -> C2 | Budget=2433 | MS=2525
+2026-07-24 06:48:12,687 - INFO - [Eval] (Context: Gen-31) P_C1 -> C3 | Budget=903 | MS=873
+2026-07-24 06:48:18,272 - INFO - [Eval] (Context: Gen-31) P_C2 -> C1 | Budget=427 | MS=411
+2026-07-24 06:48:20,316 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 06:48:20,381 - INFO - [Reconstruction_2][IPC] paths_used=1008, tasks_shifted=1744, passes=5
+2026-07-24 06:48:20,384 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4050 SignedLate=-250 Deadline=4300
+2026-07-24 06:50:24,117 - INFO - [Eval] (Context: Gen-31) P_FE -> C2 | Budget=2424 | MS=2609
+2026-07-24 06:50:53,901 - INFO - [Eval] (Context: Gen-31) P_C1 -> C1 | Budget=903 | MS=870
+2026-07-24 06:50:59,222 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=412
+2026-07-24 06:51:01,173 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=421
+2026-07-24 06:51:01,238 - INFO - [Reconstruction_2][IPC] paths_used=1016, tasks_shifted=1737, passes=5
+2026-07-24 06:51:01,242 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4074 SignedLate=-226 Deadline=4300
+2026-07-24 06:53:04,377 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2465 | MS=2369
+2026-07-24 06:53:34,598 - INFO - [Eval] (Context: Gen-31) P_C1 -> C2 | Budget=903 | MS=875
+2026-07-24 06:53:40,065 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=427 | MS=411
+2026-07-24 06:53:42,037 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 06:53:42,289 - INFO - [Reconstruction_2][IPC] paths_used=1023, tasks_shifted=1848, passes=5
+2026-07-24 06:53:42,293 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4451 SignedLate=151 Deadline=4300
+2026-07-24 06:55:46,698 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2385 | MS=2521
+2026-07-24 06:56:16,616 - INFO - [Eval] (Context: Gen-31) P_C1 -> C2 | Budget=903 | MS=875
+2026-07-24 06:56:22,144 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=409
+2026-07-24 06:56:24,176 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 06:56:24,240 - INFO - [Reconstruction_2][IPC] paths_used=1014, tasks_shifted=1703, passes=5
+2026-07-24 06:56:24,244 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4977 SignedLate=677 Deadline=4300
+2026-07-24 06:58:22,185 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2433 | MS=2336
+2026-07-24 06:58:51,548 - INFO - [Eval] (Context: Gen-31) P_C1 -> C2 | Budget=903 | MS=872
+2026-07-24 06:58:57,104 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=427 | MS=410
+2026-07-24 06:58:59,077 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 06:58:59,149 - INFO - [Reconstruction_2][IPC] paths_used=1027, tasks_shifted=2392, passes=5
+2026-07-24 06:58:59,152 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4151 SignedLate=-149 Deadline=4300
+2026-07-24 07:01:00,598 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2398 | MS=2403
+2026-07-24 07:01:28,490 - INFO - [Eval] (Context: Gen-31) P_C1 -> FE | Budget=903 | MS=870
+2026-07-24 07:01:33,794 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=410
+2026-07-24 07:01:35,833 - INFO - [Eval] (Context: Gen-31) P_C3 -> C2 | Budget=437 | MS=420
+2026-07-24 07:01:36,082 - INFO - [Reconstruction_2][IPC] paths_used=1014, tasks_shifted=2092, passes=5
+2026-07-24 07:01:36,086 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4593 SignedLate=293 Deadline=4300
+2026-07-24 07:03:40,751 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2551 | MS=2494
+2026-07-24 07:04:11,201 - INFO - [Eval] (Context: Gen-31) P_C1 -> C2 | Budget=903 | MS=872
+2026-07-24 07:04:16,722 - INFO - [Eval] (Context: Gen-31) P_C2 -> FE | Budget=423 | MS=411
+2026-07-24 07:04:18,936 - INFO - [Eval] (Context: Gen-31) P_C3 -> C3 | Budget=437 | MS=420
+2026-07-24 07:04:19,004 - INFO - [Reconstruction_2][IPC] paths_used=1020, tasks_shifted=1913, passes=5
+2026-07-24 07:04:19,007 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=3989 SignedLate=-311 Deadline=4300
+2026-07-24 07:06:24,061 - INFO - [Eval] (Context: Gen-31) P_FE -> C2 | Budget=2551 | MS=2535
+2026-07-24 07:06:51,565 - INFO - [Eval] (Context: Gen-31) P_C1 -> FE | Budget=903 | MS=869
+2026-07-24 07:06:57,023 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=410
+2026-07-24 07:06:59,319 - INFO - [Eval] (Context: Gen-31) P_C3 -> C1 | Budget=437 | MS=419
+2026-07-24 07:06:59,389 - INFO - [Reconstruction_2][IPC] paths_used=1027, tasks_shifted=2156, passes=5
+2026-07-24 07:06:59,392 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=5317 SignedLate=1017 Deadline=4300
+2026-07-24 07:08:59,084 - INFO - [Eval] (Context: Gen-31) P_FE -> FE | Budget=2501 | MS=2796
+2026-07-24 07:09:28,751 - INFO - [Eval] (Context: Gen-31) P_C1 -> C2 | Budget=903 | MS=874
+2026-07-24 07:09:34,395 - INFO - [Eval] (Context: Gen-31) P_C2 -> C1 | Budget=423 | MS=408
+2026-07-24 07:09:36,549 - INFO - [Eval] (Context: Gen-31) P_C3 -> C3 | Budget=437 | MS=419
+2026-07-24 07:09:36,621 - INFO - [Reconstruction_2][IPC] paths_used=1004, tasks_shifted=2328, passes=6
+2026-07-24 07:09:36,625 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=5105 SignedLate=805 Deadline=4300
+2026-07-24 07:11:35,347 - INFO - [Eval] (Context: Gen-31) P_FE -> C3 | Budget=2403 | MS=2434
+2026-07-24 07:12:05,867 - INFO - [Eval] (Context: Gen-31) P_C1 -> C1 | Budget=903 | MS=871
+2026-07-24 07:12:11,410 - INFO - [Eval] (Context: Gen-31) P_C2 -> C2 | Budget=428 | MS=410
+2026-07-24 07:12:13,460 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 07:12:13,543 - INFO - [Reconstruction_2][IPC] paths_used=1024, tasks_shifted=2518, passes=7
+2026-07-24 07:12:13,547 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4704 SignedLate=404 Deadline=4300
+2026-07-24 07:14:20,243 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2439 | MS=2537
+2026-07-24 07:14:47,469 - INFO - [Eval] (Context: Gen-31) P_C1 -> FE | Budget=903 | MS=874
+2026-07-24 07:14:52,665 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=409
+2026-07-24 07:14:54,799 - INFO - [Eval] (Context: Gen-31) P_C3 -> C2 | Budget=437 | MS=421
+2026-07-24 07:14:54,870 - INFO - [Reconstruction_2][IPC] paths_used=1017, tasks_shifted=1921, passes=6
+2026-07-24 07:14:54,873 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4481 SignedLate=181 Deadline=4300
+2026-07-24 07:16:59,968 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2409 | MS=2383
+2026-07-24 07:17:26,778 - INFO - [Eval] (Context: Gen-31) P_C1 -> FE | Budget=903 | MS=870
+2026-07-24 07:17:32,270 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=423 | MS=407
+2026-07-24 07:17:34,438 - INFO - [Eval] (Context: Gen-31) P_C3 -> C2 | Budget=437 | MS=420
+2026-07-24 07:17:34,511 - INFO - [Reconstruction_2][IPC] paths_used=1017, tasks_shifted=2152, passes=6
+2026-07-24 07:17:34,514 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4432 SignedLate=132 Deadline=4300
+2026-07-24 07:19:35,118 - INFO - [Eval] (Context: Gen-31) P_FE -> C1 | Budget=2403 | MS=2597
+2026-07-24 07:20:05,010 - INFO - [Eval] (Context: Gen-31) P_C1 -> C2 | Budget=903 | MS=872
+2026-07-24 07:20:10,713 - INFO - [Eval] (Context: Gen-31) P_C2 -> C3 | Budget=428 | MS=410
+2026-07-24 07:20:12,804 - INFO - [Eval] (Context: Gen-31) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 07:20:12,873 - INFO - [Reconstruction_2][IPC] paths_used=1024, tasks_shifted=1941, passes=5
+2026-07-24 07:20:12,876 - INFO - [Eval-Global] (gen=31, ctx=Gen-31) GlobalMS=4740 SignedLate=440 Deadline=4300
+2026-07-24 07:20:12,878 - INFO - [Generation 31] GlobalMS=4219 Late=-81 TB={'P_FE': 2394, 'P_C1': 903, 'P_C2': 428, 'P_C3': 437} ViolSum=0 GenTime=2546.37s TotalTime=79268.33s PeakMemMB=207.125
+2026-07-24 07:20:12,913 - INFO - [Checkpoint] Saved generation 31 to /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/checkpoint_latest.pkl
+2026-07-24 07:20:12,913 - INFO - [SystemLevelGA] Generation 32/40
+2026-07-24 07:22:16,570 - INFO - [Eval] (Context: Gen-32) P_FE -> C1 | Budget=2403 | MS=2371
+2026-07-24 07:22:46,267 - INFO - [Eval] (Context: Gen-32) P_C1 -> C2 | Budget=903 | MS=875
+2026-07-24 07:22:51,355 - INFO - [Eval] (Context: Gen-32) P_C2 -> FE | Budget=428 | MS=411
+2026-07-24 07:22:53,554 - INFO - [Eval] (Context: Gen-32) P_C3 -> C3 | Budget=437 | MS=422
+2026-07-24 07:22:53,799 - INFO - [Reconstruction_2][IPC] paths_used=1026, tasks_shifted=1873, passes=6
+2026-07-24 07:22:53,804 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4770 SignedLate=470 Deadline=4300
+2026-07-24 07:24:59,136 - INFO - [Eval] (Context: Gen-32) P_FE -> C1 | Budget=2551 | MS=2353
+2026-07-24 07:25:26,482 - INFO - [Eval] (Context: Gen-32) P_C1 -> FE | Budget=903 | MS=872
+2026-07-24 07:25:31,885 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=423 | MS=409
+2026-07-24 07:25:34,138 - INFO - [Eval] (Context: Gen-32) P_C3 -> C2 | Budget=437 | MS=420
+2026-07-24 07:25:34,212 - INFO - [Reconstruction_2][IPC] paths_used=1023, tasks_shifted=2086, passes=6
+2026-07-24 07:25:34,215 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4488 SignedLate=188 Deadline=4300
+2026-07-24 07:27:38,047 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2433 | MS=2495
+2026-07-24 07:28:06,667 - INFO - [Eval] (Context: Gen-32) P_C1 -> FE | Budget=903 | MS=872
+2026-07-24 07:28:12,211 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=427 | MS=410
+2026-07-24 07:28:14,432 - INFO - [Eval] (Context: Gen-32) P_C3 -> C1 | Budget=437 | MS=422
+2026-07-24 07:28:14,503 - INFO - [Reconstruction_2][IPC] paths_used=1019, tasks_shifted=2101, passes=6
+2026-07-24 07:28:14,507 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4343 SignedLate=43 Deadline=4300
+2026-07-24 07:30:18,975 - INFO - [Eval] (Context: Gen-32) P_FE -> C1 | Budget=2491 | MS=2433
+2026-07-24 07:30:49,384 - INFO - [Eval] (Context: Gen-32) P_C1 -> C2 | Budget=903 | MS=874
+2026-07-24 07:30:55,012 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=426 | MS=409
+2026-07-24 07:30:57,185 - INFO - [Eval] (Context: Gen-32) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 07:30:57,443 - INFO - [Reconstruction_2][IPC] paths_used=1019, tasks_shifted=2463, passes=6
+2026-07-24 07:30:57,446 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4351 SignedLate=51 Deadline=4300
+2026-07-24 07:33:01,024 - INFO - [Eval] (Context: Gen-32) P_FE -> C1 | Budget=2433 | MS=2385
+2026-07-24 07:33:31,046 - INFO - [Eval] (Context: Gen-32) P_C1 -> C2 | Budget=903 | MS=872
+2026-07-24 07:33:36,516 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=427 | MS=411
+2026-07-24 07:33:38,571 - INFO - [Eval] (Context: Gen-32) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 07:33:38,639 - INFO - [Reconstruction_2][IPC] paths_used=1021, tasks_shifted=2157, passes=5
+2026-07-24 07:33:38,642 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4625 SignedLate=325 Deadline=4300
+2026-07-24 07:35:43,131 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2491 | MS=2664
+2026-07-24 07:36:11,380 - INFO - [Eval] (Context: Gen-32) P_C1 -> FE | Budget=903 | MS=870
+2026-07-24 07:36:16,988 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=426 | MS=412
+2026-07-24 07:36:19,168 - INFO - [Eval] (Context: Gen-32) P_C3 -> C1 | Budget=437 | MS=420
+2026-07-24 07:36:19,236 - INFO - [Reconstruction_2][IPC] paths_used=1024, tasks_shifted=1928, passes=5
+2026-07-24 07:36:19,240 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4537 SignedLate=237 Deadline=4300
+2026-07-24 07:38:24,036 - INFO - [Eval] (Context: Gen-32) P_FE -> C1 | Budget=2403 | MS=2437
+2026-07-24 07:38:50,655 - INFO - [Eval] (Context: Gen-32) P_C1 -> FE | Budget=903 | MS=871
+2026-07-24 07:38:55,849 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=428 | MS=411
+2026-07-24 07:38:57,975 - INFO - [Eval] (Context: Gen-32) P_C3 -> C2 | Budget=437 | MS=419
+2026-07-24 07:38:58,042 - INFO - [Reconstruction_2][IPC] paths_used=1015, tasks_shifted=2013, passes=5
+2026-07-24 07:38:58,045 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4345 SignedLate=45 Deadline=4300
+2026-07-24 07:40:54,414 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2409 | MS=2527
+2026-07-24 07:41:23,274 - INFO - [Eval] (Context: Gen-32) P_C1 -> C1 | Budget=903 | MS=873
+2026-07-24 07:41:28,369 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=423 | MS=410
+2026-07-24 07:41:30,334 - INFO - [Eval] (Context: Gen-32) P_C3 -> FE | Budget=437 | MS=422
+2026-07-24 07:41:30,403 - INFO - [Reconstruction_2][IPC] paths_used=1014, tasks_shifted=1907, passes=5
+2026-07-24 07:41:30,406 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4662 SignedLate=362 Deadline=4300
+2026-07-24 07:43:28,047 - INFO - [Eval] (Context: Gen-32) P_FE -> C1 | Budget=2516 | MS=2545
+2026-07-24 07:43:55,995 - INFO - [Eval] (Context: Gen-32) P_C1 -> C2 | Budget=903 | MS=873
+2026-07-24 07:44:00,802 - INFO - [Eval] (Context: Gen-32) P_C2 -> FE | Budget=423 | MS=411
+2026-07-24 07:44:02,852 - INFO - [Eval] (Context: Gen-32) P_C3 -> C3 | Budget=437 | MS=420
+2026-07-24 07:44:02,926 - INFO - [Reconstruction_2][IPC] paths_used=1014, tasks_shifted=2182, passes=6
+2026-07-24 07:44:02,930 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4414 SignedLate=114 Deadline=4300
+2026-07-24 07:46:00,914 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2557 | MS=2408
+2026-07-24 07:46:30,389 - INFO - [Eval] (Context: Gen-32) P_C1 -> C1 | Budget=903 | MS=871
+2026-07-24 07:46:35,609 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=426 | MS=408
+2026-07-24 07:46:37,541 - INFO - [Eval] (Context: Gen-32) P_C3 -> FE | Budget=437 | MS=421
+2026-07-24 07:46:37,608 - INFO - [Reconstruction_2][IPC] paths_used=1013, tasks_shifted=1848, passes=5
+2026-07-24 07:46:37,612 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4099 SignedLate=-201 Deadline=4300
+2026-07-24 07:48:38,091 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2424 | MS=2422
+2026-07-24 07:49:04,674 - INFO - [Eval] (Context: Gen-32) P_C1 -> FE | Budget=903 | MS=869
+2026-07-24 07:49:09,676 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=423 | MS=411
+2026-07-24 07:49:11,783 - INFO - [Eval] (Context: Gen-32) P_C3 -> C1 | Budget=437 | MS=419
+2026-07-24 07:49:11,867 - INFO - [Reconstruction_2][IPC] paths_used=1024, tasks_shifted=2818, passes=7
+2026-07-24 07:49:11,871 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=5040 SignedLate=740 Deadline=4300
+2026-07-24 07:51:10,615 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2501 | MS=2461
+2026-07-24 07:51:39,638 - INFO - [Eval] (Context: Gen-32) P_C1 -> C1 | Budget=903 | MS=874
+2026-07-24 07:51:44,648 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=423 | MS=409
+2026-07-24 07:51:46,579 - INFO - [Eval] (Context: Gen-32) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 07:51:46,647 - INFO - [Reconstruction_2][IPC] paths_used=1015, tasks_shifted=1522, passes=6
+2026-07-24 07:51:46,651 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4217 SignedLate=-83 Deadline=4300
+2026-07-24 07:53:42,525 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2409 | MS=2267
+2026-07-24 07:54:09,849 - INFO - [Eval] (Context: Gen-32) P_C1 -> FE | Budget=903 | MS=868
+2026-07-24 07:54:14,959 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=423 | MS=411
+2026-07-24 07:54:17,004 - INFO - [Eval] (Context: Gen-32) P_C3 -> C1 | Budget=437 | MS=420
+2026-07-24 07:54:17,254 - INFO - [Reconstruction_2][IPC] paths_used=1012, tasks_shifted=1906, passes=5
+2026-07-24 07:54:17,257 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4370 SignedLate=70 Deadline=4300
+2026-07-24 07:56:16,697 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2501 | MS=2441
+2026-07-24 07:56:45,823 - INFO - [Eval] (Context: Gen-32) P_C1 -> C1 | Budget=903 | MS=871
+2026-07-24 07:56:50,998 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=423 | MS=410
+2026-07-24 07:56:52,953 - INFO - [Eval] (Context: Gen-32) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 07:56:53,025 - INFO - [Reconstruction_2][IPC] paths_used=1014, tasks_shifted=1958, passes=6
+2026-07-24 07:56:53,028 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4594 SignedLate=294 Deadline=4300
+2026-07-24 07:58:49,524 - INFO - [Eval] (Context: Gen-32) P_FE -> C2 | Budget=2557 | MS=2367
+2026-07-24 07:59:15,807 - INFO - [Eval] (Context: Gen-32) P_C1 -> FE | Budget=903 | MS=868
+2026-07-24 07:59:21,029 - INFO - [Eval] (Context: Gen-32) P_C2 -> C3 | Budget=426 | MS=412
+2026-07-24 07:59:23,076 - INFO - [Eval] (Context: Gen-32) P_C3 -> C1 | Budget=437 | MS=419
+2026-07-24 07:59:23,140 - INFO - [Reconstruction_2][IPC] paths_used=1023, tasks_shifted=1917, passes=5
+2026-07-24 07:59:23,144 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4325 SignedLate=25 Deadline=4300
+2026-07-24 08:01:22,672 - INFO - [Eval] (Context: Gen-32) P_FE -> C1 | Budget=2401 | MS=2491
+2026-07-24 08:01:51,031 - INFO - [Eval] (Context: Gen-32) P_C1 -> C2 | Budget=903 | MS=870
+2026-07-24 08:01:55,987 - INFO - [Eval] (Context: Gen-32) P_C2 -> FE | Budget=423 | MS=411
+2026-07-24 08:01:58,083 - INFO - [Eval] (Context: Gen-32) P_C3 -> C3 | Budget=437 | MS=420
+2026-07-24 08:01:58,344 - INFO - [Reconstruction_2][IPC] paths_used=1020, tasks_shifted=1826, passes=6
+2026-07-24 08:01:58,347 - INFO - [Eval-Global] (gen=32, ctx=Gen-32) GlobalMS=4538 SignedLate=238 Deadline=4300
+2026-07-24 08:01:58,350 - INFO - [Generation 32] GlobalMS=4219 Late=-81 TB={'P_FE': 2394, 'P_C1': 903, 'P_C2': 428, 'P_C3': 437} ViolSum=0 GenTime=2505.44s TotalTime=81773.81s PeakMemMB=207.3828125
+2026-07-24 08:01:58,385 - INFO - [Checkpoint] Saved generation 32 to /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/checkpoint_latest.pkl
+2026-07-24 08:01:58,386 - INFO - [SystemLevelGA] Generation 33/40
+2026-07-24 08:03:58,372 - INFO - [Eval] (Context: Gen-33) P_FE -> C1 | Budget=2501 | MS=2495
+2026-07-24 08:04:26,924 - INFO - [Eval] (Context: Gen-33) P_C1 -> C2 | Budget=903 | MS=869
+2026-07-24 08:04:32,120 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=423 | MS=409
+2026-07-24 08:04:34,095 - INFO - [Eval] (Context: Gen-33) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 08:04:34,169 - INFO - [Reconstruction_2][IPC] paths_used=1021, tasks_shifted=2127, passes=6
+2026-07-24 08:04:34,172 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=5039 SignedLate=739 Deadline=4300
+2026-07-24 08:06:30,201 - INFO - [Eval] (Context: Gen-33) P_FE -> C1 | Budget=2433 | MS=2395
+2026-07-24 08:06:56,815 - INFO - [Eval] (Context: Gen-33) P_C1 -> FE | Budget=903 | MS=871
+2026-07-24 08:07:01,899 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=427 | MS=411
+2026-07-24 08:07:03,966 - INFO - [Eval] (Context: Gen-33) P_C3 -> C2 | Budget=437 | MS=421
+2026-07-24 08:07:04,202 - INFO - [Reconstruction_2][IPC] paths_used=1020, tasks_shifted=1811, passes=5
+2026-07-24 08:07:04,205 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4348 SignedLate=48 Deadline=4300
+2026-07-24 08:08:59,690 - INFO - [Eval] (Context: Gen-33) P_FE -> C2 | Budget=2424 | MS=2424
+2026-07-24 08:09:25,978 - INFO - [Eval] (Context: Gen-33) P_C1 -> FE | Budget=903 | MS=870
+2026-07-24 08:09:31,039 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=423 | MS=410
+2026-07-24 08:09:33,145 - INFO - [Eval] (Context: Gen-33) P_C3 -> C1 | Budget=437 | MS=419
+2026-07-24 08:09:33,218 - INFO - [Reconstruction_2][IPC] paths_used=1020, tasks_shifted=2406, passes=6
+2026-07-24 08:09:33,221 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4966 SignedLate=666 Deadline=4300
+2026-07-24 08:11:33,074 - INFO - [Eval] (Context: Gen-33) P_FE -> C2 | Budget=2491 | MS=2546
+2026-07-24 08:12:02,330 - INFO - [Eval] (Context: Gen-33) P_C1 -> C1 | Budget=903 | MS=873
+2026-07-24 08:12:07,413 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=426 | MS=409
+2026-07-24 08:12:09,377 - INFO - [Eval] (Context: Gen-33) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 08:12:09,452 - INFO - [Reconstruction_2][IPC] paths_used=1017, tasks_shifted=2132, passes=6
+2026-07-24 08:12:09,455 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=5648 SignedLate=1348 Deadline=4300
+2026-07-24 08:14:03,855 - INFO - [Eval] (Context: Gen-33) P_FE -> C2 | Budget=2557 | MS=2393
+2026-07-24 08:14:32,023 - INFO - [Eval] (Context: Gen-33) P_C1 -> C1 | Budget=903 | MS=869
+2026-07-24 08:14:37,021 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=426 | MS=409
+2026-07-24 08:14:38,972 - INFO - [Eval] (Context: Gen-33) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 08:14:39,216 - INFO - [Reconstruction_2][IPC] paths_used=1016, tasks_shifted=2090, passes=6
+2026-07-24 08:14:39,219 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4116 SignedLate=-184 Deadline=4300
+2026-07-24 08:16:37,118 - INFO - [Eval] (Context: Gen-33) P_FE -> C1 | Budget=2424 | MS=2489
+2026-07-24 08:17:05,505 - INFO - [Eval] (Context: Gen-33) P_C1 -> C2 | Budget=903 | MS=872
+2026-07-24 08:17:10,271 - INFO - [Eval] (Context: Gen-33) P_C2 -> FE | Budget=423 | MS=409
+2026-07-24 08:17:12,312 - INFO - [Eval] (Context: Gen-33) P_C3 -> C3 | Budget=437 | MS=420
+2026-07-24 08:17:12,376 - INFO - [Reconstruction_2][IPC] paths_used=1014, tasks_shifted=1673, passes=5
+2026-07-24 08:17:12,379 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=3700 SignedLate=-600 Deadline=4300
+2026-07-24 08:19:07,114 - INFO - [Eval] (Context: Gen-33) P_FE -> C3 | Budget=2439 | MS=2319
+2026-07-24 08:19:35,171 - INFO - [Eval] (Context: Gen-33) P_C1 -> C1 | Budget=903 | MS=872
+2026-07-24 08:19:40,298 - INFO - [Eval] (Context: Gen-33) P_C2 -> C2 | Budget=423 | MS=410
+2026-07-24 08:19:42,261 - INFO - [Eval] (Context: Gen-33) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 08:19:42,326 - INFO - [Reconstruction_2][IPC] paths_used=1027, tasks_shifted=1889, passes=5
+2026-07-24 08:19:42,330 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4302 SignedLate=2 Deadline=4300
+2026-07-24 08:21:40,178 - INFO - [Eval] (Context: Gen-33) P_FE -> C2 | Budget=2509 | MS=2484
+2026-07-24 08:22:08,539 - INFO - [Eval] (Context: Gen-33) P_C1 -> C1 | Budget=903 | MS=868
+2026-07-24 08:22:13,727 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=423 | MS=410
+2026-07-24 08:22:15,694 - INFO - [Eval] (Context: Gen-33) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 08:22:15,774 - INFO - [Reconstruction_2][IPC] paths_used=1017, tasks_shifted=2388, passes=7
+2026-07-24 08:22:15,778 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=5710 SignedLate=1410 Deadline=4300
+2026-07-24 08:24:14,766 - INFO - [Eval] (Context: Gen-33) P_FE -> C2 | Budget=2543 | MS=2443
+2026-07-24 08:24:43,673 - INFO - [Eval] (Context: Gen-33) P_C1 -> C1 | Budget=903 | MS=869
+2026-07-24 08:24:48,906 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=426 | MS=412
+2026-07-24 08:24:50,846 - INFO - [Eval] (Context: Gen-33) P_C3 -> FE | Budget=437 | MS=421
+2026-07-24 08:24:50,918 - INFO - [Reconstruction_2][IPC] paths_used=1011, tasks_shifted=1911, passes=6
+2026-07-24 08:24:50,922 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4485 SignedLate=185 Deadline=4300
+2026-07-24 08:26:48,743 - INFO - [Eval] (Context: Gen-33) P_FE -> C1 | Budget=2403 | MS=2538
+2026-07-24 08:27:16,867 - INFO - [Eval] (Context: Gen-33) P_C1 -> FE | Budget=903 | MS=866
+2026-07-24 08:27:21,957 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=428 | MS=410
+2026-07-24 08:27:24,051 - INFO - [Eval] (Context: Gen-33) P_C3 -> C2 | Budget=437 | MS=419
+2026-07-24 08:27:24,123 - INFO - [Reconstruction_2][IPC] paths_used=1012, tasks_shifted=1965, passes=6
+2026-07-24 08:27:24,127 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4886 SignedLate=586 Deadline=4300
+2026-07-24 08:29:27,436 - INFO - [Eval] (Context: Gen-33) P_FE -> C2 | Budget=2433 | MS=2579
+2026-07-24 08:29:54,842 - INFO - [Eval] (Context: Gen-33) P_C1 -> FE | Budget=903 | MS=868
+2026-07-24 08:30:00,139 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=427 | MS=410
+2026-07-24 08:30:02,255 - INFO - [Eval] (Context: Gen-33) P_C3 -> C1 | Budget=437 | MS=419
+2026-07-24 08:30:02,331 - INFO - [Reconstruction_2][IPC] paths_used=1020, tasks_shifted=2225, passes=6
+2026-07-24 08:30:02,334 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4683 SignedLate=383 Deadline=4300
+2026-07-24 08:32:05,054 - INFO - [Eval] (Context: Gen-33) P_FE -> C1 | Budget=2543 | MS=2525
+2026-07-24 08:32:34,823 - INFO - [Eval] (Context: Gen-33) P_C1 -> C2 | Budget=903 | MS=874
+2026-07-24 08:32:39,994 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=426 | MS=409
+2026-07-24 08:32:41,965 - INFO - [Eval] (Context: Gen-33) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 08:32:42,039 - INFO - [Reconstruction_2][IPC] paths_used=1025, tasks_shifted=2134, passes=6
+2026-07-24 08:32:42,043 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4392 SignedLate=92 Deadline=4300
+2026-07-24 08:34:47,041 - INFO - [Eval] (Context: Gen-33) P_FE -> C1 | Budget=2509 | MS=2446
+2026-07-24 08:35:16,896 - INFO - [Eval] (Context: Gen-33) P_C1 -> C2 | Budget=903 | MS=874
+2026-07-24 08:35:22,221 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=423 | MS=412
+2026-07-24 08:35:24,111 - INFO - [Eval] (Context: Gen-33) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 08:35:24,185 - INFO - [Reconstruction_2][IPC] paths_used=1020, tasks_shifted=2373, passes=6
+2026-07-24 08:35:24,189 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4874 SignedLate=574 Deadline=4300
+2026-07-24 08:37:26,467 - INFO - [Eval] (Context: Gen-33) P_FE -> C2 | Budget=2409 | MS=2260
+2026-07-24 08:37:54,483 - INFO - [Eval] (Context: Gen-33) P_C1 -> FE | Budget=903 | MS=870
+2026-07-24 08:37:59,394 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=423 | MS=409
+2026-07-24 08:38:01,511 - INFO - [Eval] (Context: Gen-33) P_C3 -> C1 | Budget=437 | MS=420
+2026-07-24 08:38:01,776 - INFO - [Reconstruction_2][IPC] paths_used=1024, tasks_shifted=2055, passes=6
+2026-07-24 08:38:01,780 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4217 SignedLate=-83 Deadline=4300
+2026-07-24 08:40:08,063 - INFO - [Eval] (Context: Gen-33) P_FE -> C1 | Budget=2551 | MS=2561
+2026-07-24 08:40:36,298 - INFO - [Eval] (Context: Gen-33) P_C1 -> FE | Budget=903 | MS=872
+2026-07-24 08:40:41,713 - INFO - [Eval] (Context: Gen-33) P_C2 -> C3 | Budget=423 | MS=407
+2026-07-24 08:40:43,901 - INFO - [Eval] (Context: Gen-33) P_C3 -> C2 | Budget=437 | MS=421
+2026-07-24 08:40:43,974 - INFO - [Reconstruction_2][IPC] paths_used=1016, tasks_shifted=2350, passes=6
+2026-07-24 08:40:43,978 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=5467 SignedLate=1167 Deadline=4300
+2026-07-24 08:42:50,057 - INFO - [Eval] (Context: Gen-33) P_FE -> C1 | Budget=2403 | MS=2475
+2026-07-24 08:43:19,258 - INFO - [Eval] (Context: Gen-33) P_C1 -> C2 | Budget=903 | MS=866
+2026-07-24 08:43:24,476 - INFO - [Eval] (Context: Gen-33) P_C2 -> FE | Budget=428 | MS=409
+2026-07-24 08:43:26,655 - INFO - [Eval] (Context: Gen-33) P_C3 -> C3 | Budget=437 | MS=420
+2026-07-24 08:43:26,727 - INFO - [Reconstruction_2][IPC] paths_used=1022, tasks_shifted=2053, passes=6
+2026-07-24 08:43:26,730 - INFO - [Eval-Global] (gen=33, ctx=Gen-33) GlobalMS=4377 SignedLate=77 Deadline=4300
+2026-07-24 08:43:26,732 - INFO - [Generation 33] GlobalMS=4219 Late=-81 TB={'P_FE': 2394, 'P_C1': 903, 'P_C2': 428, 'P_C3': 437} ViolSum=0 GenTime=2488.35s TotalTime=84262.19s PeakMemMB=207.73046875
+2026-07-24 08:43:26,765 - INFO - [Checkpoint] Saved generation 33 to /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/checkpoint_latest.pkl
+2026-07-24 08:43:26,765 - INFO - [SystemLevelGA] Generation 34/40
+2026-07-24 08:45:33,037 - INFO - [Eval] (Context: Gen-34) P_FE -> C1 | Budget=2403 | MS=2496
+2026-07-24 08:45:59,623 - INFO - [Eval] (Context: Gen-34) P_C1 -> FE | Budget=903 | MS=871
+2026-07-24 08:46:05,098 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=428 | MS=407
+2026-07-24 08:46:07,423 - INFO - [Eval] (Context: Gen-34) P_C3 -> C2 | Budget=437 | MS=420
+2026-07-24 08:46:07,674 - INFO - [Reconstruction_2][IPC] paths_used=1021, tasks_shifted=2001, passes=6
+2026-07-24 08:46:07,678 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4045 SignedLate=-255 Deadline=4300
+2026-07-24 08:48:09,962 - INFO - [Eval] (Context: Gen-34) P_FE -> C2 | Budget=2543 | MS=2291
+2026-07-24 08:48:41,300 - INFO - [Eval] (Context: Gen-34) P_C1 -> C1 | Budget=903 | MS=872
+2026-07-24 08:48:46,483 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=426 | MS=412
+2026-07-24 08:48:48,495 - INFO - [Eval] (Context: Gen-34) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 08:48:48,563 - INFO - [Reconstruction_2][IPC] paths_used=1016, tasks_shifted=2035, passes=5
+2026-07-24 08:48:48,566 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4220 SignedLate=-80 Deadline=4300
+2026-07-24 08:50:51,801 - INFO - [Eval] (Context: Gen-34) P_FE -> C2 | Budget=2543 | MS=2506
+2026-07-24 08:51:21,071 - INFO - [Eval] (Context: Gen-34) P_C1 -> C1 | Budget=903 | MS=874
+2026-07-24 08:51:26,212 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=426 | MS=409
+2026-07-24 08:51:28,306 - INFO - [Eval] (Context: Gen-34) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 08:51:28,377 - INFO - [Reconstruction_2][IPC] paths_used=1019, tasks_shifted=2011, passes=6
+2026-07-24 08:51:28,380 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4817 SignedLate=517 Deadline=4300
+2026-07-24 08:53:31,195 - INFO - [Eval] (Context: Gen-34) P_FE -> C2 | Budget=2491 | MS=2501
+2026-07-24 08:53:57,142 - INFO - [Eval] (Context: Gen-34) P_C1 -> FE | Budget=903 | MS=872
+2026-07-24 08:54:02,266 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=426 | MS=412
+2026-07-24 08:54:04,576 - INFO - [Eval] (Context: Gen-34) P_C3 -> C1 | Budget=437 | MS=420
+2026-07-24 08:54:04,835 - INFO - [Reconstruction_2][IPC] paths_used=1031, tasks_shifted=1984, passes=5
+2026-07-24 08:54:04,838 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4657 SignedLate=357 Deadline=4300
+2026-07-24 08:56:09,305 - INFO - [Eval] (Context: Gen-34) P_FE -> C2 | Budget=2509 | MS=2491
+2026-07-24 08:56:37,730 - INFO - [Eval] (Context: Gen-34) P_C1 -> FE | Budget=903 | MS=868
+2026-07-24 08:56:42,943 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=423 | MS=408
+2026-07-24 08:56:45,107 - INFO - [Eval] (Context: Gen-34) P_C3 -> C1 | Budget=437 | MS=420
+2026-07-24 08:56:45,181 - INFO - [Reconstruction_2][IPC] paths_used=1021, tasks_shifted=2395, passes=6
+2026-07-24 08:56:45,184 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4879 SignedLate=579 Deadline=4300
+2026-07-24 08:58:47,612 - INFO - [Eval] (Context: Gen-34) P_FE -> C2 | Budget=2394 | MS=2386
+2026-07-24 08:59:16,908 - INFO - [Eval] (Context: Gen-34) P_C1 -> C1 | Budget=903 | MS=872
+2026-07-24 08:59:22,382 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=423 | MS=408
+2026-07-24 08:59:24,572 - INFO - [Eval] (Context: Gen-34) P_C3 -> FE | Budget=437 | MS=420
+2026-07-24 08:59:24,649 - INFO - [Reconstruction_2][IPC] paths_used=1015, tasks_shifted=2051, passes=6
+2026-07-24 08:59:24,652 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=5102 SignedLate=802 Deadline=4300
+2026-07-24 09:01:27,808 - INFO - [Eval] (Context: Gen-34) P_FE -> C1 | Budget=2409 | MS=2444
+2026-07-24 09:01:55,421 - INFO - [Eval] (Context: Gen-34) P_C1 -> FE | Budget=903 | MS=873
+2026-07-24 09:02:00,774 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=423 | MS=411
+2026-07-24 09:02:02,990 - INFO - [Eval] (Context: Gen-34) P_C3 -> C2 | Budget=437 | MS=419
+2026-07-24 09:02:03,057 - INFO - [Reconstruction_2][IPC] paths_used=1023, tasks_shifted=2113, passes=5
+2026-07-24 09:02:03,060 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4621 SignedLate=321 Deadline=4300
+2026-07-24 09:04:04,977 - INFO - [Eval] (Context: Gen-34) P_FE -> C1 | Budget=2557 | MS=2615
+2026-07-24 09:04:35,224 - INFO - [Eval] (Context: Gen-34) P_C1 -> C2 | Budget=903 | MS=869
+2026-07-24 09:04:40,443 - INFO - [Eval] (Context: Gen-34) P_C2 -> FE | Budget=426 | MS=407
+2026-07-24 09:04:42,503 - INFO - [Eval] (Context: Gen-34) P_C3 -> C3 | Budget=437 | MS=420
+2026-07-24 09:04:42,568 - INFO - [Reconstruction_2][IPC] paths_used=1010, tasks_shifted=1643, passes=5
+2026-07-24 09:04:42,571 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=3803 SignedLate=-497 Deadline=4300
+2026-07-24 09:06:45,628 - INFO - [Eval] (Context: Gen-34) P_FE -> C2 | Budget=2516 | MS=2503
+2026-07-24 09:07:15,443 - INFO - [Eval] (Context: Gen-34) P_C1 -> C1 | Budget=903 | MS=877
+2026-07-24 09:07:20,762 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=423 | MS=408
+2026-07-24 09:07:22,882 - INFO - [Eval] (Context: Gen-34) P_C3 -> FE | Budget=437 | MS=421
+2026-07-24 09:07:22,952 - INFO - [Reconstruction_2][IPC] paths_used=1027, tasks_shifted=2204, passes=6
+2026-07-24 09:07:22,956 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4712 SignedLate=412 Deadline=4300
+2026-07-24 09:09:25,686 - INFO - [Eval] (Context: Gen-34) P_FE -> C1 | Budget=2433 | MS=2396
+2026-07-24 09:09:53,136 - INFO - [Eval] (Context: Gen-34) P_C1 -> FE | Budget=903 | MS=869
+2026-07-24 09:09:58,629 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=427 | MS=408
+2026-07-24 09:10:00,666 - INFO - [Eval] (Context: Gen-34) P_C3 -> C2 | Budget=437 | MS=421
+2026-07-24 09:10:00,738 - INFO - [Reconstruction_2][IPC] paths_used=1023, tasks_shifted=2046, passes=6
+2026-07-24 09:10:00,742 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4657 SignedLate=357 Deadline=4300
+2026-07-24 09:12:02,911 - INFO - [Eval] (Context: Gen-34) P_FE -> C1 | Budget=2433 | MS=2493
+2026-07-24 09:12:31,009 - INFO - [Eval] (Context: Gen-34) P_C1 -> FE | Budget=903 | MS=873
+2026-07-24 09:12:36,355 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=427 | MS=409
+2026-07-24 09:12:38,530 - INFO - [Eval] (Context: Gen-34) P_C3 -> C2 | Budget=437 | MS=419
+2026-07-24 09:12:38,596 - INFO - [Reconstruction_2][IPC] paths_used=1024, tasks_shifted=1887, passes=5
+2026-07-24 09:12:38,599 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4551 SignedLate=251 Deadline=4300
+2026-07-24 09:13:29,002 - WARNING - [Signal] Received SIGUSR1; will checkpoint and stop at the next completed system generation.
+2026-07-24 09:14:42,866 - INFO - [Eval] (Context: Gen-34) P_FE -> C1 | Budget=2403 | MS=2503
+2026-07-24 09:15:12,822 - INFO - [Eval] (Context: Gen-34) P_C1 -> C2 | Budget=903 | MS=872
+2026-07-24 09:15:18,196 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=428 | MS=410
+2026-07-24 09:15:20,328 - INFO - [Eval] (Context: Gen-34) P_C3 -> FE | Budget=437 | MS=419
+2026-07-24 09:15:20,393 - INFO - [Reconstruction_2][IPC] paths_used=1023, tasks_shifted=1708, passes=5
+2026-07-24 09:15:20,397 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4226 SignedLate=-74 Deadline=4300
+2026-07-24 09:17:19,851 - INFO - [Eval] (Context: Gen-34) P_FE -> C2 | Budget=2433 | MS=2528
+2026-07-24 09:17:47,124 - INFO - [Eval] (Context: Gen-34) P_C1 -> FE | Budget=903 | MS=872
+2026-07-24 09:17:52,668 - INFO - [Eval] (Context: Gen-34) P_C2 -> C3 | Budget=427 | MS=411
+2026-07-24 09:17:54,907 - INFO - [Eval] (Context: Gen-34) P_C3 -> C1 | Budget=437 | MS=421
+2026-07-24 09:17:54,979 - INFO - [Reconstruction_2][IPC] paths_used=1011, tasks_shifted=2104, passes=6
+2026-07-24 09:17:54,983 - INFO - [Eval-Global] (gen=34, ctx=Gen-34) GlobalMS=4418 SignedLate=118 Deadline=4300
+2026-07-24 09:18:58,005 - WARNING - [Signal] Received SIGTERM; will checkpoint and stop at the next completed system generation.
+2026-07-24 09:26:47,807 - INFO - [Logger] config.py snapshot saved to: /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/config.py
+2026-07-24 09:26:47,863 - INFO - [RUN] run_id=AM500__ratio1.00__seed1004__proposed
+2026-07-24 09:26:47,863 - INFO - [RUN] run_key=AM500__ratio1.00__seed1004__proposed
+2026-07-24 09:26:47,863 - INFO - [RUN] seed=1004
+2026-07-24 09:26:47,863 - INFO - [RUN] PYTHONHASHSEED=1004
+2026-07-24 09:26:47,863 - INFO - [RUN] am_id=AM500
+2026-07-24 09:26:47,864 - INFO - [RUN] base_deadline=4300
+2026-07-24 09:26:47,864 - INFO - [RUN] deadline_ratio=1.00
+2026-07-24 09:26:47,864 - INFO - [RUN] actual_deadline_value=4300
+2026-07-24 09:26:47,864 - INFO - [RUN] variant=proposed
+2026-07-24 09:26:47,864 - INFO - [RUN] output_dir=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed
+2026-07-24 09:26:47,864 - INFO - [RUN] hostname=hpc-node116
+2026-07-24 09:26:47,864 - INFO - [RUN] python_version=3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]
+2026-07-24 09:26:47,864 - INFO - [RUN] working_directory=/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/codes
+2026-07-24 09:26:47,864 - INFO - [RUN] slurm_job_id=12042017
+2026-07-24 09:26:47,864 - INFO - [RUN] slurm_array_task_id=3
+2026-07-24 09:26:47,869 - INFO - [MAIN] AM size: 500T
+2026-07-24 09:26:47,869 - INFO - [MAIN] Platforms directory: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms
+2026-07-24 09:26:47,869 - INFO - [MAIN] Full AM/PM input: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/TC500.json
+2026-07-24 09:26:58,720 - INFO - Time Maksepan of the list scheduling is
+2026-07-24 09:26:58,721 - INFO - 6240
+2026-07-24 09:26:58,721 - INFO -  seconds
+2026-07-24 09:26:58,722 - INFO - List-scheduling makespan is
+2026-07-24 09:26:58,722 - INFO - 6240
+2026-07-24 09:26:58,722 - INFO - Baseline Deadline is
+2026-07-24 09:26:58,722 - INFO - 4300
+2026-07-24 09:26:58,722 - INFO - Deadline setting is
+2026-07-24 09:26:58,722 - INFO - ratio1.00
+2026-07-24 09:26:58,722 - INFO - Application Deadline is
+2026-07-24 09:26:58,723 - INFO - 4300
+2026-07-24 09:26:58,723 - INFO - [RUN] list_schedule_makespan=6240
+2026-07-24 09:26:58,723 - INFO - [MAIN] List-scheduling makespan: 6240
+2026-07-24 09:26:58,723 - INFO - [MAIN] Baseline deadline: 4300
+2026-07-24 09:26:58,723 - INFO - [MAIN] Deadline setting: ratio1.00
+2026-07-24 09:26:58,723 - INFO - [MAIN] Application deadline: 4300
+2026-07-24 09:26:58,887 - INFO - [RUN] run_config_json=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/run_config.json
+2026-07-24 09:26:58,888 - INFO - [MAIN] System-level scheduling launched
+2026-07-24 09:26:59,022 - ERROR - [Checkpoint] Incompatible checkpoint: Checkpoint does not match this manifest/configuration; mismatched field(s): git_commit_sha
+2026-07-25 09:31:48,384 - INFO - [Logger] config.py snapshot saved to: /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/config.py
+2026-07-25 09:31:48,417 - INFO - [RUN] run_id=AM500__ratio1.00__seed1004__proposed
+2026-07-25 09:31:48,417 - INFO - [RUN] run_key=AM500__ratio1.00__seed1004__proposed
+2026-07-25 09:31:48,417 - INFO - [RUN] seed=1004
+2026-07-25 09:31:48,417 - INFO - [RUN] PYTHONHASHSEED=1004
+2026-07-25 09:31:48,417 - INFO - [RUN] am_id=AM500
+2026-07-25 09:31:48,417 - INFO - [RUN] base_deadline=4300
+2026-07-25 09:31:48,417 - INFO - [RUN] deadline_ratio=1.00
+2026-07-25 09:31:48,417 - INFO - [RUN] actual_deadline_value=4300
+2026-07-25 09:31:48,417 - INFO - [RUN] variant=proposed
+2026-07-25 09:31:48,417 - INFO - [RUN] output_dir=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed
+2026-07-25 09:31:48,429 - INFO - [RUN] hostname=hpc-node090
+2026-07-25 09:31:48,429 - INFO - [RUN] python_version=3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]
+2026-07-25 09:31:48,429 - INFO - [RUN] working_directory=/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/codes
+2026-07-25 09:31:48,429 - INFO - [RUN] slurm_job_id=12049481
+2026-07-25 09:31:48,429 - INFO - [RUN] slurm_array_task_id=3
+2026-07-25 09:31:48,550 - INFO - [MAIN] AM size: 500T
+2026-07-25 09:31:48,550 - INFO - [MAIN] Platforms directory: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms
+2026-07-25 09:31:48,550 - INFO - [MAIN] Full AM/PM input: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/TC500.json
+2026-07-25 09:31:59,689 - INFO - Time Maksepan of the list scheduling is
+2026-07-25 09:31:59,689 - INFO - 6240
+2026-07-25 09:31:59,689 - INFO -  seconds
+2026-07-25 09:31:59,780 - INFO - List-scheduling makespan is
+2026-07-25 09:31:59,780 - INFO - 6240
+2026-07-25 09:31:59,780 - INFO - Baseline Deadline is
+2026-07-25 09:31:59,780 - INFO - 4300
+2026-07-25 09:31:59,780 - INFO - Deadline setting is
+2026-07-25 09:31:59,780 - INFO - ratio1.00
+2026-07-25 09:31:59,780 - INFO - Application Deadline is
+2026-07-25 09:31:59,780 - INFO - 4300
+2026-07-25 09:31:59,780 - INFO - [RUN] list_schedule_makespan=6240
+2026-07-25 09:31:59,780 - INFO - [MAIN] List-scheduling makespan: 6240
+2026-07-25 09:31:59,780 - INFO - [MAIN] Baseline deadline: 4300
+2026-07-25 09:31:59,780 - INFO - [MAIN] Deadline setting: ratio1.00
+2026-07-25 09:31:59,780 - INFO - [MAIN] Application deadline: 4300
+2026-07-25 09:31:59,835 - INFO - [RUN] run_config_json=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/run_config.json
+2026-07-25 09:31:59,836 - INFO - [MAIN] System-level scheduling launched
+2026-07-25 09:32:00,001 - ERROR - [Checkpoint] Incompatible checkpoint: Checkpoint does not match this manifest/configuration; mismatched field(s): git_commit_sha
+2026-07-25 16:09:20,975 - INFO - [Logger] config.py snapshot saved to: /work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/config.py
+2026-07-25 16:09:20,994 - INFO - [RUN] run_id=AM500__ratio1.00__seed1004__proposed
+2026-07-25 16:09:20,994 - INFO - [RUN] run_key=AM500__ratio1.00__seed1004__proposed
+2026-07-25 16:09:20,994 - INFO - [RUN] seed=1004
+2026-07-25 16:09:20,994 - INFO - [RUN] PYTHONHASHSEED=1004
+2026-07-25 16:09:20,994 - INFO - [RUN] am_id=AM500
+2026-07-25 16:09:20,994 - INFO - [RUN] base_deadline=4300
+2026-07-25 16:09:20,994 - INFO - [RUN] deadline_ratio=1.00
+2026-07-25 16:09:20,994 - INFO - [RUN] actual_deadline_value=4300
+2026-07-25 16:09:20,994 - INFO - [RUN] variant=proposed
+2026-07-25 16:09:20,994 - INFO - [RUN] output_dir=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed
+2026-07-25 16:09:20,994 - INFO - [RUN] hostname=hpc-node148
+2026-07-25 16:09:20,994 - INFO - [RUN] python_version=3.11.2 (main, Nov  1 2023, 13:05:46) [GCC 9.3.0]
+2026-07-25 16:09:20,994 - INFO - [RUN] working_directory=/work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/codes
+2026-07-25 16:09:20,994 - INFO - [RUN] slurm_job_id=12051915
+2026-07-25 16:09:20,994 - INFO - [RUN] slurm_array_task_id=3
+2026-07-25 16:09:20,999 - INFO - [MAIN] AM size: 500T
+2026-07-25 16:09:20,999 - INFO - [MAIN] Platforms directory: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms
+2026-07-25 16:09:20,999 - INFO - [MAIN] Full AM/PM input: /work/ws-tmp/u289123-IEEE_BASE/ModularFTcodes/Platforms/500T/TC500.json
+2026-07-25 16:09:31,939 - INFO - Time Maksepan of the list scheduling is
+2026-07-25 16:09:31,939 - INFO - 6240
+2026-07-25 16:09:31,939 - INFO -  seconds
+2026-07-25 16:09:31,941 - INFO - List-scheduling makespan is
+2026-07-25 16:09:31,941 - INFO - 6240
+2026-07-25 16:09:31,941 - INFO - Baseline Deadline is
+2026-07-25 16:09:31,941 - INFO - 4300
+2026-07-25 16:09:31,941 - INFO - Deadline setting is
+2026-07-25 16:09:31,941 - INFO - ratio1.00
+2026-07-25 16:09:31,941 - INFO - Application Deadline is
+2026-07-25 16:09:31,952 - INFO - 4300
+2026-07-25 16:09:31,952 - INFO - [RUN] list_schedule_makespan=6240
+2026-07-25 16:09:31,952 - INFO - [MAIN] List-scheduling makespan: 6240
+2026-07-25 16:09:31,952 - INFO - [MAIN] Baseline deadline: 4300
+2026-07-25 16:09:31,952 - INFO - [MAIN] Deadline setting: ratio1.00
+2026-07-25 16:09:31,952 - INFO - [MAIN] Application deadline: 4300
+2026-07-25 16:09:32,004 - INFO - [RUN] run_config_json=/work/ws-tmp/u289123-IEEE_BASE/logs_proposed_am500_medium/runs/AM500__ratio1.00__seed1004__proposed/run_config.json
+2026-07-25 16:09:32,005 - INFO - [MAIN] System-level scheduling launched
+2026-07-25 16:09:32,202 - ERROR - [Checkpoint] Incompatible checkpoint: Checkpoint does not match this manifest/configuration; mismatched field(s): git_commit_sha
